@@ -47,6 +47,7 @@ function renderIssue(issue, mode, prev, next) {
       body += `<article class="story-card">
         ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
         <h2 class="story-headline">${isPermalink ? esc(s.headline) : `<a href="${storyLink}">${esc(s.headline)}</a>`}</h2>
+        ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
         ${(isPermalink && s.body) ? `<p class="story-body">${esc(s.body)}</p>` : ''}
         ${!isPermalink ? `<a class="story-more" href="${storyLink}">Läs mer →</a>` : ''}
       </article>`;
