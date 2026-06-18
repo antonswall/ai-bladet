@@ -55,6 +55,7 @@ function base({ title, description, canonical, ogType, jsonLd, content, week, ye
     <a href="/feed.xml">RSS</a>
     <a href="/om/">Om</a>
   </footer>
+  <script src="/app.js" defer></script>
 </body>
 </html>`;
 }

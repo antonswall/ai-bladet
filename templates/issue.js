@@ -27,6 +27,7 @@ function renderIssue(issue, mode, prev, next) {
   // Lead
   if (lead) {
     body += `<section class="lead">
+      ${figure(lead.image, lead.headline || title, 'lead-figure')}
       <div class="lead-kicker">${esc(lead.kicker || 'VECKANS STÖRSTA')}<span class="lead-sources">${sources ? `· ${sources} källor` : ''}</span></div>
       <h1 class="lead-headline">${isPermalink ? esc(lead.headline || title) : `<a href="/v/${year}/${week}/">${esc(lead.headline || title)}</a>`}</h1>
       <p class="lead-ingress">${esc(lead.ingress || summary || '')}</p>
@@ -39,20 +40,30 @@ function renderIssue(issue, mode, prev, next) {
     body += `<div class="sections"><span class="label">I detta nummer</span>${categories.map(c => `<span class="cat">${esc(c)}</span>`).join('')}</div>`;
   }
 
-  // Secondary grid (front page: max 6, permalink: all)
+  // Story column (front page: max 6 in one scrollable column, permalink: all)
   const displayStories = isPermalink ? (stories || []) : (stories || []).slice(0, 6);
   if (displayStories.length > 0) {
-    const storyLink = `/v/${year}/${week}/`;
-    body += `<section class="stories-grid">`;
-    for (const s of displayStories) {
+    body += `<section class="stories-column">`;
+    displayStories.forEach((s, i) => {
+      const paras = (s.body || '').split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+      const bodyHtml = paras.map(p => `<p class="story-body">${esc(p)}</p>`).join('');
+      const tid = `story-body-${week}-${i}`;
       body += `<article class="story-card">
-        ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
-        <h2 class="story-headline">${isPermalink ? esc(s.headline) : `<a href="${storyLink}">${esc(s.headline)}</a>`}</h2>
-        ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
-        ${(isPermalink && s.body) ? s.body.split(/\n\n+/).map(p => `<p class="story-body">${esc(p.trim())}</p>`).join('') : ''}
-        ${!isPermalink ? `<a class="story-more" href="${storyLink}">Läs mer →</a>` : ''}
-      </article>`;
-    }
+        ${figure(s.image, s.headline, 'story-figure')}
+        <div class="story-text">
+          ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
+          <h2 class="story-headline">${esc(s.headline)}</h2>
+          ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}`;
+      if (isPermalink) {
+        body += bodyHtml;
+      } else if (bodyHtml) {
+        body += `<div class="story-body-wrap" id="${tid}" hidden>${bodyHtml}</div>
+          <button class="story-more" type="button" aria-expanded="false" aria-controls="${tid}">
+            <span class="story-more-label">Läs mer</span><span class="story-more-arrow" aria-hidden="true">→</span>
+          </button>`;
+      }
+      body += `</div></article>`;
+    });
     body += `</section>`;
   }
 
@@ -97,6 +108,17 @@ function renderIssue(issue, mode, prev, next) {
 function esc(str) {
   if (!str) return '';
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Image block with a built-in fallback. Many source image URLs 404 over time,
+// so a broken <img> flips its <figure> to the branded placeholder via onerror
+// (inline, so it works even before app.js loads). No image at all => placeholder.
+function figure(url, alt, cls) {
+  const inner = url
+    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="lazy" decoding="async"
+        onerror="this.closest('.figure').classList.add('figure--failed');this.remove();">`
+    : '';
+  return `<figure class="figure ${cls}${url ? '' : ' figure--failed'}">${inner}<span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></figure>`;
 }
 
 module.exports = { renderIssue };
