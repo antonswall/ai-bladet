@@ -1,5 +1,26 @@
 # AI-Bladet — Loggbok
 
+## 2026-06-18 — Iteration 2: pressbild-känsla, fyndiga rubriker, äkta citat (KLAR, live)
+
+Antons feedback efter att tabloid-looken gått live. Tre saker:
+1. **Mindre bilder + pressbild-känsla:** `.figure-frame` med `max-height` (lead 380px,
+   story 280px) → bilderna blir editorial-band istället för stora hero. Ny
+   `figure-credit`-byline under varje bild ("PRESSBILD · {credit}"). `credit`-fält
+   backfillat i content + emit:as av write.py (= källans namn).
+2. **Fyndigare rubriker:** skrev om lead + 5 story-rubriker till säljande men
+   100% research-förankrade (t.ex. "OpenAI tar första steget mot börsen: ”Vi räknar
+   med att det läcker”"). write.py regel #13 kodifierar detta (attribuera siffror
+   även i rubrik).
+3. **Äkta citat "då och då":** nytt `quote`-block (text + speaker) som pull-quote på
+   framsidan. KRITISKT: bara citat som finns ordagrant i research, troget översatta,
+   attribuerade till EXAKT talaren (org-nivå: "OpenAI"/"Google" — research har inga
+   namngivna personer, så inga påhittade vd-citat). 3 citat denna vecka: Gemini,
+   OpenAI-S1, kinesisk påverkanskampanj. write.py regel #14.
+
+Filer: content/2026-25.md, templates/issue.js (figure-helper + quote-render),
+static/style.css (figure-frame/credit/story-quote), pipeline/write.py (regel 13+14,
+output-mall). Byggd, verifierad i headless Chrome, deployad till main → live.
+
 ## 2026-06-18 — UI-omarbetning av framsidan: tabloid-look (KLAR, branch frontsida-tabloid)
 
 Genomförde de 5 feedback-punkterna. Mål: framsidan mer som Aftonbladet — visuell,
