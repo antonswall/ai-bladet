@@ -1,5 +1,30 @@
 # AI-Bladet — Loggbok
 
+## 2026-06-18 — Sessionssummering + autonomi-klargörande (Claude Code, Opus 4.8)
+
+Sammanfattar dagens session (framsida-omarbetningen, iteration 1–3 nedan) plus två
+saker som inte hade egen post:
+
+**Bildstorlek — 20% större (efter iteration 3).** Anton ville ha bilderna något
+större. `.figure-frame max-height`: lead 380→456px, story 280→336px. (Ersätter
+pixelangivelserna i iteration 2-posten.) Byggd + deployad.
+
+**Autonomi — schemaläggs av lutra (Hermes-agenten), INTE av sajten/repot.**
+- Det finns INGEN system-cron, launchd-agent eller GitHub Action för AI-Bladet.
+  Schemaläggningen sköts av Antons Hermes-agent "lutra" via dess egna cron-system
+  (`~/.hermes/cron/jobs.json`).
+- Jobb: **"AI-Bladet söndag"** (id ae23c12f7f29), `0 7 * * 0` (söndagar 07:00),
+  enabled, deliver=telegram. Kör scriptet `~/.hermes/scripts/ai-bladet-weekly.sh`.
+  Skapat 2026-06-18, första körning 2026-06-21 07:00 (last_run: ingen än).
+- `ai-bladet-weekly.sh` = i praktiken samma som `pipeline/run_weekly.sh`:
+  collect→dedup→score→research→images→write → validate (3 försök m. feedback-retry)
+  → `node build.js` → `git add/commit/push origin main` → Cloudflare deployar.
+  (SKIP_GIT_PUSH=1 ger torrkörning utan push.)
+- VIKTIGT: Anton schemalägger/ändrar cron-jobb SJÄLV via lutra. Claude Code ska
+  INTE röra `~/.hermes/`. Dagens session gjorde bara läs-koll där, inga ändringar.
+- Alla dagens kodändringar ligger committade i repot → söndagskörningen plockar upp
+  nya bildbanken, designen, rubrik-/citat-reglerna automatiskt.
+
 ## 2026-06-18 — Iteration 3: AUTOMATISK redaktionell bildbank (KLAR, live)
 
 Anton: OG-bilderna (källornas marknadsföringsbanners) är tråkiga — bild + rubrik är
