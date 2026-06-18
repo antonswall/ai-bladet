@@ -41,12 +41,14 @@ function renderIssue(issue, mode, prev, next) {
   // Secondary grid (front page: max 6, permalink: all)
   const displayStories = isPermalink ? (stories || []) : (stories || []).slice(0, 6);
   if (displayStories.length > 0) {
+    const storyLink = `/v/${year}/${week}/`;
     body += `<section class="stories-grid">`;
     for (const s of displayStories) {
       body += `<article class="story-card">
         ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
-        <h2 class="story-headline">${esc(s.headline)}</h2>
+        <h2 class="story-headline">${isPermalink ? esc(s.headline) : `<a href="${storyLink}">${esc(s.headline)}</a>`}</h2>
         ${(isPermalink && s.body) ? `<p class="story-body">${esc(s.body)}</p>` : ''}
+        ${!isPermalink ? `<a class="story-more" href="${storyLink}">Läs mer →</a>` : ''}
       </article>`;
     }
     body += `</section>`;
@@ -72,7 +74,6 @@ function renderIssue(issue, mode, prev, next) {
 
   if (!isPermalink) {
     body += `<nav class="bottom-nav bottom-nav--cta">
-      <a href="/v/${year}/${week}/">Läs hela ${weekLabel} →</a>
       <a href="/arkiv/">Bläddra i arkivet →</a>
     </nav>`;
   }

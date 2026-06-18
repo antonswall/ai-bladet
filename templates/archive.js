@@ -18,7 +18,10 @@ function renderArchive(issues) {
     const list = grouped[year];
     body += `<h2 class="archive-year">${year}<span>${list.length} ${list.length === 1 ? 'utgåva' : 'utgåvor'}</span></h2>`;
     for (const i of list) {
-      const dateStr = new Date(i.date + 'T12:00:00').toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
+      // i.date is normally normalized to a 'YYYY-MM-DD' string in build.js, but
+      // accept a Date object too so we never render "Invalid Date" next to a link.
+      const dObj = i.date instanceof Date ? i.date : new Date(i.date + 'T12:00:00');
+      const dateStr = dObj.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
       const cats = (i.categories || []).slice(0, 4).map(c => `<span class="cat">${esc(c)}</span>`).join(' ');
       body += `<article class="issue-card">
         <div class="issue-card-week">
