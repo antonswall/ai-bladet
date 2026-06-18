@@ -1,5 +1,16 @@
 # AI-Bladet — Loggbok
 
+> **Delad logg för båda agenterna (Claude Code + lutra).** Läs de översta posterna
+> innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
+> Spelregler: se `AGENTS.md`.
+
+## 2026-06-18 — [Claude Code] Samarbetskontrakt: AGENTS.md + delad loggbok
+
+Gjorde det enkelt för Claude Code och lutra att turas om på projektet och se varandras
+jobb. Ny `AGENTS.md` = spelregler (läs loggbok-toppen innan, skriv taggad post efter,
+revirgränser). Loggboken är nu officiellt delad och poster taggas `[Claude Code]`/`[lutra]`.
+Nästa: Anton ber lutra läsa AGENTS.md + loggboken och följa konventionen.
+
 ## 2026-06-18 — Driftsäkring inför första autonoma körningen (Claude Code, Opus 4.8)
 
 Granskning inför premiärkörningen söndag 2026-06-21. Reda ut Antons farhågor:
