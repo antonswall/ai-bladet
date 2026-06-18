@@ -158,7 +158,13 @@ REDAKTIONELLA REGLER — inga undantag:
    Den ska kontextualisera och tolka veckans största nyhet — vad den betyder i ett
    större sammanhang — inte återupprepa ingressen och inte spå framtiden lösryckt.
    Allt ska gå att grunda i research (regel 6 och 7 gäller fullt ut). Neutral
-   redaktionell röst, ingen personlig signatur, ingen brasklapp."""
+   redaktionell röst, ingen personlig signatur, ingen brasklapp.
+
+12. BILDER
+   Varje story (och lead) som har en Bild-URL i research ska få ett image-fält
+   med EXAKT samma URL — kopiera tecken för tecken, hitta aldrig på eller ändra en
+   URL. Saknar storyn bild: utelämna image-raden helt (framsidan visar då en
+   snygg fallback). Matcha bilden till rätt story — blanda inte ihop dem."""
 
 
 def build_prompt(stories: list[dict], week: str, year: int,
@@ -204,7 +210,7 @@ Siffror:
 Citat:
 {chr(10).join(f'  "{q.get("text", "")}" — {q.get("speaker", "")}' for q in quotes[:2])}
 
-Bild: {image[:80] if image else 'Ingen bild'}
+Bild (kopiera URL:en EXAKT om du väljer denna story): {image if image else 'Ingen bild'}
 """
         stories_text += "\n---\n"
 
@@ -243,10 +249,12 @@ lead:
   headline: "#1-nyhetens rubrik (inte exakt samma som research-titeln)"
   ingress: "2-3 meningar som säljer storyn"
   analysis: "AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11)"
+  image: "Klistra in Bild-URL:en EXAKT från den valda lead-storyn. Utelämna raden helt om storyn saknar bild."
 stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
     headline: "Rubrik"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
+    image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
     body: "200-300 ord markdown i stycken (blankrad mellan): vad hände / varför det spelar roll / Sverige-EU där relevant"
 briefs:
   - "Kort enradare"
