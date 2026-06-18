@@ -151,7 +151,14 @@ REDAKTIONELLA REGLER — inga undantag:
    3) Vad det betyder för Sverige/EU — ENDAST där det finns en genuin koppling i
       research (~50 ord). Tvinga aldrig in en svensk vinkel som inte finns;
       hoppa över del 3 hellre än att hitta på.
-   Fyll inte ut med upprepning — varje mening ska bära ny information från research."""
+   Fyll inte ut med upprepning — varje mening ska bära ny information från research.
+
+11. AI-BLADETS ANALYS (endast toppstoryn)
+   Toppstoryn (lead) avslutas med en kort analys på 50-70 ord, märkt "AI-Bladets analys".
+   Den ska kontextualisera och tolka veckans största nyhet — vad den betyder i ett
+   större sammanhang — inte återupprepa ingressen och inte spå framtiden lösryckt.
+   Allt ska gå att grunda i research (regel 6 och 7 gäller fullt ut). Neutral
+   redaktionell röst, ingen personlig signatur, ingen brasklapp."""
 
 
 def build_prompt(stories: list[dict], week: str, year: int,
@@ -235,6 +242,7 @@ lead:
   kicker: "VECKANS STÖRSTA"
   headline: "#1-nyhetens rubrik (inte exakt samma som research-titeln)"
   ingress: "2-3 meningar som säljer storyn"
+  analysis: "AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11)"
 stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
     headline: "Rubrik"

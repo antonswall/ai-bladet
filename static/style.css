@@ -225,6 +225,26 @@ a { color: inherit; text-decoration: none; }
   font-weight: 600; color: var(--accent);
   margin-right: 0.5rem;
 }
+.lead-analysis {
+  margin-top: 1.8rem;
+  max-width: 60ch;
+  padding: 1.1rem 1.4rem;
+  background: var(--paper-2);
+  border-left: 3px solid var(--accent);
+}
+.lead-analysis-label {
+  display: block;
+  font-family: var(--grot);
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.lead-analysis p {
+  margin: 0;
+  font-size: 1.0rem; line-height: 1.55;
+  color: var(--ink-2);
+}
 
 /* ----------  Sections row (categories)  --------------------------------- */
 .sections {
