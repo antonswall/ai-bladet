@@ -1,5 +1,30 @@
 # AI-Bladet — Loggbok
 
+## 2026-06-18 — Iteration 3: AUTOMATISK redaktionell bildbank (KLAR, live)
+
+Anton: OG-bilderna (källornas marknadsföringsbanners) är tråkiga — bild + rubrik är
+det första läsaren ser. KRAV: likvärdiga slående bilder ska hämtas AUTOMATISKT varje
+söndag, inte handplockas.
+
+**Lösning — `pipeline/image_bank.py`:** kurerad bank av fria pressfoton (Wikimedia
+Commons, alla HEAD-verifierade 200 image/jpeg) med korrekt fotobyline + licens.
+`pick(story, used)` väljer i tre steg: 1) tematiska nyckelord (ipo→NYSE, energi→
+kraftledningar, compute/gpu→serverhall, rymd/förvärv→Musk/Falcon 9), 2) källa
+(openai→Sam Altman, google-ai→Google HQ, xai→Musk), 3) kategori-fallback. `used`-set
+ger automatisk avdramatisering av dubbletter (t.ex. två olika serverhallar, Musk +
+Falcon 9). Pipelinens källor är en fast uppsättning → banken täcker dem; nya aktörer
+faller till kategori-default tills banken utökas.
+
+- `images.py`: OG-skrapningen ersatt — bildbanken är nu primär källa, sätter
+  image_url + image_credit. (OG-helpers kvar men oanvända.)
+- `write.py`: skickar Byline i prompten, emit:ar credit ordagrant (regel #12).
+- `issue.js`: figcaption renderar credit rakt av ("Foto · X / CC BY").
+- content/2026-25.md: backfillat med bankens 6 foton + bylines (Google HQ, Google
+  HQ-entré, NYSE-golvet, Elon Musk, BalticServers serverhall, kraftledningar).
+
+Verifierat: körde banken mot riktiga research-JSON:en → korrekt automatiskt val.
+Byggd, screenshot-granskad, deployad → live.
+
 ## 2026-06-18 — Iteration 2: pressbild-känsla, fyndiga rubriker, äkta citat (KLAR, live)
 
 Antons feedback efter att tabloid-looken gått live. Tre saker:
