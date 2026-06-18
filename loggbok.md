@@ -1,5 +1,53 @@
 # AI-Bladet — Loggbok
 
+## 2026-06-18 — UI-omarbetning av framsidan: tabloid-look (KLAR, branch frontsida-tabloid)
+
+Genomförde de 5 feedback-punkterna. Mål: framsidan mer som Aftonbladet — visuell,
+stora rubriker, en bild per nyhet. Verifierat via headless Chrome mot lokal HTTP-server
+(file:// fungerar inte — absoluta /style.css-sökvägar löses mot FS-roten).
+
+**Vad gjordes (per punkt):**
+1. `.stories-grid` (3-kol grid) → `.stories-column` (en vertikal spalt, flex-column).
+2. Stora story-rubriker (clamp 1.7–2.7rem). Lead kvar prominent överst med hero-bild.
+3. Bilder per story: stor bild ÖVER varje rubrik (Antons val), 16:9. Lead får 16:8 hero.
+   - `templates/issue.js`: ny `figure()`-helper. Inline `onerror` flippar `<figure>`
+     till en branded fallback ("AI-Bladet"-monogram på ink-gradient) — funkar även
+     innan app.js laddat. Käll-URL:er 404:ar över tid → fallbacken fångar det.
+   - `content/2026-25.md`: backfillade `image:` på lead + 5 stories (exakta URL:er
+     ur `pipeline/output/images/2026-25.json`).
+   - `pipeline/write.py`: skickar nu HELA bild-URL:en i prompten (förr `[:80]`-trunkerad),
+     output-mallen emit:ar `image:` på lead + story, ny regel #12 (kopiera URL exakt,
+     utelämna vid avsaknad).
+4. "Läs mer" länkade till numret-sidan → nu INLINE-expansion av `s.body` under storyn
+   (renderas dold med `hidden`, `aria-controls`/`aria-expanded`).
+5. "Läs mindre"-toggle: ny `static/app.js` (event-delegation, ~25 rader), laddas via
+   `templates/base.js` (`<script src="/app.js" defer>`). Sajtens första JS.
+
+Permalink-sidan (`/v/ÅÅÅÅ/VV/`) oförändrad i beteende: bilder visas, body alltid synlig,
+ingen toggle. Responsiva grid-brytpunkter för gamla `.stories-grid` borttagna.
+
+**Ursprungliga 5 punkterna (för referens):**
+
+**De 5 punkterna:**
+1. Story-korten (Modeller/Företag/Säkerhet/Verktyg) ligger i 3-kolumners grid
+   (`.stories-grid` i style.css). Gör om till EN vertikal, scrollbar spalt — Aftonbladet-stil.
+2. Stora rubriker per nyhet. Viktigaste storyn kvar prominent på huvudomslaget (lead).
+3. BILDER per story saknas helt. OBS: pipelinen HAR redan bild-URL:er per story i
+   `pipeline/output/images/2026-25.json` (fält `image_url`), men de tappas bort —
+   `write.py` skickar bild i prompt-kontexten men emit:ar inget image-fält i YAML,
+   och mallen renderar ingen bild. Att göra: (a) write.py emit:ar image per story,
+   (b) issue.js renderar bild, (c) backfilla content/2026-25.md med image_url ur
+   pipeline-outputen. Snygg fallback krävs (många käll-URL:er blir 404 över tid).
+4. "Läs mer" länkar i dag till hela numret-sidan (visar all text). Ändra till INLINE-
+   expansion bara under den story man klickar på (storyns body finns som `s.body`).
+5. Lägg till "Läs mindre" (toggle). Sajten har INGEN JavaScript i dag — lägg till en
+   liten vanilla-JS-snutt (base.js eller separat fil kopierad från static/).
+
+**Arbetssätt:** använd skill:en frontend-design för estetiken. Bygg med `node build.js`,
+verifiera i public/ (framsida + permalänk). Ny branch, commit per logisk del.
+
+---
+
 ## 2026-06-18 — Steg 7 byggt + full pipeline-test
 
 [... tidigare loggar ...]
