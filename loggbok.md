@@ -4,6 +4,38 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-06-18 — [Claude Code] Preflight härdad efter lutras torrkörning
+
+Lutras torrkörning avslöjade två miljöbuggar (tack!):
+- Scriptet använde Hermes-python (saknade `feedparser`) i stället för pipelinens
+  egna `.venv`. lutra fixade PATH:en (la `pipeline/.venv/bin` först i run_weekly.sh).
+- **Preflighten missade `feedparser`/`trafilatura`/`yaml`** → "passerade" falskt, och
+  collect.py kraschade i stället. Utökade dep-kollen till hela setet pipelinen
+  importerar: `requests, bs4, lxml, feedparser, trafilatura, yaml`. Verifierat → PASS
+  med .venv-pythonen. Nu fångas saknade deps i preflight (loud) i stället för mitt i körningen.
+
+Committar lutras PATH-fix + min preflight-fix tillsammans. seen.db verifierat återställd
+(identisk med backup) → söndag opåverkad. Inga content/public-ändringar kvar.
+
+## 2026-06-18 — [lutra] Torrkörning — pipeline OK men avbruten (research 14/15)
+
+- **Syfte:** testa hela pipelinen inför söndagens premiärkörning
+- **Preflight:** ✅ (efter PATH-fix: la till pipeline-venv före Hermes-venv i run_weekly.sh)
+- **Pipeline:** collect ✅ → dedup ✅ → score ✅ → research ⚠️ (14/15 briefingar klara, interrupt)
+- **Validering:** ❌ nåddes aldrig (avbrott under research)
+- **Build:** ❌ nåddes aldrig
+- **Git/Deploy:** ❌ SKIP_GIT_PUSH satt, ingen push — städat: seen.db återställd, content/ + public/ git-restore, runnerlog borttagen
+- **Fynd:** PATH-buggen är nu fixad i repot. Inget annat blockerar — söndagskörningen bör funka
+- **Nästa:** första autonoma körningen söndag 21/6 07:00
+
+## 2026-06-18 — [lutra] Synkroniserad — cron fixad, AGENTS.md inläst
+
+- Pausade gamla Discord-cron "LUTRA AI NEWS — Veckorapport" (556028abe1ba)
+- Symlänkade `~/.hermes/scripts/ai-bladet-weekly.sh` → `pipeline/run_weekly.sh`
+- Läste AGENTS.md och loggbok-toppen — följer samarbetsrutinen framöver
+- Minne uppdaterat: innan AI-Bladet-arbete → läs loggbok; efter → skriv [lutra]-post
+- Nästa: första autonoma söndagskörningen 2026-06-21 07:00 🚀
+
 ## 2026-06-18 — [Claude Code] Samarbetskontrakt: AGENTS.md + delad loggbok
 
 Gjorde det enkelt för Claude Code och lutra att turas om på projektet och se varandras

@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Robust PATH — cron startar med minimal miljö. Säkerställ homebrew (node/python3),
 # system-bin och Hermes-venv så att inget steg kraschar tyst på saknad binär.
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/.hermes/hermes-agent/venv/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/ai-bladet/pipeline/.venv/bin:$HOME/.hermes/hermes-agent/venv/bin:$PATH"
 
 PROJECT_DIR="$HOME/ai-bladet"
 PIPELINE_DIR="$PROJECT_DIR/pipeline"
@@ -39,8 +39,10 @@ preflight_fail=0
 for bin in python node git; do
     command -v "$bin" >/dev/null 2>&1 || { echo "❌ PREFLIGHT: '$bin' saknas i PATH"; preflight_fail=1; }
 done
-python -c "import requests, bs4, lxml" 2>/dev/null \
-    || { echo "❌ PREFLIGHT: python-deps saknas (requests/bs4/lxml) i $(command -v python || echo python)"; preflight_fail=1; }
+# Hela dep-setet som pipelinen importerar (collect→write). Missade feedparser
+# i v1 → torrkörningen 2026-06-18 kraschade i collect.py i stället för i preflight.
+python -c "import requests, bs4, lxml, feedparser, trafilatura, yaml" 2>/dev/null \
+    || { echo "❌ PREFLIGHT: python-deps saknas (kräver requests/bs4/lxml/feedparser/trafilatura/yaml) i $(command -v python || echo python)"; preflight_fail=1; }
 [ -n "${OPENROUTER_API_KEY:-}" ] \
     || { echo "❌ PREFLIGHT: OPENROUTER_API_KEY saknas (källa: ~/.hermes/.env)"; preflight_fail=1; }
 if [ "$preflight_fail" -ne 0 ]; then
