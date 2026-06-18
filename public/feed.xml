@@ -7,18 +7,11 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
-  <title>GPT-5.5 är här — och EU:s AI Act börjar gälla — Vecka 26 2026</title>
-  <description>OpenAI lanserar sin kraftfullaste modell hittills, EU:s AI-förordning träder i kraft, och ett svenskt startup landar 200 miljoner för AI-driven läkemedelsforskning.</description>
-  <link>https://aibladet.se/v/2026/26/</link>
-  <guid>https://aibladet.se/v/2026/26/</guid>
-  <pubDate>Sun, 28 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Storbråk om copyright och en ny svensk AI-modell — Vecka 25 2026</title>
-  <description>EU drar åt skruvarna, OpenAI släpper ny modell och Sverige får en egen satsning</description>
+  <title>Googles miljardmaskin och OpenAIs börsplaner — Vecka 25 2026</title>
+  <description>En vecka av stora rörelser: Google dominerar sökning, OpenAI siktar mot börsen och xAI byter ägare.</description>
   <link>https://aibladet.se/v/2026/25/</link>
   <guid>https://aibladet.se/v/2026/25/</guid>
-  <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

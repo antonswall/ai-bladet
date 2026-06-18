@@ -8,7 +8,7 @@ function renderIssue(issue, mode, prev, next) {
   // Build a Date safely from either so we never produce "Invalid Date".
   const dateObj = date instanceof Date ? date : new Date(date + 'T12:00:00');
   const dateStr = dateObj.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const readTime = Math.max(1, Math.ceil((summary + ' ' + (lead?.ingress || '') + ' ' + (stories || []).map(s => s.body || '').join(' ')).split(/\s+/).length / 200));
+  const readTime = Math.max(1, Math.ceil((summary + ' ' + (lead?.ingress || '') + ' ' + (lead?.analysis || '') + ' ' + (stories || []).map(s => (s.ingress || '') + ' ' + (s.body || '')).join(' ')).split(/\s+/).length / 200));
 
   const isPermalink = mode === 'permalink';
   const canonical = `/v/${year}/${week}/`;
@@ -30,6 +30,7 @@ function renderIssue(issue, mode, prev, next) {
       <div class="lead-kicker">${esc(lead.kicker || 'VECKANS STÖRSTA')}<span class="lead-sources">${sources ? `· ${sources} källor` : ''}</span></div>
       <h1 class="lead-headline">${isPermalink ? esc(lead.headline || title) : `<a href="/v/${year}/${week}/">${esc(lead.headline || title)}</a>`}</h1>
       <p class="lead-ingress">${esc(lead.ingress || summary || '')}</p>
+      ${lead.analysis ? `<aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>${esc(lead.analysis)}</p></aside>` : ''}
     </section>`;
   }
 
@@ -41,12 +42,15 @@ function renderIssue(issue, mode, prev, next) {
   // Secondary grid (front page: max 6, permalink: all)
   const displayStories = isPermalink ? (stories || []) : (stories || []).slice(0, 6);
   if (displayStories.length > 0) {
+    const storyLink = `/v/${year}/${week}/`;
     body += `<section class="stories-grid">`;
     for (const s of displayStories) {
       body += `<article class="story-card">
         ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
-        <h2 class="story-headline">${esc(s.headline)}</h2>
-        ${(isPermalink && s.body) ? `<p class="story-body">${esc(s.body)}</p>` : ''}
+        <h2 class="story-headline">${isPermalink ? esc(s.headline) : `<a href="${storyLink}">${esc(s.headline)}</a>`}</h2>
+        ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
+        ${(isPermalink && s.body) ? s.body.split(/\n\n+/).map(p => `<p class="story-body">${esc(p.trim())}</p>`).join('') : ''}
+        ${!isPermalink ? `<a class="story-more" href="${storyLink}">Läs mer →</a>` : ''}
       </article>`;
     }
     body += `</section>`;
@@ -72,7 +76,6 @@ function renderIssue(issue, mode, prev, next) {
 
   if (!isPermalink) {
     body += `<nav class="bottom-nav bottom-nav--cta">
-      <a href="/v/${year}/${week}/">Läs hela ${weekLabel} →</a>
       <a href="/arkiv/">Bläddra i arkivet →</a>
     </nav>`;
   }

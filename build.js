@@ -34,7 +34,7 @@ for (const file of issueFiles) {
   data.url = `/${data.slug}/`;
   data.bodyHtml = content.trim();
   if (!data.wordcount) {
-    const text = (data.lead?.ingress || '') + ' ' + (data.stories || []).map(s => s.body || '').join(' ') + ' ' + (data.briefs || []).join(' ');
+    const text = (data.lead?.ingress || '') + ' ' + (data.lead?.analysis || '') + ' ' + (data.stories || []).map(s => (s.ingress || '') + ' ' + (s.body || '')).join(' ') + ' ' + (data.briefs || []).join(' ');
     data.wordcount = text.split(/\s+/).filter(Boolean).length;
   }
   issues.push(data);

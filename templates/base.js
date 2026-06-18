@@ -29,7 +29,6 @@ function base({ title, description, canonical, ogType, jsonLd, content, week, ye
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
   <header class="masthead">
     <div class="masthead-top">
-      <span class="pulse">Nattupplagan</span>
       <span>${editionLabel}</span>
     </div>
     <div class="masthead-brand">
