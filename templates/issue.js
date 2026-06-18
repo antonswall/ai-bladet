@@ -8,7 +8,7 @@ function renderIssue(issue, mode, prev, next) {
   // Build a Date safely from either so we never produce "Invalid Date".
   const dateObj = date instanceof Date ? date : new Date(date + 'T12:00:00');
   const dateStr = dateObj.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const readTime = Math.max(1, Math.ceil((summary + ' ' + (lead?.ingress || '') + ' ' + (stories || []).map(s => s.body || '').join(' ')).split(/\s+/).length / 200));
+  const readTime = Math.max(1, Math.ceil((summary + ' ' + (lead?.ingress || '') + ' ' + (lead?.analysis || '') + ' ' + (stories || []).map(s => (s.ingress || '') + ' ' + (s.body || '')).join(' ')).split(/\s+/).length / 200));
 
   const isPermalink = mode === 'permalink';
   const canonical = `/v/${year}/${week}/`;
