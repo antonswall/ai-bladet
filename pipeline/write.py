@@ -165,7 +165,8 @@ REDAKTIONELLA REGLER — inga undantag:
    med EXAKT samma URL — kopiera tecken för tecken, hitta aldrig på eller ändra en
    URL. Saknar storyn bild: utelämna image-raden helt (framsidan visar då en
    snygg fallback). Matcha bilden till rätt story — blanda inte ihop dem.
-   Sätt även credit till källans namn (fältet Källa) — det blir bild-byline.
+   Kopiera även Byline ordagrant till credit — det är fotografens/källans
+   attribution och licens och får aldrig ändras eller hittas på.
 
 13. FYNDIGA RUBRIKER — MEN ALDRIG PÅ BEKOSTNAD AV FAKTA
    Rubriker får vara säljande och tabloida, men varje påstående i en rubrik måste
@@ -206,6 +207,7 @@ def build_prompt(stories: list[dict], week: str, year: int,
         lead = s.get("lead_potential", 0)
         source = s.get("source_label", "")
         image = s.get("image_url", "")
+        credit = s.get("image_credit", "")
 
         stories_text += f"""
 ## STORY {i+1} — Score: {score} | Kategori: {category}
@@ -227,6 +229,7 @@ Citat:
 {chr(10).join(f'  "{q.get("text", "")}" — {q.get("speaker", "")}' for q in quotes[:2])}
 
 Bild (kopiera URL:en EXAKT om du väljer denna story): {image if image else 'Ingen bild'}
+Byline (kopiera EXAKT till credit-fältet): {credit if credit else 'Ingen'}
 """
         stories_text += "\n---\n"
 
@@ -266,13 +269,13 @@ lead:
   ingress: "2-3 meningar som säljer storyn"
   analysis: "AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11)"
   image: "Klistra in Bild-URL:en EXAKT från den valda lead-storyn. Utelämna raden helt om storyn saknar bild."
-  credit: "Källans namn (fältet Källa) för bild-bylinen, t.ex. Google. Utelämna om bild saknas."
+  credit: "Klistra in Byline EXAKT från den valda lead-storyn (t.ex. 'Foto · X / CC BY 2.0'). Utelämna om bild saknas."
 stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
     headline: "Rubrik — gärna fyndig/säljande, men 100% förankrad i research (regel 7 + 13)"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
     image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
-    credit: "Källans namn (fältet Källa) för bild-bylinen. Utelämna om bild saknas."
+    credit: "Klistra in Byline EXAKT från den valda storyn. Utelämna om bild saknas."
     quote: "(VALFRITT) Ta med ENDAST om storyn har ett Citat i research. Annars utelämna hela quote-blocket."
     # quote ska vara ett block med text + speaker, ordagrant från research (regel 14):
     #   quote:

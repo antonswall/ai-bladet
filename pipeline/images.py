@@ -22,6 +22,8 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
+import image_bank
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 PIPELINE_DIR = Path(__file__).parent
@@ -119,37 +121,21 @@ def find_images(input_path: Path, output_path: Path) -> dict:
         data = json.load(f)
 
     stories = data["stories"]
-    print(f"🖼️  Bildsökning: {len(stories)} stories\n")
+    print(f"🖼️  Bildval: {len(stories)} stories (redaktionell bildbank)\n")
+
+    used: set[str] = set()  # undvik samma bild två gånger i samma nummer
 
     for i, story in enumerate(stories):
         title = story.get("title", "Untitled")[:70]
-        url = story.get("url", "")
-        fetch_success = story.get("fetch_success", False)
-
         print(f"  [{i+1}/{len(stories)}] {title}...", end=" ", flush=True)
 
-        img_url = None
-
-        # Steg 1: OG-image från käll-URL
-        if url:
-            img_url = extract_og_image(url)
-
-        # Steg 2: Fallback — bild i extracted text
-        if not img_url and fetch_success:
-            img_url = find_image_in_text(story.get("full_text_excerpt", ""))
-
-        # Steg 3: Verify
-        if img_url:
-            valid = verify_image(img_url)
-            if valid:
-                print(f"✅")
-            else:
-                print(f"⚠️  OG hittad men ej verifierbar")
-                img_url = None  # acceptera ändå? ja, låt den stå
-        else:
-            print("—")
+        # Primärt: kurerat pressfoto ur bildbanken (ämne → källa → kategori).
+        # Källornas egna OG-bilder är marknadsförings-banners och används inte.
+        img_url, credit = image_bank.pick(story, used)
+        print(f"✅ {credit.split('·')[-1].strip()}")
 
         story["image_url"] = img_url or ""
+        story["image_credit"] = credit or ""
 
     # Statistik
     with_images = sum(1 for s in stories if s.get("image_url"))

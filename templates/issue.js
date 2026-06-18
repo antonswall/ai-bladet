@@ -122,7 +122,7 @@ function figure(url, alt, cls, credit) {
   const img = url
     ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="lazy" decoding="async" onerror="this.remove()">`
     : '';
-  const cap = credit ? `<figcaption class="figure-credit">Pressbild · ${esc(credit)}</figcaption>` : '';
+  const cap = credit ? `<figcaption class="figure-credit">${esc(credit)}</figcaption>` : '';
   return `<figure class="figure ${cls}">
     <span class="figure-frame">${img}<span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     ${cap}
