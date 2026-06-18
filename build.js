@@ -26,6 +26,10 @@ const issues = [];
 for (const file of issueFiles) {
   const raw = fs.readFileSync(path.join(CONTENT_DIR, file), 'utf8');
   const { data, content } = matter(raw);
+  // gray-matter parses unquoted YAML dates (date: 2026-06-21) into JS Date
+  // objects. Normalize to a 'YYYY-MM-DD' string so every consumer (folio
+  // formatting, JSON-LD datePublished, RSS pubDate) gets a predictable value.
+  if (data.date instanceof Date) data.date = data.date.toISOString().slice(0, 10);
   data.slug = `v/${data.year}/${data.week}`;
   data.url = `/${data.slug}/`;
   data.bodyHtml = content.trim();
