@@ -237,11 +237,21 @@ Svara endast med JSON:
     result["lead_sources"] = _check_lead_sources(research_stories)
     result["duplication"] = _check_duplication(issue)
     result["se_eu_angle"] = _check_se_eu_angle(issue, research_stories)
+
+    # Hård gate: en enda obekräftad HIGH-allvarlig faktaflagga blockerar deploy,
+    # oavsett pass-rate. (Anton 2026-06-18: fakta går före kadens. Retry-loopen i
+    # run_weekly.sh skickar high/medium-flaggor till Sonnet för rättning först.)
+    result["high_issues"] = [
+        i for i in result.get("issues", [])
+        if i.get("severity") == "high" and not i.get("supported", True)
+    ]
+
     result["pass"] = (result.get("pass_rate", 0) >= VALIDATION_THRESHOLD and
                       result["url_checks"]["valid"] > 0 and
                       result.get("lead_sources", 1) >= 1 and
                       not result["duplication"]["duplicate"] and
-                      result["se_eu_angle"]["found"])
+                      result["se_eu_angle"]["found"] and
+                      not result["high_issues"])
 
     return result
 
@@ -431,6 +441,11 @@ def validate(content_path: Path, research_input_path: Path,
     se_icon = "✅" if se.get("found") else "❌"
     print(f"  Dublettkontroll: {dup_icon}")
     print(f"  SE/EU-vinkel:    {se_icon}")
+    high = result.get("high_issues", [])
+    if high:
+        print(f"  HIGH-flaggor:    ❌ {len(high)} (BLOCKERAR deploy oavsett pass-rate)")
+        for h in high:
+            print(f"      ➜ [{h.get('location','?')}] {h.get('claim','')[:80]}")
     print()
 
     for issue_item in result.get("issues", [])[:5]:

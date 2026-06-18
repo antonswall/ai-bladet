@@ -4,6 +4,19 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-06-18 — [Claude Code] Hård gate: HIGH-faktaflagga blockerar deploy
+
+Torrkörning #2 (lutra) gick hela vägen ✅ MEN valideringen PASSADE (75%) trots en
+[high]-flagga (lead tillskrev Jassy en 50-mdr-siffra som research inte stöder).
+Grinden i `validate.py` saknade severity-koll → allvarliga faktafel kunde gå live.
+
+**Fix (Antons beslut: fakta > kadens):** `result["pass"]` kräver nu även
+`not high_issues`, där high_issues = flaggor med severity=="high" och supported=False.
+Retry-loopen i run_weekly.sh skickar redan high/medium till Sonnet → 3 försök att
+rätta; kvarstår en high → ingen deploy, utkast sparas, notis till Telegram.
+Lade även en tydlig "HIGH-flaggor ❌ BLOCKERAR"-rad i valideringsutskriften.
+Gate-logiken enhetstestad (blockerar obekräftad high, släpper medium + bekräftad high).
+
 ## 2026-06-18 — [Claude Code] Preflight härdad efter lutras torrkörning
 
 Lutras torrkörning avslöjade två miljöbuggar (tack!):
@@ -16,6 +29,14 @@ Lutras torrkörning avslöjade två miljöbuggar (tack!):
 
 Committar lutras PATH-fix + min preflight-fix tillsammans. seen.db verifierat återställd
 (identisk med backup) → söndag opåverkad. Inga content/public-ändringar kvar.
+
+## 2026-06-19 — [lutra] Torrkörning #2 — full pipeline PASS ✅
+
+- **Preflight:** ✅ (PATH-fix från igår fungerar)
+- **Pipeline:** collect ✅ → dedup ✅ → score ✅ → research ✅ → images ✅ (15/15) → write ✅ (~1501 ord, Sonnet) → validate ✅ (PASS, 75%, 1 försök) → build ✅ (Vecka 25)
+- **Deploy:** ❌ SKIP_GIT_PUSH — torrkörning, städad: seen.db återställd, git restore, runnerloggar bort
+- **Fynd:** en high-flagga i valideringen — lead-artikelns 50 miljarder-siffra attribueras som Jassy-citat trots att research säger internt estimat. Inget blockerande.
+- **Nästa:** söndag 21/6 07:00 — första autonoma skarpa körningen 🚀
 
 ## 2026-06-18 — [lutra] Torrkörning — pipeline OK men avbruten (research 14/15)
 
