@@ -1,0 +1,285 @@
+/* === AI-Bladet — Tabloid Newspaper CSS === */
+
+:root {
+  --paper:       #FAF9F6;
+  --ink:         #111111;
+  --accent:      #E5141A;
+  --accent-blue: #0B4F9C;
+  --rule:        #CCCCCC;
+  --muted:       #6B6B6B;
+  --paper-2:     #F2F0EA;
+  --link:        #111111;
+  --link-hover:  #E5141A;
+}
+
+/* === @font-face — self-hosted fonts === */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: swap;
+  src: url('/fonts/Archivo.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+  src: url('/fonts/Fraunces.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/SourceSans3.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, sans-serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); }
+
+/* === Masthead === */
+.masthead {
+  text-align: center;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 3px solid var(--accent);
+}
+.masthead-name {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 56px;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--ink);
+}
+.masthead-name a { color: var(--ink); }
+.masthead-name a:hover { color: var(--accent); }
+
+.dateline {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.nav a { color: var(--ink); }
+.nav a:hover { color: var(--accent); }
+
+/* === Lead story === */
+.lead { margin: 2rem 0; padding-bottom: 1.5rem; border-bottom: 2px solid var(--rule); }
+.lead-kicker {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.lead-sources {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.lead-headline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 900;
+  font-size: 48px;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.5px;
+}
+.lead-headline a { color: var(--ink); }
+.lead-headline a:hover { color: var(--link-hover); }
+
+.lead-ingress {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.lead-ingress::first-letter {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 64px;
+  font-weight: 900;
+  float: left;
+  line-height: 0.8;
+  padding-right: 6px;
+  padding-top: 4px;
+}
+
+/* === Story grid (secondary) === */
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--rule);
+  margin-bottom: 1.5rem;
+}
+.story-card { }
+.story-kicker {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+.story-headline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.story-headline a { color: var(--ink); }
+.story-headline a:hover { color: var(--link-hover); }
+.story-body {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-top: 0.5rem;
+  color: var(--ink);
+}
+
+/* === KORTNYTT === */
+.briefs-section { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--rule); }
+.briefs-header {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+.briefs-list { list-style: none; }
+.briefs-list li {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 16px;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.briefs-list li:last-child { border-bottom: none; }
+
+/* === Bottom nav === */
+.bottom-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+/* === Archive === */
+.issue-card {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.issue-card-week {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 20px;
+}
+.issue-card-title {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+
+/* === Page heading === */
+.page-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 900;
+  font-size: 36px;
+  margin: 2rem 0 1rem;
+}
+
+/* === Permalink / full issue === */
+.full-stories { margin: 2rem 0; }
+.full-story {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.full-story:last-child { border-bottom: none; }
+
+/* === Footer === */
+.footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--rule);
+  text-align: center;
+  font-family: 'Archivo', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+/* === About page === */
+.about-section h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 1.5rem 0 0.5rem;
+}
+.about-section p {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  max-width: 68ch;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  body { padding: 1rem; }
+  .masthead-name { font-size: 36px; }
+  .lead-headline { font-size: 32px; }
+  .stories-grid { grid-template-columns: 1fr; }
+  .lead-ingress { font-size: 17px; }
+  .lead-ingress::first-letter { font-size: 48px; }
+  .nav { gap: 1rem; font-size: 12px; }
+}
+
+/* === 404 page === */
