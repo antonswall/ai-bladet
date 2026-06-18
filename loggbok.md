@@ -1,5 +1,26 @@
 # AI-Bladet — Loggbok
 
+## 2026-06-18 — Driftsäkring inför första autonoma körningen (Claude Code, Opus 4.8)
+
+Granskning inför premiärkörningen söndag 2026-06-21. Reda ut Antons farhågor:
+
+- **"Scriptet saknas" — falskt.** `~/.hermes/scripts/ai-bladet-weekly.sh` FINNS och är
+  byte-identiskt med `pipeline/run_weekly.sh`. Cronen failar inte av den orsaken.
+- **"Loggboken föråldrad (Fas 0)" — fel fil.** Det står i den gamla planeringsfilen
+  `claude-analyser/runda4-content-pipeline.md`, inte i loggbok.md (som är aktuell).
+- **Riktiga risker åtgärdade i `run_weekly.sh`:**
+  - Härdad PATH (homebrew + system + hermes-venv) — cron-miljön kan vara minimal.
+  - Preflight som failar TIDIGT och tydligt (till Telegram) om python/node/git,
+    python-deps (requests/bs4/lxml) eller OPENROUTER_API_KEY saknas. Testad → PASS.
+  - `mkdir -p output` så loggfilen alltid kan skrivas.
+- **`RUNBOOK.md` skapad** — driftmanual: manuell körning (SKIP_GIT_PUSH=1), samt
+  åtgärder vid validerings-fail, Sonnet nere, git-push-fail, preflight-stopp.
+- **Kvar för Anton (hans revir, ~/.hermes):**
+  1. Symlänka Hermes-kopian → repo så de inte driftar:
+     `ln -sf ~/ai-bladet/pipeline/run_weekly.sh ~/.hermes/scripts/ai-bladet-weekly.sh`
+  2. Besluta om Discord-jobbet "LUTRA AI NEWS — Veckorapport" (0 9 * * 0) ska vara
+     kvar parallellt, ersättas, eller bli en länk-postare till AI-Bladet.
+
 ## 2026-06-18 — Sessionssummering + autonomi-klargörande (Claude Code, Opus 4.8)
 
 Sammanfattar dagens session (framsida-omarbetningen, iteration 1–3 nedan) plus två

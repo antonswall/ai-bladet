@@ -3,8 +3,14 @@
 # Körs av cron varje söndag. Auto-deployar vid godkänd validering.
 
 set -euo pipefail
+
+# Robust PATH — cron startar med minimal miljö. Säkerställ homebrew (node/python3),
+# system-bin och Hermes-venv så att inget steg kraschar tyst på saknad binär.
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$HOME/.hermes/hermes-agent/venv/bin:$PATH"
+
 PROJECT_DIR="$HOME/ai-bladet"
 PIPELINE_DIR="$PROJECT_DIR/pipeline"
+mkdir -p "$PROJECT_DIR/pipeline/output"
 LOG_FILE="$PROJECT_DIR/pipeline/output/runner-$(date +%Y-%m-%d_%H%M).log"
 
 exec > >(tee -a "$LOG_FILE") 2>&1
@@ -27,6 +33,21 @@ fi
 if [ -f "$PROJECT_DIR/.env" ]; then
     export $(grep -v '^#' "$PROJECT_DIR/.env" | xargs)
 fi
+
+# ── Preflight: faila TIDIGT och TYDLIGT (till Telegram) om miljön saknar något ──
+preflight_fail=0
+for bin in python node git; do
+    command -v "$bin" >/dev/null 2>&1 || { echo "❌ PREFLIGHT: '$bin' saknas i PATH"; preflight_fail=1; }
+done
+python -c "import requests, bs4, lxml" 2>/dev/null \
+    || { echo "❌ PREFLIGHT: python-deps saknas (requests/bs4/lxml) i $(command -v python || echo python)"; preflight_fail=1; }
+[ -n "${OPENROUTER_API_KEY:-}" ] \
+    || { echo "❌ PREFLIGHT: OPENROUTER_API_KEY saknas (källa: ~/.hermes/.env)"; preflight_fail=1; }
+if [ "$preflight_fail" -ne 0 ]; then
+    echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
+    exit 1
+fi
+echo "✅ Preflight OK — python=$(command -v python), node $(node -v)"
 
 # Kör pipeline (utan rm seen.db — vi vill minnas tidigare)
 python collect.py || { echo "❌ collect failade"; exit 1; }
