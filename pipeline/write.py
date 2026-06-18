@@ -94,7 +94,7 @@ SYSTEM_PROMPT = """Du är chefredaktör för AI-Bladet, en svensk nyhetstidning 
 
 Din röst: ledig men trovärdig — tabloid i energi, sansad i sak. Tänk DN/SvD möter tech-blogg.
 Inga uppmaningar till läsaren, ingen "i den här artikeln", inga emojis, inget marknadsföringsspråk.
-Svenska, genomgående. 500-700 ord totalt.
+Svenska, genomgående. Varje huvudstory skrivs på 200-300 ord enligt strukturkravet (regel 10).
 
 REDAKTIONELLA REGLER — inga undantag:
 
@@ -141,7 +141,17 @@ REDAKTIONELLA REGLER — inga undantag:
    Varje sekundär story ska ha en fristående ingress på 40-60 ord som besvarar:
    vad hände, och varför det spelar roll. Ingressen är en egen, säljande
    sammanfattning (dek) — INTE de första meningarna av brödtexten ordagrant.
-   Den ska kunna stå ensam på framsidan och få läsaren att vilja läsa vidare."""
+   Den ska kunna stå ensam på framsidan och få läsaren att vilja läsa vidare.
+
+10. LÄNGD & STRUKTUR PÅ BRÖDTEXTEN
+   Varje stories.body ska vara 200-300 ord, i markdown med stycken (blankrad mellan),
+   och följa denna struktur:
+   1) Vad hände — fakta och konkreta detaljer (~80 ord).
+   2) Varför det spelar roll / kontext — sätt nyheten i sitt sammanhang (~100 ord).
+   3) Vad det betyder för Sverige/EU — ENDAST där det finns en genuin koppling i
+      research (~50 ord). Tvinga aldrig in en svensk vinkel som inte finns;
+      hoppa över del 3 hellre än att hitta på.
+   Fyll inte ut med upprepning — varje mening ska bära ny information från research."""
 
 
 def build_prompt(stories: list[dict], week: str, year: int,
@@ -229,7 +239,7 @@ stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
     headline: "Rubrik"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
-    body: "1-3 stycken markdown-brödtext"
+    body: "200-300 ord markdown i stycken (blankrad mellan): vad hände / varför det spelar roll / Sverige-EU där relevant"
 briefs:
   - "Kort enradare"
   - "Ännu en kort enradare"
@@ -237,7 +247,9 @@ categories: [Kategori1, Kategori2]
 sources: {len(stories)}
 ---
 
-Skriv 500-700 ord totalt (lead.ingress + alla stories.body + briefs)."""
+Varje stories.body skrivs på 200-300 ord enligt strukturen i regel 10 (vad hände /
+varför det spelar roll / Sverige-EU där relevant). lead.ingress + varje story.ingress
+hålls korta (2-3 meningar resp. 40-60 ord)."""
 
     return prompt
 

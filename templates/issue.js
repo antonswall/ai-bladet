@@ -48,7 +48,7 @@ function renderIssue(issue, mode, prev, next) {
         ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
         <h2 class="story-headline">${isPermalink ? esc(s.headline) : `<a href="${storyLink}">${esc(s.headline)}</a>`}</h2>
         ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
-        ${(isPermalink && s.body) ? `<p class="story-body">${esc(s.body)}</p>` : ''}
+        ${(isPermalink && s.body) ? s.body.split(/\n\n+/).map(p => `<p class="story-body">${esc(p.trim())}</p>`).join('') : ''}
         ${!isPermalink ? `<a class="story-more" href="${storyLink}">Läs mer →</a>` : ''}
       </article>`;
     }
