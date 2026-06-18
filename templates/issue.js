@@ -27,7 +27,7 @@ function renderIssue(issue, mode, prev, next) {
   // Lead
   if (lead) {
     body += `<section class="lead">
-      ${figure(lead.image, lead.headline || title, 'lead-figure')}
+      ${figure(lead.image, lead.headline || title, 'lead-figure', lead.credit)}
       <div class="lead-kicker">${esc(lead.kicker || 'VECKANS STÖRSTA')}<span class="lead-sources">${sources ? `· ${sources} källor` : ''}</span></div>
       <h1 class="lead-headline">${isPermalink ? esc(lead.headline || title) : `<a href="/v/${year}/${week}/">${esc(lead.headline || title)}</a>`}</h1>
       <p class="lead-ingress">${esc(lead.ingress || summary || '')}</p>
@@ -48,12 +48,16 @@ function renderIssue(issue, mode, prev, next) {
       const paras = (s.body || '').split(/\n\n+/).map(p => p.trim()).filter(Boolean);
       const bodyHtml = paras.map(p => `<p class="story-body">${esc(p)}</p>`).join('');
       const tid = `story-body-${week}-${i}`;
+      const quote = (s.quote && s.quote.text)
+        ? `<blockquote class="story-quote"><p>${esc(s.quote.text)}</p>${s.quote.speaker ? `<cite>${esc(s.quote.speaker)}</cite>` : ''}</blockquote>`
+        : '';
       body += `<article class="story-card">
-        ${figure(s.image, s.headline, 'story-figure')}
+        ${figure(s.image, s.headline, 'story-figure', s.credit)}
         <div class="story-text">
           ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
           <h2 class="story-headline">${esc(s.headline)}</h2>
-          ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}`;
+          ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
+          ${quote}`;
       if (isPermalink) {
         body += bodyHtml;
       } else if (bodyHtml) {
@@ -110,15 +114,19 @@ function esc(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// Image block with a built-in fallback. Many source image URLs 404 over time,
-// so a broken <img> flips its <figure> to the branded placeholder via onerror
-// (inline, so it works even before app.js loads). No image at all => placeholder.
-function figure(url, alt, cls) {
-  const inner = url
-    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="lazy" decoding="async"
-        onerror="this.closest('.figure').classList.add('figure--failed');this.remove();">`
+// Image block with a built-in fallback + press credit. Many source image URLs
+// 404 over time; the branded placeholder always sits behind the image, so a
+// broken <img> simply removes itself (inline onerror — works before app.js) and
+// the placeholder shows through. `credit` renders a newspaper-style photo byline.
+function figure(url, alt, cls, credit) {
+  const img = url
+    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="lazy" decoding="async" onerror="this.remove()">`
     : '';
-  return `<figure class="figure ${cls}${url ? '' : ' figure--failed'}">${inner}<span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></figure>`;
+  const cap = credit ? `<figcaption class="figure-credit">Pressbild · ${esc(credit)}</figcaption>` : '';
+  return `<figure class="figure ${cls}">
+    <span class="figure-frame">${img}<span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+    ${cap}
+  </figure>`;
 }
 
 module.exports = { renderIssue };

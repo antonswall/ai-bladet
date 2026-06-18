@@ -259,12 +259,13 @@ a { color: inherit; text-decoration: none; }
 .sections .cat::before { content: "· "; color: var(--accent-dim); margin-right: 0.15em; }
 
 /* ----------  Figures (images + branded fallback)  ----------------------- */
-.figure {
+.figure { margin: 0; display: block; }
+.figure-frame {
   position: relative;
-  margin: 0;
   display: block;
   overflow: hidden;
   aspect-ratio: 16 / 9;
+  max-height: 300px;            /* editorial press-photo band, not a giant hero */
   background: var(--ink);
 }
 .figure-img {
@@ -287,11 +288,20 @@ a { color: inherit; text-decoration: none; }
     var(--ink);
 }
 .figure-fallback-b { color: var(--accent); }
+/* Newspaper-style photo byline under each image */
+.figure-credit {
+  margin-top: 0.5rem;
+  font-family: var(--grot);
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--faint);
+}
 
 /* ----------  Lead hero image  ------------------------------------------- */
-.lead-figure {
-  margin-bottom: clamp(1.4rem, 3vw, 2.2rem);
+.lead-figure { margin-bottom: clamp(1.4rem, 3vw, 2.2rem); }
+.lead-figure .figure-frame {
   aspect-ratio: 16 / 8;
+  max-height: 380px;
   box-shadow: 0 20px 44px -26px rgba(0, 0, 0, 0.6);
 }
 
@@ -307,12 +317,13 @@ a { color: inherit; text-decoration: none; }
   animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .story-card:first-child { border-top: none; padding-top: 0; }
-.story-figure {
-  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+.story-figure { margin-bottom: clamp(1rem, 2.5vw, 1.4rem); }
+.story-figure .figure-frame {
+  max-height: 280px;
   box-shadow: 0 14px 32px -24px rgba(0, 0, 0, 0.55);
   transition: filter 0.35s ease;
 }
-.story-card:hover .story-figure { filter: saturate(1.06) contrast(1.02); }
+.story-card:hover .story-figure .figure-frame { filter: saturate(1.06) contrast(1.02); }
 .story-text { max-width: 66ch; }
 .story-kicker {
   font-family: var(--grot);
@@ -336,6 +347,33 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.55;
   color: var(--dim);
 }
+/* Pull-quote — real, sourced quotes sprinkled through the column */
+.story-quote {
+  margin: 1.4rem 0 0;
+  padding: 0.1rem 0 0.1rem 1.5rem;
+  border-left: 3px solid var(--accent);
+  max-width: 56ch;
+}
+.story-quote p {
+  position: relative;
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500; font-style: italic;
+  font-size: clamp(1.3rem, 2.3vw, 1.75rem);
+  line-height: 1.26;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.story-quote cite {
+  display: block;
+  margin-top: 0.75rem;
+  font-family: var(--grot); font-style: normal;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.story-quote cite::before { content: "— "; }
 .story-body-wrap {
   animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
