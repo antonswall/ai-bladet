@@ -164,7 +164,23 @@ REDAKTIONELLA REGLER — inga undantag:
    Varje story (och lead) som har en Bild-URL i research ska få ett image-fält
    med EXAKT samma URL — kopiera tecken för tecken, hitta aldrig på eller ändra en
    URL. Saknar storyn bild: utelämna image-raden helt (framsidan visar då en
-   snygg fallback). Matcha bilden till rätt story — blanda inte ihop dem."""
+   snygg fallback). Matcha bilden till rätt story — blanda inte ihop dem.
+   Sätt även credit till källans namn (fältet Källa) — det blir bild-byline.
+
+13. FYNDIGA RUBRIKER — MEN ALDRIG PÅ BEKOSTNAD AV FAKTA
+   Rubriker får vara säljande och tabloida, men varje påstående i en rubrik måste
+   gå att belägga i research (regel 7 gäller fullt ut). Attribuera leverantörers
+   prestandasiffror även i rubrik (regel 3): "Google: fyra gånger snabbare", inte
+   "fyra gånger snabbare" som blank sanning. Överdriv aldrig, lova aldrig framtid.
+
+14. CITAT — ENDAST ÄKTA, ALDRIG PÅHITTADE
+   Lägg gärna in ett pull-citat "då och då" via quote-fältet, MEN:
+   - Citatet måste finnas ordagrant i storyns Citat-lista i research.
+   - Översätt troget till svenska om originalet är engelskt — ändra inte innebörden.
+   - speaker ska vara EXAKT den talare research anger (ofta en organisation som
+     "OpenAI" eller "Google"). Tillskriv ALDRIG ett citat en namngiven person
+     (t.ex. en vd) om inte research uttryckligen namnger den personen.
+   - Har storyn inget citat i research: utelämna quote-blocket helt."""
 
 
 def build_prompt(stories: list[dict], week: str, year: int,
@@ -250,11 +266,18 @@ lead:
   ingress: "2-3 meningar som säljer storyn"
   analysis: "AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11)"
   image: "Klistra in Bild-URL:en EXAKT från den valda lead-storyn. Utelämna raden helt om storyn saknar bild."
+  credit: "Källans namn (fältet Källa) för bild-bylinen, t.ex. Google. Utelämna om bild saknas."
 stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
-    headline: "Rubrik"
+    headline: "Rubrik — gärna fyndig/säljande, men 100% förankrad i research (regel 7 + 13)"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
     image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
+    credit: "Källans namn (fältet Källa) för bild-bylinen. Utelämna om bild saknas."
+    quote: "(VALFRITT) Ta med ENDAST om storyn har ett Citat i research. Annars utelämna hela quote-blocket."
+    # quote ska vara ett block med text + speaker, ordagrant från research (regel 14):
+    #   quote:
+    #     text: "Citatet, troget översatt till svenska om originalet är engelskt"
+    #     speaker: "Exakt talare ur research, t.ex. OpenAI (aldrig en påhittad person)"
     body: "200-300 ord markdown i stycken (blankrad mellan): vad hände / varför det spelar roll / Sverige-EU där relevant"
 briefs:
   - "Kort enradare"
