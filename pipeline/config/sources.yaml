@@ -1,0 +1,259 @@
+# AI-Bladet — Källkonfiguration
+# Tier 1: Primärkällor (officiella bloggar, modellregister, forskning, GitHub)
+# Tier 2: Sekundärkällor (tech-media, kuraterade experter)
+# Tier 3: Signalkällor (popularitet/upptäckt)
+# Tier 4: Lucktäckare (Google News, SearXNG)
+
+feeds:
+  # === TIER 1: Primärkällor ===
+
+  # -- Frontier-labb (RSS) --
+  - id: openai
+    tier: 1
+    type: rss
+    url: "https://openai.com/news/rss.xml"
+    label: "OpenAI"
+    weight: 30
+
+  - id: huggingface-blog
+    tier: 1
+    type: rss
+    url: "https://huggingface.co/blog/feed.xml"
+    label: "Hugging Face Blog"
+    weight: 25
+
+  - id: qwen
+    tier: 1
+    type: rss
+    url: "https://qwenlm.github.io/blog/index.xml"
+    label: "Qwen (Alibaba)"
+    weight: 22
+
+  - id: google-ai
+    tier: 1
+    type: rss
+    url: "https://blog.google/technology/ai/rss/"
+    label: "Google AI"
+    weight: 25
+
+  - id: microsoft-ai
+    tier: 1
+    type: rss
+    url: "https://azure.microsoft.com/en-us/blog/feed/"
+    label: "Microsoft Azure/AI"
+    weight: 20
+
+  - id: nvidia
+    tier: 1
+    type: rss
+    url: "https://blogs.nvidia.com/feed/"
+    label: "NVIDIA"
+    weight: 20
+
+  - id: nvidia-dev
+    tier: 1
+    type: rss
+    url: "https://developer.nvidia.com/blog/feed/"
+    label: "NVIDIA Developer"
+    weight: 18
+
+  # -- Forskning --
+  - id: arxiv-cs-ai
+    tier: 1
+    type: rss
+    url: "http://export.arxiv.org/rss/cs.AI"
+    label: "arXiv cs.AI"
+    weight: 16
+
+  - id: arxiv-cs-cl
+    tier: 1
+    type: rss
+    url: "http://export.arxiv.org/rss/cs.CL"
+    label: "arXiv cs.CL"
+    weight: 14
+
+  - id: arxiv-cs-lg
+    tier: 1
+    type: rss
+    url: "http://export.arxiv.org/rss/cs.LG"
+    label: "arXiv cs.LG"
+    weight: 14
+
+  - id: arxiv-cs-cv
+    tier: 1
+    type: rss
+    url: "http://export.arxiv.org/rss/cs.CV"
+    label: "arXiv cs.CV"
+    weight: 12
+
+  - id: arxiv-stat-ml
+    tier: 1
+    type: rss
+    url: "http://export.arxiv.org/rss/stat.ML"
+    label: "arXiv stat.ML"
+    weight: 10
+
+  # -- Hugging Face API (JSON) --
+  - id: hf-models
+    tier: 1
+    type: json_api
+    url: "https://huggingface.co/api/models"
+    params:
+      sort: "createdAt"
+      direction: -1
+      limit: 50
+      full: true
+    label: "HF Models"
+    weight: 28
+
+  - id: hf-daily-papers
+    tier: 1
+    type: json_api
+    url: "https://huggingface.co/api/daily_papers"
+    label: "HF Daily Papers"
+    weight: 22
+
+  # -- GitHub releases (Atom) --
+  - id: github-llama
+    tier: 1
+    type: rss
+    url: "https://github.com/ggml-org/llama.cpp/releases.atom"
+    label: "GitHub: llama.cpp"
+    weight: 10
+
+  - id: github-transformers
+    tier: 1
+    type: rss
+    url: "https://github.com/huggingface/transformers/releases.atom"
+    label: "GitHub: transformers"
+    weight: 8
+
+  - id: github-vllm
+    tier: 1
+    type: rss
+    url: "https://github.com/vllm-project/vllm/releases.atom"
+    label: "GitHub: vLLM"
+    weight: 8
+
+  - id: github-comfyui
+    tier: 1
+    type: rss
+    url: "https://github.com/comfyanonymous/ComfyUI/releases.atom"
+    label: "GitHub: ComfyUI"
+    weight: 6
+
+  - id: github-langchain
+    tier: 1
+    type: rss
+    url: "https://github.com/langchain-ai/langchain/releases.atom"
+    label: "GitHub: LangChain"
+    weight: 6
+
+  # -- GitHub trending (RSS proxy) --
+  - id: github-trending-daily
+    tier: 1
+    type: rss
+    url: "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml"
+    label: "GitHub Trending (daily)"
+    weight: 12
+
+  # -- YouTube (produktlanseringar via keynote/launch-videor) --
+  - id: youtube-openai
+    tier: 1
+    type: rss
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A"
+    label: "YouTube: OpenAI"
+    weight: 8
+
+  # === TIER 2: Sekundärkällor ===
+
+  # -- Tech-media --
+  - id: techcrunch-ai
+    tier: 2
+    type: rss
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    label: "TechCrunch AI"
+    weight: 16
+
+  - id: verge-ai
+    tier: 2
+    type: rss
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    label: "The Verge AI"
+    weight: 16
+
+  - id: venturebeat-ai
+    tier: 2
+    type: rss
+    url: "https://venturebeat.com/category/ai/feed/"
+    label: "VentureBeat AI"
+    weight: 14
+
+  - id: ars-ai
+    tier: 2
+    type: rss
+    url: "https://arstechnica.com/ai/feed/"
+    label: "Ars Technica AI"
+    weight: 14
+
+  - id: mit-tr-ai
+    tier: 2
+    type: rss
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed/"
+    label: "MIT Tech Review AI"
+    weight: 14
+
+  - id: register-ai
+    tier: 2
+    type: rss
+    url: "https://www.theregister.com/software/ai_ml/headlines.atom"
+    label: "The Register AI/ML"
+    weight: 10
+
+  # -- Kuraterade experter --
+  - id: simon-willison
+    tier: 2
+    type: rss
+    url: "https://simonwillison.net/atom/everything/"
+    label: "Simon Willison"
+    weight: 20
+
+  - id: synced
+    tier: 2
+    type: rss
+    url: "https://syncedreview.com/feed/"
+    label: "Synced (kinesisk AI)"
+    weight: 12
+
+  # === TIER 3: Signalkällor ===
+
+  - id: hn-frontpage
+    tier: 3
+    type: rss
+    url: "https://hnrss.org/frontpage?points=50"
+    label: "HN (≥50 points)"
+    weight: 18
+
+  # === TIER 4: Lucktäckare ===
+
+  - id: google-news-ai
+    tier: 4
+    type: rss
+    url: "https://news.google.com/rss/search?q=%22artificial+intelligence%22+when:7d&hl=en-US&gl=US&ceid=US:en"
+    label: "Google News AI (EN)"
+    weight: 10
+
+  - id: google-news-sv
+    tier: 4
+    type: rss
+    url: "https://news.google.com/rss/search?q=artificiell+intelligens+when:7d&hl=sv&gl=SE&ceid=SE:sv"
+    label: "Google News AI (SV)"
+    weight: 10
+
+  # === SCRAPE: xAI ===
+  - id: xai
+    tier: 1
+    type: scrape_xai
+    url: "https://x.ai/news"
+    label: "xAI"
+    weight: 28

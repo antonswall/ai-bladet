@@ -1,3 +1,13 @@
 node_modules/
 .DS_Store
 *.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Pipeline-artefakter (regenereras per körning, ska inte versionshanteras)
+pipeline/output/
+pipeline/seen.db
