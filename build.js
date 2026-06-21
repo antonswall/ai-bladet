@@ -56,7 +56,7 @@ const latest = issues[0];
 
 // 3. RENDER
 // a) Homepage = front page of latest
-const homeHtml = renderIssue(latest, 'frontpage', latest._prev, latest._next);
+const homeHtml = renderIssue(latest, 'frontpage', latest._prev, latest._next, issues);
 fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 fs.writeFileSync(path.join(PUBLIC_DIR, 'index.html'), homeHtml);
 

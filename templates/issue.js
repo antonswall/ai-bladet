@@ -1,7 +1,7 @@
 // issue.js — Front page + permalink rendering
 const base = require('./base');
 
-function renderIssue(issue, mode, prev, next) {
+function renderIssue(issue, mode, prev, next, allIssues) {
   const { year, week, date, title, summary, lead, stories, briefs, categories, sources } = issue;
   const weekLabel = `Vecka ${week} ${year}`;
   // gray-matter may hand us a Date object (unquoted YAML date) or a string.
@@ -93,6 +93,32 @@ function renderIssue(issue, mode, prev, next) {
     body += `<nav class="bottom-nav bottom-nav--cta">
       <a href="/arkiv/">Bläddra i arkivet →</a>
     </nav>`;
+
+    // "Tidigare nummer" — visa upp till 3 tidigare utgåvor som miniatyrkort
+    const prevIssues = (allIssues || []).filter(i => i.week !== week || i.year !== year).slice(0, 3);
+    if (prevIssues.length > 0) {
+      body += `<section class="previous-issues">
+        <h2 class="previous-issues-title">Tidigare nummer</h2>
+        <div class="previous-issues-grid">`;
+      for (const pi of prevIssues) {
+        const piDate = pi.date instanceof Date ? pi.date : new Date(pi.date + 'T12:00:00');
+        const piDateStr = piDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
+        const piImg = pi.lead?.image || (pi.stories && pi.stories[0]?.image) || '';
+        const piCredit = pi.lead?.credit || (pi.stories && pi.stories[0]?.credit) || '';
+        body += `<a href="/v/${pi.year}/${pi.week}/" class="previous-card">
+          <div class="previous-card-img">
+            ${piImg ? `<img src="${esc(piImg)}" alt="" loading="lazy" decoding="async" onerror="this.parentElement.remove()">` : ''}
+            <span class="previous-card-fallback" aria-hidden="true">AI<span class="previous-card-fallback-b">-Bladet</span></span>
+          </div>
+          <div class="previous-card-text">
+            <span class="previous-card-week">Vecka ${pi.week} · ${piDateStr}</span>
+            <span class="previous-card-title">${esc(pi.title || '')}</span>
+            ${pi.summary ? `<span class="previous-card-ingress">${esc(pi.summary)}</span>` : ''}
+          </div>
+        </a>`;
+      }
+      body += `</div></section>`;
+    }
   }
 
   const pageTitle = isPermalink ? `${title} — Vecka ${week} ${year}` : `${title} — AI-Bladet`;
