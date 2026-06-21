@@ -181,7 +181,25 @@ REDAKTIONELLA REGLER — inga undantag:
    - speaker ska vara EXAKT den talare research anger (ofta en organisation som
      "OpenAI" eller "Google"). Tillskriv ALDRIG ett citat en namngiven person
      (t.ex. en vd) om inte research uttryckligen namnger den personen.
-   - Har storyn inget citat i research: utelämna quote-blocket helt."""
+   - Har storyn inget citat i research: utelämna quote-blocket helt.
+
+15. YAML-FORMATERING FÖR FLERRADIG TEXT
+   Använd ALLTID YAML literal block scalar (|) för fält som kan innehålla
+   flera stycken: lead.analysis, stories[].body.
+   Exempel:
+     body: |
+       Första stycket följer direkt efter |.
+
+       Andra stycket — blankrad mellan stycken.
+
+       Tredje stycket.
+   Indentera varje rad i blocket med SAMMA antal mellanslag (6 steg för
+   stories.body, 4 steg för lead.analysis). En blankrad mellan stycken
+   ska vara HELT tom (ingen indent på blankraden).
+   För ENRADIGA fält (kicker, headline, ingress, title, summary, image,
+   credit) använd vanliga double-quoted strings: headline: "Rubrik här".
+   För quote-fältet: använd YAML-mapping med text: och speaker: som är
+   enradiga double-quoted strings."""
 
 
 def build_prompt(stories: list[dict], week: str, year: int,
@@ -255,7 +273,9 @@ INSTRUKTIONER:
 
 4. Skriv i svensk ledig tidningston. Faktabaserat — hitta inte på något som inte finns i research.
 
-5. OUTPUT — exakt detta format, inget annat före eller efter:
+5. OUTPUT — exakt detta format, inget annat före eller efter.
+   OBS: För flerradiga fält (analysis, body) använd YAML literal block scalar (|).
+   För enradiga fält använd double-quoted strings ("...").
 
 ---
 year: {year}
@@ -267,7 +287,9 @@ lead:
   kicker: "VECKANS STÖRSTA"
   headline: "#1-nyhetens rubrik (inte exakt samma som research-titeln)"
   ingress: "2-3 meningar som säljer storyn"
-  analysis: "AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11)"
+  analysis: |
+    AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11).
+    OBS: indentera med 4 mellanslag. Blankrader mellan stycken ska vara HELT tomma.
   image: "Klistra in Bild-URL:en EXAKT från den valda lead-storyn. Utelämna raden helt om storyn saknar bild."
   credit: "Klistra in Byline EXAKT från den valda lead-storyn (t.ex. 'Foto · X / CC BY 2.0'). Utelämna om bild saknas."
 stories:
@@ -276,12 +298,16 @@ stories:
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
     image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
     credit: "Klistra in Byline EXAKT från den valda storyn. Utelämna om bild saknas."
-    quote: "(VALFRITT) Ta med ENDAST om storyn har ett Citat i research. Annars utelämna hela quote-blocket."
     # quote ska vara ett block med text + speaker, ordagrant från research (regel 14):
     #   quote:
     #     text: "Citatet, troget översatt till svenska om originalet är engelskt"
     #     speaker: "Exakt talare ur research, t.ex. OpenAI (aldrig en påhittad person)"
-    body: "200-300 ord markdown i stycken (blankrad mellan): vad hände / varför det spelar roll / Sverige-EU där relevant"
+    body: |
+      Första stycket — vad hände, fakta och detaljer (~80 ord). Indentera med 6 mellanslag.
+
+      Andra stycket — varför det spelar roll, kontext (~100 ord). Blankrad mellan stycken.
+
+      Tredje stycket — Sverige/EU-vinkel ENDAST om research stöder det (~50 ord).
 briefs:
   - "Kort enradare"
   - "Ännu en kort enradare"
@@ -328,7 +354,7 @@ def parse_sonnet_output(text: str) -> str:
 def write_issue(input_path: Path, output_path: Path, feedback: str = "") -> dict:
     """Generera veckans utgåva med Claude Sonnet 4.6.
     
-    feedback: Om validering tidigare failat — skickas som extra instruktion
+    feedback: Om validering tidigare failat - skickas som extra instruktion
               till Sonnet så den kan korrigera specifika fel.
     """
     with open(input_path) as f:

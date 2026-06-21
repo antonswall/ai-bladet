@@ -51,6 +51,11 @@ NYSE = _c(
     "https://upload.wikimedia.org/wikipedia/commons/2/23/Trading_Floor_at_the_New_York_Stock_Exchange.jpg",
     "Foto · Scott Beale / CC BY-SA 4.0")
 
+# ── Utökad bank (2026-06-21) ──────────────────────────────────────────────────
+SERVER_RACK = _c(
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Wikimedia_Foundation_Servers-8055_35.jpg/1280px-Wikimedia_Foundation_Servers-8055_35.jpg",
+    "Foto · Victor Grigas / CC BY-SA 3.0")
+
 
 # ── 1. Tematiska nyckelord (slår källan när de matchar story-texten) ──────────
 #    Ordning spelar roll — första matchande bucket vinner.
@@ -60,10 +65,24 @@ KEYWORD_BUCKETS = [
     ("energi", ["elpris", "elpriser", "energi", "energy", "kraftledning", "elnät"],
      [POWERLINES]),
     ("compute", ["gpu", "grafikkort", "colossus", "200 000", "superdator", "kluster",
-                 "beräkningskraft", "serverhall", "datacenter", "data center", "tränad", "träning"],
-     [DATACENTER, DATACENTER2]),
+                 "beräkningskraft", "serverhall", "datacenter", "data center", "tränad", "träning",
+                 "chip", "chipp", "processor", "h100", "b100", "trainium", "inferens"],
+     [DATACENTER, DATACENTER2, SERVER_RACK]),
     ("rymd", ["spacex", "raket", "falcon", "rymd", "satellit", "förvärv", "köper", "köpte", "joins"],
      [MUSK, FALCON9]),
+    ("eu", ["eu", "europeisk", "bryssel", "kommissionen", "parlamentet", "eu:s", "gdpr",
+            "ai-förordningen", "eu-kommissionen", "europa", "europeiska unionen"],
+     [OPENAI_EC]),
+    ("sverige", ["sverige", "svensk", "stockholm", "svenska", "sveriges", "riksdag", "kista"],
+     [OPENAI_EC]),
+    ("reglering", ["domstol", "exportkontroll", "reglering", "lag", "förbud", "böter", "dömd",
+                   "regulator", "tillsyn", "myndighet", "beslut", "supreme"],
+     [NYSE]),
+    ("robot", ["robot", "robotarm", "automatisering", "humanoid", "autonom"],
+     [DATACENTER2]),
+    ("chip", ["halvledare", "chip", "chipp", "processor", "h100", "b100", "semiconductor",
+              "wafer", "kisel", "euv", "asml", "tsmc", "tillverkning", "fabrik", "factory"],
+     [SERVER_RACK, DATACENTER]),
 ]
 
 # ── 2. Per källa (source_id) — porträtt/varumärke ────────────────────────────
@@ -71,17 +90,17 @@ SOURCE_BUCKETS = {
     "openai": [ALTMAN, OPENAI_EC],
     "google-ai": [GOOGLE_SIGN, GOOGLE_ENTRANCE],
     "xai": [MUSK, FALCON9],
-    # qwen saknar eget foto → faller igenom till kategori/default
 }
 
 # ── 3. Kategori-fallback ─────────────────────────────────────────────────────
 CATEGORY_BUCKETS = {
     "Företag": [NYSE, DATACENTER2],
-    "Modeller": [DATACENTER, DATACENTER2],
+    "Modeller": [DATACENTER, SERVER_RACK, DATACENTER2],
     "Säkerhet": [DATACENTER2, POWERLINES],
     "Forskning": [DATACENTER2, DATACENTER],
-    "Verktyg": [DATACENTER, DATACENTER2],
-    "default": [DATACENTER, DATACENTER2],
+    "Politik": [OPENAI_EC, NYSE],
+    "Verktyg": [SERVER_RACK, DATACENTER],
+    "default": [DATACENTER, DATACENTER2, SERVER_RACK],
 }
 
 
