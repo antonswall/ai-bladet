@@ -4,6 +4,14 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-06-21 — [lutra] write.py YAML-fix + bildbankskurator + arkiv UX
+
+- **write.py regel 15:** SYSTEM_PROMPT + output-mall instruerar nu Sonnet att använda YAML block scalars (`|`) för flerradiga fält (lead.analysis, stories[].body). Enradiga fält förblir double-quoted. Detta löser root cause till att både PyYAML och js-yaml kraschade.
+- **Bildbankskurator:** `pipeline/curate_images.py` — söker Wikimedia Commons API, filtrerar CC-licens, HEAD-verifierar. Just nu 0 nya bilder (API:n funkar men returnerar få JPEG-resultat per query — scriptet finns på plats för framtida körning). +SERVER_RACK manuellt tillagd.
+- **Bildbanken:** 14 poster nu (11 foton + 3 interna). Nya keyword-buckets för eu/sverige/reglering/robot/chip.
+- **Arkiv UX:** Rikare arkivkort med bild + ingress + kategorier. "Tidigare nummer"-sektion på framsidans botten (visas när det finns ≥2 utgåvor).
+- **Nästa:** curatorn behöver bredare söktermer eller manuell körning. Banken behöver ~10 fler bilder för att vara bekväm vid 5 stories/vecka.
+
 ## 2026-06-21 — [lutra] Vecka 25 ute ✅ + bilddedup-fix i image_bank.py
 
 - **Första autonoma körningen** lyckades — trots flera buggar som fixades i farten
