@@ -161,6 +161,11 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" || true
         git push origin main || { echo "❌ git push failade"; exit 1; }
 
+        # Posta till Moltbook
+        echo ""
+        echo "🦞 Postar till Moltbook..."
+        python3 "$PIPELINE_DIR/post-to-moltbook.py" || echo "⚠️ Moltbook-post misslyckades (fortsätter)"
+
         echo ""
         echo "══════════════════════════════════════"
         echo "  🚀 DEPLOYAD till ai-bladet.pages.dev"
