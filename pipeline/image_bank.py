@@ -94,25 +94,44 @@ def _haystack(story: dict) -> str:
 
 
 def pick(story: dict, used: set) -> tuple[str, str]:
-    """Välj (url, credit) för en story. `used` muteras för att undvika dubbletter."""
+    """Välj (url, credit) för en story. `used` muteras för att undvika dubbletter.
+
+    Tre steg: 1) temanyckelord → 2) källa → 3) kategori → 4) default.
+    Om alla kandidater i ett steg är använda, fall tillbaka till nästa steg.
+    Om ALLT är använt (inklusive default), tillåt repris som sista utväg."""
     hay = _haystack(story)
 
-    candidates = []
-    for _name, kws, cands in KEYWORD_BUCKETS:           # 1. tema
-        if any(k in hay for k in kws):
-            candidates = cands
-            break
-    if not candidates:                                  # 2. källa
-        candidates = SOURCE_BUCKETS.get(story.get("source_id", ""), [])
-    if not candidates:                                  # 3. kategori
-        candidates = CATEGORY_BUCKETS.get(story.get("category", ""), [])
-    if not candidates:                                  # 4. default
-        candidates = CATEGORY_BUCKETS["default"]
+    def _try_candidates(cands: list) -> tuple[str, str] | None:
+        for c in cands:
+            if c["url"] not in used:
+                used.add(c["url"])
+                return c["url"], c["credit"]
+        return None
 
-    for c in candidates:                                # första oanvända
-        if c["url"] not in used:
-            used.add(c["url"])
-            return c["url"], c["credit"]
-    c = candidates[0]                                   # allt använt → tillåt repris
+    # 1. Tema (keyword)
+    for _name, kws, cands in KEYWORD_BUCKETS:
+        if any(k in hay for k in kws):
+            result = _try_candidates(cands)
+            if result:
+                return result
+            break  # bucket matchade men alla bilder använda → fall igenom
+
+    # 2. Källa
+    result = _try_candidates(SOURCE_BUCKETS.get(story.get("source_id", ""), []))
+    if result:
+        return result
+
+    # 3. Kategori
+    result = _try_candidates(CATEGORY_BUCKETS.get(story.get("category", ""), []))
+    if result:
+        return result
+
+    # 4. Default
+    result = _try_candidates(CATEGORY_BUCKETS["default"])
+    if result:
+        return result
+
+    # 5. Allt använt — tillåt repris (välj första default-bilden)
+    c = CATEGORY_BUCKETS["default"][0]
     used.add(c["url"])
     return c["url"], c["credit"]
