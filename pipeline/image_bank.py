@@ -55,6 +55,18 @@ NYSE = _c(
 SERVER_RACK = _c(
     "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Wikimedia_Foundation_Servers-8055_35.jpg/1280px-Wikimedia_Foundation_Servers-8055_35.jpg",
     "Foto · Victor Grigas / CC BY-SA 3.0")
+EU_PARLIAMENT = _c(
+    "https://upload.wikimedia.org/wikipedia/commons/2/2c/European_Parliament_Strasbourg_Hemicycle_-_Diliff.jpg",
+    "Foto · Diliff / CC BY-SA 3.0")
+EU_COMMISSION = _c(
+    "https://upload.wikimedia.org/wikipedia/commons/d/d2/Belgique_-_Bruxelles_-_Schuman_-_Berlaymont_-_01.jpg",
+    "Foto · EmDee / CC BY-SA 3.0")
+RIKSDAG = _c(
+    "https://upload.wikimedia.org/wikipedia/commons/5/5a/Government_buildings_by_Norrstr%C3%B6m_in_Stockholm_Sweden_01.jpg",
+    "Foto · Sinikka Halme / CC BY-SA 4.0")
+MICROCHIP = _c(
+    "https://upload.wikimedia.org/wikipedia/commons/6/64/Intel_8742_153056995.jpg",
+    "Foto · Ioan Sameli / CC BY-SA 2.0")
 
 
 # ── 1. Tematiska nyckelord (slår källan när de matchar story-texten) ──────────
@@ -67,22 +79,22 @@ KEYWORD_BUCKETS = [
     ("compute", ["gpu", "grafikkort", "colossus", "200 000", "superdator", "kluster",
                  "beräkningskraft", "serverhall", "datacenter", "data center", "tränad", "träning",
                  "chip", "chipp", "processor", "h100", "b100", "trainium", "inferens"],
-     [DATACENTER, DATACENTER2, SERVER_RACK]),
+     [DATACENTER, DATACENTER2, SERVER_RACK, MICROCHIP]),
     ("rymd", ["spacex", "raket", "falcon", "rymd", "satellit", "förvärv", "köper", "köpte", "joins"],
      [MUSK, FALCON9]),
     ("eu", ["eu", "europeisk", "bryssel", "kommissionen", "parlamentet", "eu:s", "gdpr",
             "ai-förordningen", "eu-kommissionen", "europa", "europeiska unionen"],
-     [OPENAI_EC]),
+     [EU_PARLIAMENT, EU_COMMISSION, OPENAI_EC]),
     ("sverige", ["sverige", "svensk", "stockholm", "svenska", "sveriges", "riksdag", "kista"],
-     [OPENAI_EC]),
+     [RIKSDAG, OPENAI_EC]),
     ("reglering", ["domstol", "exportkontroll", "reglering", "lag", "förbud", "böter", "dömd",
                    "regulator", "tillsyn", "myndighet", "beslut", "supreme"],
-     [NYSE]),
+     [NYSE, EU_PARLIAMENT]),
     ("robot", ["robot", "robotarm", "automatisering", "humanoid", "autonom"],
-     [DATACENTER2]),
+     [DATACENTER2, MICROCHIP]),
     ("chip", ["halvledare", "chip", "chipp", "processor", "h100", "b100", "semiconductor",
               "wafer", "kisel", "euv", "asml", "tsmc", "tillverkning", "fabrik", "factory"],
-     [SERVER_RACK, DATACENTER]),
+     [MICROCHIP, SERVER_RACK, DATACENTER]),
 ]
 
 # ── 2. Per källa (source_id) — porträtt/varumärke ────────────────────────────
@@ -94,13 +106,13 @@ SOURCE_BUCKETS = {
 
 # ── 3. Kategori-fallback ─────────────────────────────────────────────────────
 CATEGORY_BUCKETS = {
-    "Företag": [NYSE, DATACENTER2],
-    "Modeller": [DATACENTER, SERVER_RACK, DATACENTER2],
-    "Säkerhet": [DATACENTER2, POWERLINES],
-    "Forskning": [DATACENTER2, DATACENTER],
-    "Politik": [OPENAI_EC, NYSE],
-    "Verktyg": [SERVER_RACK, DATACENTER],
-    "default": [DATACENTER, DATACENTER2, SERVER_RACK],
+    "Företag": [NYSE, DATACENTER2, GOOGLE_ENTRANCE],
+    "Modeller": [DATACENTER, SERVER_RACK, DATACENTER2, MICROCHIP],
+    "Säkerhet": [DATACENTER2, POWERLINES, EU_PARLIAMENT],
+    "Forskning": [DATACENTER2, DATACENTER, MICROCHIP],
+    "Politik": [EU_PARLIAMENT, RIKSDAG, EU_COMMISSION],
+    "Verktyg": [SERVER_RACK, DATACENTER, MICROCHIP],
+    "default": [DATACENTER, DATACENTER2, SERVER_RACK, MICROCHIP],
 }
 
 

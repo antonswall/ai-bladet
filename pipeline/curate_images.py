@@ -35,14 +35,16 @@ BANK_PATH = PIPELINE_DIR / "image_bank.py"
 
 SEARCHES = [
     # (bucket_name, search_query, max_results)
-    ("ai_chips", "semiconductor chip factory wafer production", 3),
-    ("eu_politics", "European Parliament Brussels EU Commission building exterior", 3),
-    ("ai_robots", "robot artificial intelligence laboratory", 3),
-    ("tech_campus", "Google headquarters Apple campus Microsoft office building exterior", 3),
-    ("research_lab", "AI research laboratory scientist computer", 3),
-    ("data_centers_extra", "data center server rack interior", 4),
-    ("sweden_tech", "Stockholm Sweden technology office building", 3),
-    ("cloud_infra", "cloud computing network server infrastructure", 3),
+    ("ai_chips", "Intel semiconductor wafer chip die macro closeup", 3),
+    ("eu_politics", "European Parliament plenary building Brussels exterior", 3),
+    ("ai_robots", "industrial robot arm automation factory assembly", 3),
+    ("tech_campus", "technology company office building corporate campus", 3),
+    ("research_lab", "research laboratory scientist experiment microscope", 3),
+    ("data_centers", "server room data center rack network cables", 4),
+    ("sweden_tech", "Stockholm Sweden skyline architecture modern building", 3),
+    ("cloud_infra", "network server room data cables technology hub", 3),
+    ("eu_buildings", "Berlaymont European Commission Brussels headquarters", 3),
+    ("government", "supreme court courthouse government building exterior", 3),
 ]
 
 
@@ -54,7 +56,7 @@ def search_commons(query: str, limit: int = 5) -> list[dict]:
         "list": "search",
         "srsearch": query,
         "srnamespace": "6",      # File namespace
-        "srlimit": limit * 5,    # Hämta fler — vi filtrerar sen
+        "srlimit": limit * 10,    # Hämta fler — vi filtrerar sen
         "format": "json",
     }
     try:
@@ -79,7 +81,7 @@ def search_commons(query: str, limit: int = 5) -> list[dict]:
         "format": "json",
     }
     try:
-        r2 = requests.post(url, data=info_params, timeout=15,
+        r2 = requests.get(url, params=info_params, timeout=15,
                           headers={"User-Agent": "AI-Bladet-image-curator/1.0"})
         r2.raise_for_status()
         pages = r2.json().get("query", {}).get("pages", {})
@@ -105,15 +107,17 @@ def search_commons(query: str, limit: int = 5) -> list[dict]:
         license_obj = meta.get("LicenseUrl", {})
         license_url = license_obj.get("value", "")
         artist = meta.get("Artist", {}).get("value", "")
-        credit_text = meta.get("Credit", {}).get("value", "")
-
-        # Bestäm credit-sträng
-        if artist:
-            credit = f"Foto · {artist} / Wikimedia Commons"
-        elif credit_text:
-            credit = f"Foto · {credit_text}"
+        # Rensa HTML från artist/credit
+        artist_clean = re.sub(r"<[^>]+>", "", artist).strip()
+        # Ta bort tomma prefix som "URL:" eller "author name string:"
+        artist_clean = re.sub(r"^(?:URL|author name string|author|name)\s*:?\s*", "", artist_clean, flags=re.IGNORECASE).strip()
+        # Om bara webbadresser finns kvar, använd fotograf/okänd
+        if not artist_clean or artist_clean.startswith("http"):
+            credit_text = meta.get("Credit", {}).get("value", "")
+            credit_clean = re.sub(r"<[^>]+>", "", credit_text).strip()
+            credit = f"Foto · {credit_clean}" if credit_clean and len(credit_clean) < 100 else "Foto · Wikimedia Commons"
         else:
-            credit = "Foto · Wikimedia Commons"
+            credit = f"Foto · {artist_clean}"
 
         # Tillåtna licenser
         allowed = ["creativecommons.org/licenses/by", "creativecommons.org/publicdomain",
@@ -174,6 +178,7 @@ def curate(auto: bool = False, dry_run: bool = True) -> dict:
 
     for bucket, query, limit in SEARCHES:
         print(f"\n🔍 Söker: {bucket} ('{query[:60]}...')")
+        time.sleep(3)  # Respektera Wikimedia rate limit
         images = search_commons(query, limit)
         print(f"   Hittade {len(images)} kandidater")
 
