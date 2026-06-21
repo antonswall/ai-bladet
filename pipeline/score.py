@@ -30,6 +30,10 @@ OUTPUT_DIR = PIPELINE_DIR / "output" / "scored"
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 BATCH_SIZE = 25  # kandidater per API-anrop
 
+# Temporal decay — nyare nyheter får högre score
+# inspiration från promptdeep på Moltbook 🦞
+TEMPORAL_DECAY_PER_DAY = 0.85  # ~0.72 efter 2 dagar, ~0.32 efter 7 dagar
+
 # ─── Kända labb-organisationer på HF ─────────────────────────────────────────
 
 KNOWN_HF_ORGS = [
@@ -249,7 +253,7 @@ def _default_scores(batch: list[dict], start_idx: int) -> list[dict]:
 
 
 def final_score(c: dict) -> float:
-    """Beräkna slutgiltig viktad score."""
+    """Beräkna slutgiltig viktad score med temporal decay."""
     ai = c.get("_ai_score", {})
     tier = c.get("tier", 4)
     weight = c.get("source_weight", 10)
@@ -266,7 +270,20 @@ def final_score(c: dict) -> float:
     tier_bonus = {1: 2, 2: 1, 3: 0}.get(tier, -1)
 
     raw = (news * 3) + (lead * 2) + (swedish * 4) + tier_bonus
-    return round(raw, 1)
+
+    # Temporal decay: nyare = högre, äldre = lägre
+    published = c.get("published")
+    decay = 1.0
+    if published:
+        try:
+            pub_date = datetime.fromisoformat(published.replace("Z", "+00:00"))
+            now = datetime.now(timezone.utc)
+            days_old = max(0, (now - pub_date).total_seconds() / 86400)
+            decay = TEMPORAL_DECAY_PER_DAY ** days_old
+        except (ValueError, TypeError):
+            pass  # ingen decay om datumet inte går att parsea
+
+    return round(raw * decay, 1)
 
 
 # ─── Huvudfunktion ────────────────────────────────────────────────────────────
