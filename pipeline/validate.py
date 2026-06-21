@@ -80,30 +80,84 @@ def deepseek_call(prompt: str, system: str = None,
 
 
 def parse_issue(content_path: Path) -> dict | None:
-    """Läs markdown-fil med YAML frontmatter."""
+    """Läs markdown-fil med YAML frontmatter — regex-baserad för att tolerera
+    multi-paragraph text i YAML-värden som bryter strict parsning."""
     if not content_path.exists():
         print(f"  ❌ Ingen utgåva på {content_path}")
         return None
 
     text = content_path.read_text(encoding="utf-8")
 
-    # Extrahera frontmatter
-    fm_match = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
-    if not fm_match:
-        print(f"  ❌ Ingen frontmatter i {content_path}")
+    # Extrahera frontmatter-block (första --- till sista ---)
+    fm_start = text.find("---\n")
+    if fm_start != 0:
+        print(f"  ❌ Frontmatter saknas (förväntad --- på rad 1)")
+        return None
+    fm_end = text.find("\n---\n", fm_start + 4)
+    if fm_end == -1:
+        fm_end = text.find("\n---", fm_start + 4)
+    if fm_end == -1:
+        print(f"  ❌ Ingen avslutande --- i frontmattern")
         return None
 
-    try:
-        fm = yaml.safe_load(fm_match.group(1))
-        # Konvertera datum-objekt till strängar (YAML parsar vissa datum som date())
-        if isinstance(fm.get("date"), (date, datetime)):
-            fm["date"] = str(fm["date"])
-    except Exception as e:
-        print(f"  ❌ YAML error: {e}")
-        return None
+    fm_text = text[fm_start + 4:fm_end]
+    body = text[fm_end + 4:].strip()
 
-    # Extrahera brödtext (efter frontmatter)
-    body = text[fm_match.end():].strip()
+    # Extrahera enkla fält med regex
+    def _re_field(name: str, default=None):
+        m = re.search(rf"^{name}:\s*(.+)$", fm_text, re.MULTILINE)
+        if m:
+            val = m.group(1).strip().strip('"').strip("'")
+            return val
+        return default
+
+    def _parse_lead():
+        lead = {}
+        for f in ["kicker", "headline", "ingress", "analysis", "image", "credit"]:
+            m = re.search(rf"^\s+{f}:\s*\"(.+?)\"\s*$", fm_text, re.MULTILINE | re.DOTALL)
+            if m:
+                lead[f] = m.group(1).strip()
+        return lead
+
+    def _parse_stories():
+        stories = []
+        # Dela på story-block (börjar med indent + "kicker:")
+        blocks = re.split(r"\n\s+- kicker:", fm_text)
+        for block in blocks[1:]:  # första är allt före första storyn
+            block = "  - kicker:" + block
+            story = {}
+            for f in ["kicker", "headline", "ingress", "image", "credit"]:
+                m = re.search(rf"^\s+{f}:\s*\"(.+?)\"\s*$", block, re.MULTILINE | re.DOTALL)
+                if m:
+                    story[f] = m.group(1).strip()
+            # body kan spänna över flera rader — fånga allt mellan body: och nästa fält eller block-slut
+            m_body = re.search(r'^\s+body:\s*"(.+?)"\s*$', block, re.MULTILINE | re.DOTALL)
+            if m_body:
+                story["body"] = m_body.group(1).strip()
+            # quote
+            m_quote_text = re.search(r'^\s+text:\s*"(.+?)"', block, re.MULTILINE | re.DOTALL)
+            m_quote_speaker = re.search(r'^\s+speaker:\s*"(.+?)"', block, re.MULTILINE)
+            if m_quote_text:
+                story["quote"] = {"text": m_quote_text.group(1).strip(),
+                                  "speaker": m_quote_speaker.group(1).strip() if m_quote_speaker else ""}
+            if any(v for v in story.values()):
+                stories.append(story)
+        return stories
+
+    def _parse_briefs():
+        briefs = re.findall(r'^\s+-\s*"(.+?)"\s*$', fm_text[fm_text.rfind("briefs:"):], re.MULTILINE | re.DOTALL)
+        return briefs
+
+    fm = {
+        "year": _re_field("year", ""),
+        "week": _re_field("week", ""),
+        "date": _re_field("date", ""),
+        "title": _re_field("title", ""),
+        "summary": _re_field("summary", ""),
+        "lead": _parse_lead(),
+        "stories": _parse_stories(),
+        "briefs": _parse_briefs(),
+    }
 
     return {"frontmatter": fm, "body": body, "full_text": text}
 
