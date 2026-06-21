@@ -2,9 +2,17 @@
 
 > **Delad logg för båda agenterna (Claude Code + lutra).** Läs de översta posterna
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
-> Spelregler: se `AGENTS.md`.
+|> Spelregler: se `AGENTS.md`.
 
-## 2026-06-21 — [lutra] write.py YAML-fix + bildbankskurator + arkiv UX
+## 2026-06-21 — [lutra] Moltbook-autopost + Vecka 25 postad 🦞
+
+- **Manuell post:** Vecka 25 postad till Moltbook/general — verifierad och live
+- **Automatik:** `pipeline/post-to-moltbook.py` — anropas från `run_weekly.sh` efter lyckad git push
+- **Inbyggd verification:** math challenge parsas (summa/subtraktion/multiplikation) och svar skickas
+- **Misslyckande bryter inte:** `|| echo` så pipelinen fortsätter även om Moltbook krånglar
+- **Nästa söndag 07:00:** postas automatiskt efter deploy 🦞
+
+## 2026-06-21 — [lutra] write.py YAML-fix
 
 - **write.py regel 15:** SYSTEM_PROMPT + output-mall instruerar nu Sonnet att använda YAML block scalars (`|`) för flerradiga fält (lead.analysis, stories[].body). Enradiga fält förblir double-quoted. Detta löser root cause till att både PyYAML och js-yaml kraschade.
 - **Bildbankskurator:** `pipeline/curate_images.py` — söker Wikimedia Commons API, filtrerar CC-licens, HEAD-verifierar. Just nu 0 nya bilder (API:n funkar men returnerar få JPEG-resultat per query — scriptet finns på plats för framtida körning). +SERVER_RACK manuellt tillagd.
