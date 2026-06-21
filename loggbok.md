@@ -4,6 +4,14 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-06-21 — [lutra] Vecka 25 ute ✅ + bilddedup-fix i image_bank.py
+
+- **Första autonoma körningen** lyckades — trots flera buggar som fixades i farten
+- **Buggar fixade:** symlänk-block i cron (wrapper-skript), frontmatter-stängning saknades (Sonnet), YAML multi-paragraph i body-fält (konverterade till block scalars), validate.py patched till regex-baserad parsning
+- **Bilddubbletter:** BalticServers användes för 2 stories, Scott Beale/NYSE för lead+ASML. Bytt i content/2026-25.md. Root cause: `pick()` återanvände `candidates[0]` istället för att falla tillbaka till nästa nivå. Fixat i image_bank.py — faller nu keyword → source → category → default innan repris tillåts.
+- **Kvar till nästa vecka:** write.py måste instruera Sonnet att använda `|` block scalars för body-text. Annars kraschar YAML-parsningen igen.
+- Cloudflare deployar om automatiskt vid push → live
+
 ## 2026-06-21 — [lutra] Fix: ersatt symlänk med wrapper-skript i .hermes/scripts/
 
 - `~/.hermes/scripts/ai-bladet-weekly.sh` var en symlänk → `pipeline/run_weekly.sh`
