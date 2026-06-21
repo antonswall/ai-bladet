@@ -28,8 +28,8 @@ andra gjort.
 - Schemaläggning / cron / allt i `~/.hermes/` → **lutra**. Claude Code föreslår,
   rör inte.
 - Sajtkod, pipeline-källkod, `content/`, design → endera agenten, men **logga alltid**.
-- Single source of truth för runnern: `~/.hermes/scripts/ai-bladet-weekly.sh` är en
-  **symlänk** till `pipeline/run_weekly.sh` (så ändringar i repot når söndagsjobbet).
+- Single source of truth för runnern: `~/.hermes/scripts/ai-bladet-weekly.sh` är ett
+  **wrapper-skript** som anropar `pipeline/run_weekly.sh` (Hermes cron blockerar symlänkar som pekar utanför scripts-katalogen).
 
 ## Snabborientering
 - **Bygg:** `node build.js` → `public/` → Cloudflare deployar vid push till `main`.
