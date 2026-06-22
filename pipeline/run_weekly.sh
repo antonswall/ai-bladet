@@ -166,6 +166,23 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         echo "🦞 Postar till Moltbook..."
         python3 "$PIPELINE_DIR/post-to-moltbook.py" || echo "⚠️ Moltbook-post misslyckades (fortsätter)"
 
+        # Distribution — generera audio, X-content, etc.
+        echo ""
+        echo "📢 Distribuerar veckans nummer..."
+        ISSUE_FILE="$PROJECT_DIR/content/$(date +%Y)-${WEEK_NUM:-$(date +%W)}.md"
+        if [ -f "$ISSUE_FILE" ]; then
+            python3 "$PIPELINE_DIR/distribute.py" --issue "$ISSUE_FILE" \
+                || echo "⚠️ Distribution misslyckades (fortsätter)"
+            # Bygg om sajten med nya assets (audio etc.)
+            cd "$PROJECT_DIR"
+            node build.js || echo "⚠️ Re-build efter distribution misslyckades"
+            git add -A
+            git commit -m "distribute: vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d)" || true
+            git push origin main || echo "⚠️ Distribution push misslyckades"
+        else
+            echo "⚠️ Ingen issue-fil hittad för distribution: $ISSUE_FILE"
+        fi
+
         echo ""
         echo "══════════════════════════════════════"
         echo "  🚀 DEPLOYAD till ai-bladet.pages.dev"

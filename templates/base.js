@@ -1,9 +1,11 @@
 // base.js — HTML shell, masthead, edition strip, nav, footer, SEO
-function base({ title, description, canonical, ogType, jsonLd, content, week, year, bodyClass }) {
+function base({ title, description, canonical, ogType, ogImage, jsonLd, content, week, year, bodyClass }) {
   const w = week || '';
   const y = year || '';
   const editionLabel = w ? `Vecka ${w} · ${y}` : 'Veckotidning om AI';
   const descr = description || 'Sveriges veckotidning om artificiell intelligens. En utgåva i veckan, rankat efter vad som faktiskt betyder något.';
+  const ogImg = ogImage || 'https://aibladet.se/favicon.svg';
+
   return `<!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -16,9 +18,15 @@ function base({ title, description, canonical, ogType, jsonLd, content, week, ye
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${descr}">
   <meta property="og:type" content="${ogType || 'website'}">
+  <meta property="og:image" content="${ogImg}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:locale" content="sv_SE">
   <meta property="og:site_name" content="AI-Bladet">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${descr}">
+  <meta name="twitter:image" content="${ogImg}">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
@@ -53,6 +61,7 @@ function base({ title, description, canonical, ogType, jsonLd, content, week, ye
     <span class="spacer"></span>
     <span>En automatiserad nyhetstjänst om AI</span>
     <a href="/feed.xml">RSS</a>
+    <a href="/arkiv/">Arkiv</a>
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>

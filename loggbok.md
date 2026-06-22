@@ -4,6 +4,64 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 |> Spelregler: se `AGENTS.md`.
 
+## 2026-06-22 — [lutra] SEO implementerad 🔍 — alla 6 punkter klara
+
+- **JSON-LD (#2):** `issue.js` — image, author (Anton Swall), publisher (AI-Bladet + logo), isAccessibleForFree, url, dateModified, keywords. Kvalificerar för Google News carousel.
+- **Sitemap (#6):** `build.js` — lastmod, changefreq, priority per URL. Inkluderar ordbok/audio/memes/feed om de finns. 4 URLs för nuvarande issue-sida.
+- **Alt-text (#4):** `issue.js` + `archive.js` — tidigare-nummer-kort använder issue-titel som alt. 0 tomma alt-attribut i hela bygget.
+- **Rubriker (#3):** `issue.js` — Kortnytt-sektionen använder `<h2>` istället för `<div>`.
+- **Meta descriptions (#1):** `issue.js` + `base.js` — rikare sidbeskrivning: "summary + AI-Bladet vecka X år". OG-bild + twitter:card=summary_large_image.
+- **Internlänkar (#5):** `issue.js` — "Relaterade artiklar"-widget baserad på kategori-överlapp mellan nummer. Syns först när ≥2 nummer finns.
+- **Dist-tillgångar bevaras:** `build.js` — backuppar ordbok/audio/memes/feed till /tmp före wipe och återställer efter.
+- **Testad ✅** — build.js kör, sitemap=4 URLs, 0 tomma alt, JSON-LD på index + permalink
+- **Nästa:** Google indexerar om — resultat syns om 1–2 veckor
+
+## 2026-06-22 — [lutra] SEO-plan skapad 🔍
+
+- **planer/seo-plan.md:** Detaljerad analys av 6 SEO-punkter + åtgärdsplan i 3 faser
+- **Status:** 3 punkter är redan delvis klara (meta, titlar, sitemap), 3 behöver jobb (JSON-LD, alt-text, interna länkar)
+- **Största vinst:** JSON-LD enrichment → kvalificerar för Google News carousel
+- **3 faser:** Fas 1 (JSON-LD + sitemap + alt-text, ~30 min) → Fas 2 (rubriker + meta, ~20 min) → Fas 3 (korsreferenser, ~30 min)
+- **Nästa:** Anton bestämmer om jag ska koda fas 1
+
+## 2026-06-22 — [lutra] Sprint 3 byggd: LinkedIn 💼 + Alla 5 distribueringsmoduler klara
+
+- **pipeline/distribute_linkedin.py:** DeepSeek väljer mest vardagsrelevant story → genererar LinkedIn-post (max 1500 tecken, icke-teknisk ton) → sparar som utkast
+- **distribute.py:** 5/5 moduler i default-setet (audio, x, glossary, meme, linkedin)
+- **Dry-run testad ✅** med alla 5 parallellt: 5/5 lyckades
+- **Total distribution per vecka:** ~$0.017 (alla 5 moduler)
+- **Nästa:** API-nycklar + live-test på söndagens pipeline
+
+## 2026-06-22 — [lutra] Sprint 2 byggd: Ordbok + Meme 🎨
+
+- **pipeline/distribute_glossary.py:** DeepSeek identifierar AI-term → genererar SEO-sida i `public/ordbok/[slug].html` + uppdaterar index med alla termer
+- **pipeline/distribute_meme.py:** DeepSeek identifierar memevärdig story → Pollinations.ai genererar bild (gratis) → Chrome renderar text overlay → `public/memes/YYYY-WW.png`
+- **distribute.py:** Default-moduler uppdaterade till alla 4 (audio, x, glossary, meme)
+- **Dry-run testad ✅** på vecka 25: 4/4 moduler parallellt, alla output-filer skapade
+- **Kostnad Sprint 2:** ~$0.0005/vecka extra (DeepSeek x2, Pollinations gratis)
+- **Nästa:** Sprint 3 (LinkedIn) eller verkligt API-test med ElevenLabs
+
+## 2026-06-22 — [lutra] Sprint 1 byggd: Audio + X distribution 📡
+
+- **pipeline/distribute.py:** Orkestrator — kör alla distribueringsmoduler parallellt, exit 0 om ≥50% lyckas
+- **pipeline/distribute_audio.py:** TTS-sammanfattning (DeepSeek-manus → ElevenLabs → mp3 → podcast-RSS)
+- **pipeline/distribute_x.py:** X-thread (4 tweets) + Veckans AI-lögn (konträr tweet → sparas som .md)
+- **run_weekly.sh:** Distribution anropas efter lyckad git push + Moltbook, med re-build + re-push för audio-assets
+- **Dry-run testad ✅** på vecka 25: 2/2 moduler, alla output-filer skapade
+- **Kostnad:** ~$0.016/vecka extra (DeepSeek ~$0.001 + ElevenLabs ~$0.015)
+- **Saknas för live:** ElevenLabs-röst-ID måste verifieras (använder "Rachel" som fallback — byt till svensk röst)
+- **Nästa:** Anton testar med riktigt ElevenLabs-anrop + verifierar podcast-RSS
+
+## 2026-06-22 — [lutra] Marknadsföringsplan skapad 📋
+
+- **planer/marknadsforingsplan.md:** Detaljerad plan för autonom organisk marknadsföring
+- **6 byggblock:** Audio-sammanfattning (TTS), AI-ordbok (SEO), LinkedIn-post, X-lögn, Meme-kort, X-thread
+- **Content atomization:** Varje story → 5–7 format, helt automatiskt
+- **Kostnad:** ~$0.017/vecka extra (~$0.90/år)
+- **Implementation:** 3 sprintar över 6 veckor. Sprint 1: Audio + X
+- **Claude Code:** Läs och granska planen. Börja inte bygga förrän Anton säger kör.
+- **Nästa:** Anton beslutar om vi börjar med Sprint 1 (audio) eller annat block först
+
 ## 2026-06-21 — [lutra] Moltbook-autopost + Vecka 25 postad 🦞
 
 - **Manuell post:** Vecka 25 postad till Moltbook/general — verifierad och live
