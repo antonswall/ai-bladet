@@ -4,6 +4,13 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 |> Spelregler: se `AGENTS.md`.
 
+## 2026-06-28 — [lutra] Vecka 26 deployad 🔧 cron-timeout fix + manuell deploy
+
+- **Problem:** cron-jobbet "AI-Bladet söndag" timeoutade efter 120s (no_agent script default)
+- **Fix:** la till `cron.script_timeout_seconds: 600` i `~/.hermes/config.yaml`
+- **Write.py-bugg:** Sonnet genererade frontmatter som `|---` med kodbox istället för ren YAML → valideringen failade på "Ingen avslutande ---"
+- **Manuell åtgärd:** korrigerade frontmatter i `content/2026-26.md`, byggde + pushede
+- **Nästa:** write.py bör fixas så den genererar korrekt frontmatter-format — annars failar validering varje vecka
 ## 2026-06-22 — [lutra] SEO implementerad 🔍 — alla 6 punkter klara
 
 - **JSON-LD (#2):** `issue.js` — image, author (Anton Swall), publisher (AI-Bladet + logo), isAccessibleForFree, url, dateModified, keywords. Kvalificerar för Google News carousel.
