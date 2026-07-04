@@ -19,7 +19,7 @@ function renderArchive(issues) {
     body += `<h2 class="archive-year">${year}<span>${list.length} ${list.length === 1 ? 'utgåva' : 'utgåvor'}</span></h2>`;
     body += `<div class="archive-grid">`;
     for (const i of list) {
-      const dObj = i.date instanceof Date ? i.date : new Date(i.date + 'T12:00:00');
+      const dObj = (i.date instanceof Date) ? i.date : (i.date ? new Date(i.date + 'T12:00:00') : new Date());
       const dateStr = dObj.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' });
       const cats = (i.categories || []).slice(0, 4).map(c => `<span class="cat">${esc(c)}</span>`).join(' ');
       const img = i.lead?.image || (i.stories && i.stories[0]?.image) || '';

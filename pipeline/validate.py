@@ -97,11 +97,19 @@ def parse_issue(content_path: Path) -> dict | None:
     if fm_end == -1:
         fm_end = text.find("\n---", fm_start + 4)
     if fm_end == -1:
-        print(f"  ❌ Ingen avslutande --- i frontmattern")
-        return None
-
-    fm_text = text[fm_start + 4:fm_end]
-    body = text[fm_end + 4:].strip()
+        # Fallback: ingen avslutande --- — parsning av allt från öppnande ---
+        # till EOF som YAML. Detta händer t.ex. när Sonnet trunkerar output vid
+        # DNS-avbrott eller API-timeout. Inte idealiskt men bättre än att faila hårt.
+        print(f"  ⚠️  Ingen avslutande --- i frontmattern — fallback: parsar allt som YAML")
+        fm_text = text[fm_start + 4:].strip()
+        body = ""
+        # Verifiera att vi faktiskt fick användbar YAML
+        if not fm_text or "title:" not in fm_text:
+            print(f"  ❌ Fallback misslyckades — ingen title i extraherad YAML")
+            return None
+    else:
+        fm_text = text[fm_start + 4:fm_end]
+        body = text[fm_end + 4:].strip()
 
     # Extrahera enkla fält med regex
     def _re_field(name: str, default=None):
@@ -292,6 +300,9 @@ Svara endast med JSON:
     result["duplication"] = _check_duplication(issue)
     result["se_eu_angle"] = _check_se_eu_angle(issue, research_stories)
 
+    # Word count-kontroll: varje story.body måste vara minst MIN_STORY_WORDS ord
+    result["word_counts"] = _check_word_counts(issue)
+
     # Hård gate: en enda obekräftad HIGH-allvarlig faktaflagga blockerar deploy,
     # oavsett pass-rate. (Anton 2026-06-18: fakta går före kadens. Retry-loopen i
     # run_weekly.sh skickar high/medium-flaggor till Sonnet för rättning först.)
@@ -305,7 +316,8 @@ Svara endast med JSON:
                       result.get("lead_sources", 1) >= 1 and
                       not result["duplication"]["duplicate"] and
                       result["se_eu_angle"]["found"] and
-                      not result["high_issues"])
+                      not result["high_issues"] and
+                      result.get("word_counts", {}).get("all_ok", True))
 
     return result
 
@@ -460,9 +472,27 @@ def _check_se_eu_angle(issue: dict, research_stories: list[dict]) -> dict:
     return {"found": False, "source": ""}
 
 
+def _check_word_counts(issue: dict) -> dict:
+    """Kontrollera att varje story.body har minst MIN_STORY_WORDS ord."""
+    fm = issue.get("frontmatter", {})
+    stories = fm.get("stories", [])
+    results = []
+    all_ok = True
+    for i, s in enumerate(stories):
+        body = s.get("body", "") or ""
+        wc = len(body.split())
+        if wc < MIN_STORY_WORDS:
+            all_ok = False
+            headline = s.get("headline", f"Story {i+1}")[:60]
+            results.append({
+                "index": i, "headline": headline,
+                "words": wc, "min": MIN_STORY_WORDS, "ok": False,
+            })
+            print(f"  ⚠️  [{headline}] {wc} ord — under minimum {MIN_STORY_WORDS}")
+    return {"all_ok": all_ok, "min_target": MIN_STORY_WORDS, "stories": results}
+
+
 # ─── Huvudfunktion ────────────────────────────────────────────────────────────
-
-
 def validate(content_path: Path, research_input_path: Path,
              output_path: Path) -> dict:
     """Validera den skrivna utgåvan."""

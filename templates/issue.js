@@ -5,7 +5,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
   const { year, week, date, title, summary, lead, stories, briefs, categories, sources } = issue;
   // gray-matter may hand us a Date object (unquoted YAML date) or a string.
   // Build a Date safely from either so we never produce "Invalid Date".
-  const dateObj = date instanceof Date ? date : new Date(date + 'T12:00:00');
+  const dateObj = (date instanceof Date) ? date : (date ? new Date(date + 'T12:00:00') : new Date());
   const dateStr = dateObj.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const readTime = Math.max(1, Math.ceil((summary + ' ' + (lead?.ingress || '') + ' ' + (lead?.analysis || '') + ' ' + (stories || []).map(s => (s.ingress || '') + ' ' + (s.body || '')).join(' ')).split(/\s+/).length / 200));
 
@@ -79,7 +79,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
         <div class="story-text">
           ${s.kicker ? `<div class="story-kicker">${esc(s.kicker)}</div>` : ''}
           <h2 class="story-headline">${esc(s.headline)}</h2>
-          ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : ''}
+          ${s.ingress ? `<p class="story-ingress">${esc(s.ingress)}</p>` : (s.body ? `<p class="story-ingress story-ingress--fallback">${esc(s.body.split(/\n\n+/)[0].slice(0, 200))}…</p>` : '')}
           ${quote}`;
       if (isPermalink) {
         body += bodyHtml;

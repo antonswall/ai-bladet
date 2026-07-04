@@ -255,7 +255,8 @@ a { color: inherit; text-decoration: none; }
   margin: -1.2rem 0 2.4rem;
 }
 .sections .label { color: var(--faint); }
-.sections .cat { color: var(--dim); }
+.sections .cat { color: var(--dim); position: relative; }
+.sections .cat + .cat { margin-left: 0.25rem; padding-left: 0.75rem; border-left: 1px solid var(--rule); }
 .sections .cat::before { content: "· "; color: var(--accent-dim); margin-right: 0.15em; }
 
 /* ----------  Figures (images + branded fallback)  ----------------------- */

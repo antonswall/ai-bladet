@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+import yaml
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,10 @@ SONNET_MODEL = "anthropic/claude-sonnet-4.6"
 MAX_STORIES = 10            # max stories att skicka till Claude
 MAX_BRIEFS = 8              # max briefs för KORTNYTT-sektionen
 MAX_INPUT_CHARS = 4000      # max tecken per story i prompten
+MIN_STORY_WORDS = 200       # måltext per story — valideringen underkänner kortare
+MAX_OUTPUT_TOKENS = 8000    # 4000 var för snålt: 5 stories à 250 svenska ord
+                            # (~2 tokens/ord) + lead + briefs slog i taket och
+                            # pressade Sonnet att skriva 150-ordsartiklar
 
 
 # ─── OpenRouter helper ───────────────────────────────────────────────────────
@@ -50,7 +55,7 @@ def _get_openrouter_key() -> Optional[str]:
 
 
 def sonnet_call(prompt: str, system: str = None,
-                max_tokens: int = 4000) -> Optional[str]:
+                max_tokens: int = MAX_OUTPUT_TOKENS) -> Optional[str]:
     """Anropa Claude Sonnet 4.6 via OpenRouter."""
     key = _get_openrouter_key()
     if not key:
