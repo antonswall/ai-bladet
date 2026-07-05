@@ -127,7 +127,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
       for (const r of related) {
         const ri = r.issue;
         body += `<a href="/v/${ri.year}/${ri.week}/" class="related-card">
-          <span class="related-card-week">Vecka ${ri.week} · ${ri.shared.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}</span>
+          <span class="related-card-week">Vecka ${ri.week} · ${(ri.shared || []).map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}</span>
           <span class="related-card-title">${esc(ri.title || '')}</span>
         </a>`;
       }

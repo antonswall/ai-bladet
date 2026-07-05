@@ -35,6 +35,7 @@ OUTPUT_DIR = PIPELINE_DIR / "output" / "validated"
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
 VALIDATION_THRESHOLD = 0.7  # minsta andel godkända claims för PASS
+MIN_STORY_WORDS = 200  # minsta antal ord per story.body
 
 
 # ─── DeepSeek helper ─────────────────────────────────────────────────────────
@@ -142,6 +143,14 @@ def parse_issue(content_path: Path) -> dict | None:
             m_body = re.search(r'^\s+body:\s*"(.+?)"\s*$', block, re.MULTILINE | re.DOTALL)
             if m_body:
                 story["body"] = m_body.group(1).strip()
+            else:
+                # block scalar: body: |\n    indragen text...
+                m_body_block = re.search(r'^\s+body:\s*\|\s*\n((?:\s{4,}.+\n?)+)', block, re.MULTILINE)
+                if m_body_block:
+                    # strippa indent (4+ spaces) från varje rad
+                    lines = m_body_block.group(1).split("\n")
+                    body_text = "\n".join(l.rstrip() for l in lines if l.strip() != "")
+                    story["body"] = body_text.strip()
             # quote
             m_quote_text = re.search(r'^\s+text:\s*"(.+?)"', block, re.MULTILINE | re.DOTALL)
             m_quote_speaker = re.search(r'^\s+speaker:\s*"(.+?)"', block, re.MULTILINE)

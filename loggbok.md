@@ -4,6 +4,12 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-07-05 — [lutra] Fix: MIN_STORY_WORDS saknades — validate.py crashade varje söndag
+
+- **Orsak:** `MIN_STORY_WORDS = 200` raderades vid en refaktor i validate.py, `_check_word_counts()` anropade en odefinierad variabel → NameError
+- **Fix:** La till `MIN_STORY_WORDS = 200` i config-blocket (rad 38)
+- **Status:** validate fungerar nu. Manuell omkörning behövs för vecka 27
+
 ## 2026-07-04 — [lutra] Fix: UI-bugs, article length, cron-validering
 
 - **Invalid Date:** issue.js + archive.js — fallback till dagens datum om date saknas
