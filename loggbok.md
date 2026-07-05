@@ -4,6 +4,15 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-07-05 — [lutra] v27 omgjord + 4 buggfixar för söndagspipelinen
+
+- **MIN_STORY_WORDS saknades** → NameError varje söndag. Fix: la till variabeln i validate.py
+- **body: | block scalars** parsades inte → alla stories fick 0 ord. Fix: block scalar regex i validate.py
+- **Sonnet wrappar YAML i ` ```yaml `** — write.py kraschade. Fix: code block stripper i parse_sonnet_output + Regel 16 i system prompt
+- **issue.js ri.shared undefined** → build crash. Fix: `(ri.shared || [])` fallback
+- **Regel 0** (anti-hallucination), **Regel 10 sänkt till 150-250 ord**, **Regel 8 utökad fallback** i write.py system prompt
+- **v27 publicerad v2** — xAI Series E, Grok 4, Pentagon-avtal
+
 ## 2026-07-05 — [lutra] Fix: MIN_STORY_WORDS saknades — validate.py crashade varje söndag
 
 - **Orsak:** `MIN_STORY_WORDS = 200` raderades vid en refaktor i validate.py, `_check_word_counts()` anropade en odefinierad variabel → NameError

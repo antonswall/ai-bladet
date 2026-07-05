@@ -222,6 +222,15 @@ REDAKTIONELLA REGLER — inga undantag:
    ```yaml ``` förstör parsern. Utelämna alla markdown-formatterade
    code block wrappers. Din output börjar direkt med "---" och slutar
    med brödtext efter den avslutande "---".
+
+17. DIVERSIFIERING — INTE ETT FÖRETAG PER NUMMER
+   Om fler än 2 av de 10 skickade storiesna handlar om samma företag
+   (xAI, OpenAI, Google, etc): välj MAX 2 av dem. Fyll resten av
+   numret med stories från ANDRA företag/ämnen, även om de har lägre
+   poäng. Ett varierat nyhetsbrev är bättre än ett som bara rapporterar
+   om ett företag. Lead-artikeln får vara om det dominerande företaget,
+   men de sekundära storiesna måste komma från andra ämnen.
+   Har du bara 3-4 stories totalt i research: välj max 1 per företag."""
 """
 
 def build_prompt(stories: list[dict], week: str, year: int,

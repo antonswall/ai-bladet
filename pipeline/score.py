@@ -357,6 +357,9 @@ def score(input_path: Path, output_path: Path) -> dict:
     # Sortera efter final score (fallande)
     candidates.sort(key=lambda c: -c["final_score"])
 
+    # Diversifiera topp-10: max 2 stories per företag/ämne
+    candidates = _diversify_top(candidates, top_n=20, max_per_entity=2)
+
     # Skriv output
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output = {
@@ -390,6 +393,75 @@ def score(input_path: Path, output_path: Path) -> dict:
     print(f"{'─'*40}")
 
     return {"before": before, "after": len(candidates)}
+
+
+# ─── Diversifiering ────────────────────────────────────────────────────────────
+
+# Kända företagsnyckelord för att identifiera ämneskoncentration
+_ENTITY_KEYWORDS = [
+    "openai", "anthropic", "google", "deepmind", "meta", "microsoft",
+    "nvidia", "xai", "elon musk", "grok", "apple", "ibm", "amazon",
+    "aws", "azure", "oracle", "salesforce", "samsung", "intel",
+    "amd", "arm", "tsmc", "qualcomm", "broadcom", "micron",
+    "mistral", "deepseek", "qwen", "alibaba", "baidu", "tencent",
+    "bytedance", "zhipu", "cohere", "stability", "hugging face",
+    "midjourney", "runway", "openai", "perplexity",
+    "reddit", "meta", "x (twitter)", "spacex", "tesla",
+    "sie", "saab", "ericsson", "spotify", "klarna", "embracer",
+    "hexagon", "sinch", "evolution",
+]
+
+def _extract_entities(title: str) -> list[str]:
+    """Extrahera kända företagsnamn ur en titel."""
+    title_lower = title.lower()
+    found = []
+    for kw in _ENTITY_KEYWORDS:
+        if kw in title_lower:
+            found.append(kw)
+    return found
+
+def _diversify_top(candidates: list[dict], top_n: int = 20, max_per_entity: int = 2) -> list[dict]:
+    """Diversifiera topp-N så att inget företag/ämne har mer än max_per_entity stories.
+    Behåll originalordning inom varje grupp — pusha ner överskjutande stories till efter topp-N."""
+    if len(candidates) <= top_n:
+        return candidates
+
+    top = candidates[:top_n]
+    rest = candidates[top_n:]
+
+    # Räkna förekomst per entity i toppen
+    entity_count: dict[str, int] = {}
+    over_limit = []
+
+    for c in top:
+        title = c.get("title", "")
+        entities = _extract_entities(title)
+        if not entities:
+            # Inget företagsnamn — behåll alltid
+            continue
+
+        # Använd första matchade entity som identifierare
+        primary = entities[0]
+        current = entity_count.get(primary, 0)
+        if current >= max_per_entity:
+            over_limit.append(c)
+        else:
+            entity_count[primary] = current + 1
+
+    # Om inget över limit — returnera som det är
+    if not over_limit:
+        return candidates
+
+    # Ta bort överlimit från top, stoppa in längst fram i rest
+    for c in over_limit:
+        top.remove(c)
+    rest = over_limit + rest
+
+    # Begränsa topp till original top_n (plocka från rest om färre)
+    top.extend(rest[:top_n - len(top)])
+    rest = rest[top_n - len(top):]
+
+    return top + rest
 
 
 if __name__ == "__main__":
