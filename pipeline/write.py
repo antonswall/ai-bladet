@@ -103,6 +103,13 @@ Svenska, genomgående. Varje huvudstory skrivs på 200-300 ord enligt strukturkr
 
 REDAKTIONELLA REGLER — inga undantag:
 
+0. ANTI-HALLUCINATION — VIKTIGASTE REGELN
+   OM DET INTE FINNS I RESEARCH: SKRIV DET INTE. PERIOD.
+   Inga påståenden om företag, produkter, siffror eller händelser som inte
+   finns i research-briefsen. Hellre ett tråkigt men korrekt nummer än ett
+   engagerande men påhittat. Lead, title och summary är extra kritiska —
+   de exponeras mest och ska vara 100% verifierbara mot research.
+
 1. DATERINGSKRAV
    Huvudsektioner: endast utveckling från de senaste 7 dagarna.
    Äldre material får endast tas med om det finns en konkret NY händelse denna vecka som motiverar det.
@@ -139,8 +146,9 @@ REDAKTIONELLA REGLER — inga undantag:
    Om de senaste 7 dagarna är nyhetsfattiga och du har för få stories:
    Skapa en "Bakgrund/Djupdykning"-sektion. Där får äldre material finnas,
    men det måste TYDLIGT märkas som bakgrund/analys — inte presenteras som nyhet.
-   Exempel: "SpaceX/xAI-affären (feb 2026): Så här ser det ut nu."
-   Detta löser tunna veckor utan att ljuga om datering.
+   Om färre än 4 stories har fyllig research (>500 tecken i brief):
+   kör ENDAST 2-3 stories + 3-5 briefs. En kort tidning är bättre än en
+   påhittad tidning. Du får ALDRIG fylla ut med fabricerat innehåll.
 
 9. INGRESS PER STORY (framsidan)
    Varje sekundär story ska ha en fristående ingress på 40-60 ord som besvarar:
@@ -149,14 +157,16 @@ REDAKTIONELLA REGLER — inga undantag:
    Den ska kunna stå ensam på framsidan och få läsaren att vilja läsa vidare.
 
 10. LÄNGD & STRUKTUR PÅ BRÖDTEXTEN
-   Varje stories.body ska vara 200-300 ord, i markdown med stycken (blankrad mellan),
+   Varje stories.body ska vara 150-250 ord, i markdown med stycken (blankrad mellan),
    och följa denna struktur:
-   1) Vad hände — fakta och konkreta detaljer (~80 ord).
-   2) Varför det spelar roll / kontext — sätt nyheten i sitt sammanhang (~100 ord).
+   1) Vad hände — fakta och konkreta detaljer (~60 ord).
+   2) Varför det spelar roll / kontext — sätt nyheten i sitt sammanhang (~80 ord).
    3) Vad det betyder för Sverige/EU — ENDAST där det finns en genuin koppling i
-      research (~50 ord). Tvinga aldrig in en svensk vinkel som inte finns;
+      research (~40 ord). Tvinga aldrig in en svensk vinkel som inte finns;
       hoppa över del 3 hellre än att hitta på.
    Fyll inte ut med upprepning — varje mening ska bära ny information från research.
+   GÅR DET INTE ATT NÅ 150 ORD UTAN ATT HITTA PÅ: skriv en kortare artikel och
+   komplettera med en extra brief — bättre kort och korrekt än lång och osann.
 
 11. AI-BLADETS ANALYS (endast toppstoryn)
    Toppstoryn (lead) avslutas med en kort analys på 50-70 ord, märkt "AI-Bladets analys".
@@ -204,8 +214,15 @@ REDAKTIONELLA REGLER — inga undantag:
    För ENRADIGA fält (kicker, headline, ingress, title, summary, image,
    credit) använd vanliga double-quoted strings: headline: "Rubrik här".
    För quote-fältet: använd YAML-mapping med text: och speaker: som är
-   enradiga double-quoted strings."""
+   enradiga double-quoted strings.
 
+16. ALDRIG CODE BLOCKS
+   ALDRIG någonsin wrappa YAML:en i ```yaml eller ``` code blocks.
+   Hela svaret ska vara REN YAML-frontmatter + markdown-body.
+   ```yaml ``` förstör parsern. Utelämna alla markdown-formatterade
+   code block wrappers. Din output börjar direkt med "---" och slutar
+   med brödtext efter den avslutande "---".
+"""
 
 def build_prompt(stories: list[dict], week: str, year: int,
                  published_date: str) -> str:
@@ -334,6 +351,11 @@ def parse_sonnet_output(text: str) -> str:
     """Verifiera att Sonnet producerade korrekt frontmatter + markdown."""
     if not text:
         raise ValueError("Sonnet returnerade tomt svar")
+
+    # Strippa code block wrappers (```yaml / ```) som Sonnet ibland lägger till
+    text = re.sub(r'^```(?:yaml)?\s*\n', '', text, flags=re.MULTILINE)
+    text = re.sub(r'\n```\s*$', '', text)
+    text = text.strip()
 
     # Kolla att frontmatter finns
     if not text.startswith("---"):

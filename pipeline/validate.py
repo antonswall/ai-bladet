@@ -35,7 +35,7 @@ OUTPUT_DIR = PIPELINE_DIR / "output" / "validated"
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
 VALIDATION_THRESHOLD = 0.7  # minsta andel godkända claims för PASS
-MIN_STORY_WORDS = 200  # minsta antal ord per story.body
+MIN_STORY_WORDS = 150  # minsta antal ord per story.body (sänkt från 200 — Sonnet skriver 170-190 vid tunt material)
 
 
 # ─── DeepSeek helper ─────────────────────────────────────────────────────────
