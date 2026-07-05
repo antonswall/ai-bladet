@@ -4,6 +4,19 @@
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.
 
+## 2026-07-05 — [Claude Code] Bildstrategi omgjord — 5 nivåer med Jina-proxy för OG-bilder
+
+- **OG-bilder via Jina-proxy:** x.ai blockerar direkt requests (Cloudflare 403). Använder `r.jina.ai/<URL>` istället, samma trick som research.py. 14/15 v27-stories fick artikelspecifika pressbilder (grok-4-1.webp, dow.webp, spacex-acquisition.webp etc.)
+- **Nivå 1:** OG-bild via Jina → HEAD/GET-verifieras
+- **Nivå 2:** AI-genererad (Pollinations.ai, gratis) för lead-kandidat, sparas i static/img/generated/
+- **Nivå 3:** Openverse API (ingen nyckel) med relevansfilter på titel/taggar, avsmalnande sökning
+- **Nivå 4:** Bildbanken (rensad — bara Albæk, Jensen Huang, Rosenbad etc. kvar)
+- **Nivå 5:** Grafisk placeholder (SVG per kategori, serif-rubrik, AI-Bladet-wordmark)
+- **images.py:** implementerar nivå 1-5 per story, meta.image_levels i output, dedup garanterar ingen bild delas mellan stories
+- **image_bank.py:** `pick_specific()` returnerar None istället för random default. Kategori/default-listor borttagna
+- **fallback_image.py:** nya redaktionella SVG:er per kategori — ser ut som tidningen
+- **Test:** `python images.py` → 14 OG + 1 bank (Series B dedup → Musk-foto), inga CLI- eller formatändringar
+
 ## 2026-07-05 — [lutra] v27 omgjord + 4 buggfixar för söndagspipelinen
 
 - **MIN_STORY_WORDS saknades** → NameError varje söndag. Fix: la till variabeln i validate.py
@@ -500,3 +513,42 @@ Valideringen trunkerade research-briefs till 300 tecken (bara summary), ignorera
 Pipeline → write → validate → PASS? → build → deploy
                               → FAIL? → feedback → write (retry 2) → validate → ...
                               → FAIL x3? → STOP + notis till Anton
+
+## 2026-07-05 — Ny bildstrategi: bilder som matchar innehållet
+
+### Problem
+v27: xAI-artiklar illustrerades med indonesiska konsulat och EU-kontor ur
+den statiska Commons-banken. Kategori-matchning ("Företag") gav irrelevanta bilder.
+
+### Ny prioritetsordning i images.py
+1. **OG-bild från källan** — direkt request, annars via r.jina.ai-proxy
+   (samma trick som research.py; klarar Cloudflare-skyddade sidor som x.ai)
+2. **AI-genererad lead-bild** — Pollinations.ai (gratis, ingen nyckel) för
+   lead-kandidaten (högst lead_potential). Sparas i static/img/generated/
+3. **Openverse-sökning** — CC-foton på konkreta nyckelord ur titeln (4→3→2 ord)
+   + relevansfilter (sökord måste finnas i bildens titel/taggar).
+   Ersätter Unsplash/Pexels som båda kräver API-nycklar
+4. **Bildbanken** — rensad från 54 till 21 bilder (bara personer/HQ/datacenter/
+   chip/EU/Sverige). Används ENDAST vid specifik tema/källa-träff (pick_specific),
+   kategori-/default-listorna borttagna
+5. **Grafisk placeholder** — ny modul fallback_image.py genererar tidnings-
+   grafik (SVG per kategori) i static/img/fallback/, absoluta URL:er för og:image
+
+### Resultat v27-test
+- 14/15 stories fick artikelspecifika OG-bilder från x.ai (unika, verifierade)
+- 1/15 (Series B, dublett-OG) föll till bildbanken → Musk-foto (relevant)
+- 15/15 unika bild-URL:er, `used`-set förhindrar dubletter inom numret
+- meta.image_levels i output visar fördelningen per nivå
+
+### Ändrade filer
+- pipeline/images.py — omskriven huvudlogik, jina-proxy för OG, Pollinations,
+  Openverse med licens-formatering
+- pipeline/image_bank.py — rensad v3, pick() → pick_specific() (kan returnera None)
+- pipeline/fallback_image.py — NY, genererar kategori-SVG:er
+- static/img/fallback/*.svg — 8 genererade placeholders
+
+### Noteringar
+- Inga nya API-nycklar. Pollinations och Openverse är gratis/nyckelfria
+- Openverse-filter hellre None än fel bild (kvarkdiagram på "Anthropic"-sök
+  utan filter) — None faller vidare till bank/grafik
+- curate_images.py fungerar fortfarande (IMG_N = _c(...)-formatet behållet)
