@@ -122,7 +122,7 @@ def parse_issue(content_path: Path) -> dict | None:
 
     def _parse_lead():
         lead = {}
-        for f in ["kicker", "headline", "ingress", "analysis", "image", "credit"]:
+        for f in ["kicker", "segment", "headline", "ingress", "analysis", "image", "credit"]:
             m = re.search(rf"^\s+{f}:\s*\"(.+?)\"\s*$", fm_text, re.MULTILINE | re.DOTALL)
             if m:
                 lead[f] = m.group(1).strip()
@@ -130,13 +130,13 @@ def parse_issue(content_path: Path) -> dict | None:
 
     def _parse_stories():
         stories = []
-        # Dela på story-block (börjar med indent + "kicker:")
-        blocks = re.split(r"\n\s+- kicker:", fm_text)
+        # Dela på story-block — nya nummer börjar med "- segment:", gamla med "- kicker:"
+        blocks = re.split(r"\n\s+- (?=(?:segment|kicker):)", fm_text)
         for block in blocks[1:]:  # första är allt före första storyn
-            block = "  - kicker:" + block
+            block = "  - " + block
             story = {}
-            for f in ["kicker", "headline", "ingress", "image", "credit"]:
-                m = re.search(rf"^\s+{f}:\s*\"(.+?)\"\s*$", block, re.MULTILINE | re.DOTALL)
+            for f in ["segment", "kicker", "headline", "ingress", "image", "credit"]:
+                m = re.search(rf"^\s*(?:- )?{f}:\s*\"(.+?)\"\s*$", block, re.MULTILINE | re.DOTALL)
                 if m:
                     story[f] = m.group(1).strip()
             # body kan spänna över flera rader — fånga allt mellan body: och nästa fält eller block-slut
@@ -161,9 +161,12 @@ def parse_issue(content_path: Path) -> dict | None:
                 stories.append(story)
         return stories
 
-    def _parse_briefs():
-        briefs = re.findall(r'^\s+-\s*"(.+?)"\s*$', fm_text[fm_text.rfind("briefs:"):], re.MULTILINE | re.DOTALL)
-        return briefs
+    def _parse_brief_list(name: str) -> list[str]:
+        """Parsa en namngiven brief-lista (briefs, briefs_bransch, briefs_vart_att_veta)."""
+        m = re.search(rf"^{name}:\s*\n((?:\s+- .*\n?)+)", fm_text, re.MULTILINE)
+        if not m:
+            return []
+        return re.findall(r'-\s*"(.+?)"\s*$', m.group(1), re.MULTILINE | re.DOTALL)
 
     fm = {
         "year": _re_field("year", ""),
@@ -173,7 +176,9 @@ def parse_issue(content_path: Path) -> dict | None:
         "summary": _re_field("summary", ""),
         "lead": _parse_lead(),
         "stories": _parse_stories(),
-        "briefs": _parse_briefs(),
+        "briefs": _parse_brief_list("briefs"),
+        "briefs_bransch": _parse_brief_list("briefs_bransch"),
+        "briefs_vart_att_veta": _parse_brief_list("briefs_vart_att_veta"),
     }
 
     return {"frontmatter": fm, "body": body, "full_text": text}
@@ -244,13 +249,18 @@ def validate_issue(issue: dict, research_stories: list[dict]) -> dict:
     if lead.get("analysis"):
         lead_text += " [AI-BLADETS ANALYS] " + lead.get("analysis", "")
 
+    # Alla brief-listor: legacy briefs + segmenterade (bransch / värt att veta)
+    alla_briefs = (fm.get("briefs", []) +
+                   fm.get("briefs_bransch", []) +
+                   fm.get("briefs_vart_att_veta", []))
+
     # Claims att verifiera
     claims = {
         "lead": lead_text,
         "title": fm.get("title", ""),
         "summary": fm.get("summary", ""),
         "stories": story_sections[:6],
-        "briefs": fm.get("briefs", [])[:8],
+        "briefs": alla_briefs[:10],
     }
 
     # Bygg prompt
@@ -261,7 +271,7 @@ def validate_issue(issue: dict, research_stories: list[dict]) -> dict:
     for i, s in enumerate(story_sections):
         claims_text += f"ARTICLE {i+1}:\n{s}\n\n"
 
-    for i, b in enumerate(fm.get("briefs", [])):
+    for i, b in enumerate(alla_briefs):
         claims_text += f"BRIEF {i+1}: {b}\n"
 
     prompt = f"""Verifiera AI-nyhetsartikeln nedan mot de underliggande research-briefsen.
@@ -312,6 +322,10 @@ Svara endast med JSON:
     # Word count-kontroll: varje story.body måste vara minst MIN_STORY_WORDS ord
     result["word_counts"] = _check_word_counts(issue)
 
+    # Segmentkontroller (endast nya segmenterade nummer — gamla format passerar)
+    result["lead_verktyg"] = _check_lead_verktyg(issue, research_stories)
+    result["konsekvensrad"] = _check_konsekvensrad(issue)
+
     # Hård gate: en enda obekräftad HIGH-allvarlig faktaflagga blockerar deploy,
     # oavsett pass-rate. (Anton 2026-06-18: fakta går före kadens. Retry-loopen i
     # run_weekly.sh skickar high/medium-flaggor till Sonnet för rättning först.)
@@ -326,9 +340,91 @@ Svara endast med JSON:
                       not result["duplication"]["duplicate"] and
                       result["se_eu_angle"]["found"] and
                       not result["high_issues"] and
-                      result.get("word_counts", {}).get("all_ok", True))
+                      result.get("word_counts", {}).get("all_ok", True) and
+                      result["lead_verktyg"]["ok"] and
+                      result["konsekvensrad"]["ok"])
 
     return result
+
+
+# ─── Segmentkontroller ────────────────────────────────────────────────────────
+
+
+def _ar_segmenterad(fm: dict) -> bool:
+    """Är utgåvan skriven med den nya segmentstrukturen?"""
+    if fm.get("lead", {}).get("segment"):
+        return True
+    if any(s.get("segment") for s in fm.get("stories", [])):
+        return True
+    return bool(fm.get("briefs_bransch") or fm.get("briefs_vart_att_veta"))
+
+
+def _check_lead_verktyg(issue: dict, research_stories: list[dict]) -> dict:
+    """Regel 18: Leaden måste vara ett verktyg (kategori Modeller/Verktyg),
+    aldrig politik eller forskning.
+
+    Kollar två signaler:
+    1. lead.segment / lead.kicker — ska signalera verktyg
+    2. Fuzzy-match av lead-headline mot research-titlar → kategorin på bästa träff
+    Gäller endast segmenterade nummer — gamla format passerar orörda.
+    """
+    fm = issue.get("frontmatter", {})
+    if not _ar_segmenterad(fm):
+        return {"ok": True, "reason": "Legacy-format — segmentkrav gäller ej"}
+
+    lead = fm.get("lead", {})
+    segment = lead.get("segment", "").lower()
+    kicker = lead.get("kicker", "").lower()
+
+    # Signal 1: uttrycklig segment-/kicker-markering
+    if segment and segment != "verktyg":
+        return {"ok": False, "reason": f"lead.segment är '{segment}' — måste vara 'verktyg' (regel 18)"}
+    forbjudna_kickers = ["politik", "forskning", "företag", "reglering"]
+    if any(k in kicker for k in forbjudna_kickers):
+        return {"ok": False, "reason": f"Lead-kickern '{lead.get('kicker','')}' signalerar bransch/forskning — lead måste vara verktyg (regel 18)"}
+
+    # Signal 2: kategori på bäst matchande research-story
+    lead_words = set((lead.get("headline", "") + " " + lead.get("ingress", "")).lower().split())
+    best_cat, best_overlap = "", 0.0
+    for s in research_stories:
+        title_words = set(s.get("title", "").lower().split())
+        if not title_words or not lead_words:
+            continue
+        overlap = len(lead_words & title_words) / len(title_words)
+        if overlap > best_overlap:
+            best_overlap = overlap
+            best_cat = s.get("category", "")
+
+    if best_overlap >= 0.4 and best_cat in ("Politik", "Forskning"):
+        return {"ok": False, "reason": f"Leaden matchar en {best_cat}-story i research ({best_overlap:.0%} överlapp) — lead måste vara Modeller/Verktyg (regel 18)"}
+
+    return {"ok": True, "reason": ""}
+
+
+def _check_konsekvensrad(issue: dict) -> dict:
+    """Regel 19: Varje bransch-story och bransch-brief måste innehålla
+    'Vad betyder det för dig:'. Gäller endast segmenterade nummer."""
+    fm = issue.get("frontmatter", {})
+    if not _ar_segmenterad(fm):
+        return {"ok": True, "missing": [], "reason": "Legacy-format — segmentkrav gäller ej"}
+
+    marker = "vad betyder det för dig"
+    missing = []
+
+    for i, s in enumerate(fm.get("stories", [])):
+        if s.get("segment") == "bransch":
+            body = (s.get("body", "") or "").lower()
+            if marker not in body:
+                missing.append(f"Bransch-story {i+1} ({s.get('headline', '?')[:50]})")
+
+    for i, b in enumerate(fm.get("briefs_bransch", [])):
+        if marker not in b.lower():
+            missing.append(f"Bransch-brief {i+1} ({b[:50]})")
+
+    if missing:
+        return {"ok": False, "missing": missing,
+                "reason": "Saknar 'Vad betyder det för dig:'-rad (regel 19): " + "; ".join(missing)}
+    return {"ok": True, "missing": [], "reason": ""}
 
 
 def _parse_json_from_text(text: str | None) -> dict | None:
@@ -534,6 +630,14 @@ def validate(content_path: Path, research_input_path: Path,
     se_icon = "✅" if se.get("found") else "❌"
     print(f"  Dublettkontroll: {dup_icon}")
     print(f"  SE/EU-vinkel:    {se_icon}")
+    lv = result.get("lead_verktyg", {})
+    kr = result.get("konsekvensrad", {})
+    print(f"  Lead = verktyg:  {'✅' if lv.get('ok') else '❌'}")
+    if not lv.get("ok"):
+        print(f"      ➜ {lv.get('reason', '')[:100]}")
+    print(f"  Konsekvensrad:   {'✅' if kr.get('ok') else '❌'}")
+    if not kr.get("ok"):
+        print(f"      ➜ {kr.get('reason', '')[:100]}")
     high = result.get("high_issues", [])
     if high:
         print(f"  HIGH-flaggor:    ❌ {len(high)} (BLOCKERAR deploy oavsett pass-rate)")

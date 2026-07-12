@@ -97,6 +97,20 @@ def deepseek_call(prompt: str, system: str = None, max_tokens: int = 2000) -> Op
 
 # ─── Pre-filter ───────────────────────────────────────────────────────────────
 
+# Konkreta verktygs-/release-signaler — små aktörer med riktiga släpp ska INTE
+# filtreras bort. Ett verktyg från en okänd org kan vara veckans lead.
+_VERKTYG_KEYWORDS = [
+    "release", "released", "launch", "open source", "open-source",
+    "verktyg", "tool", "cli", "sdk", "api", "agent", "plugin",
+    "gguf", "instruct", "quantized", "fine-tune", "finetune",
+    "v1.", "v2.", "v3.", "1.0", "2.0", "weights",
+]
+
+
+def _ar_verktygssignal(text: str) -> bool:
+    """Signalerar texten ett konkret verktyg/modellsläpp?"""
+    return any(kw in text for kw in _VERKTYG_KEYWORDS)
+
 
 def pre_filter(candidates: list[dict]) -> list[dict]:
     """Ta bort uppenbart irrelevanta kandidater mekaniskt."""
@@ -110,7 +124,8 @@ def pre_filter(candidates: list[dict]) -> list[dict]:
         summary = c.get("summary", "")
         text = f"{title} {summary}".lower()
 
-        # HF Models: behåll bara från kända orgs
+        # HF Models: behåll kända orgs, tillräckliga downloads ELLER konkret
+        # release-signal — små aktörer med riktiga verktygssläpp ska med.
         if sid == "hf-models":
             org_match = any(org.lower() in text for org in KNOWN_HF_ORGS)
             # Kolla downloads i summary
@@ -119,7 +134,7 @@ def pre_filter(candidates: list[dict]) -> list[dict]:
             if dl_match:
                 downloads = int(dl_match.group(1).replace(",", ""))
 
-            if not org_match and downloads < 1000:
+            if not org_match and downloads < 1000 and not _ar_verktygssignal(text):
                 removed += 1
                 reasons.append(f"HF Models (okänd org, {downloads} dl): {title[:60]}")
                 continue
@@ -159,11 +174,21 @@ def pre_filter(candidates: list[dict]) -> list[dict]:
 
 SCORE_SYSTEM_PROMPT = """Du är en AI-nyhetsredaktör. Din uppgift: bedöm och poängsätt AI-nyheter inför ett svenskt veckobrev.
 
+Målgruppen är personer som BYGGER med AI dagligen — utvecklare, produktfolk, AI-entusiaster.
+
 Varje artikel får en score baserat på:
 - Nyhetsvärde (1-10): Hur viktig är nyheten för AI-branschen?
 - Lead-potential (1-5): Skulle detta kunna vara veckans lead story?
+- Aktionabilitet (ja/nej): Skulle en person som bygger med AI dagligen ändra något
+  i sitt arbete DEN HÄR VECKAN på grund av den här nyheten? Ja → hög lead-potential.
+  Nej men strategiskt viktig → brief-material, aldrig lead.
+  Konkreta verktyg, modellsläpp och releaser är oftast aktionabla.
+  Policy, förvärv och metaforskning är det nästan aldrig.
 - Svensk relevans (0-3): Relevant för svenska läsare? (Svenska bolag, EU-policy, svenska forskare)
 - Kategori: Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Övrigt
+
+Lead-potential ska spegla aktionabiliteten: en nyhet som inte ändrar någons
+AI-vardag denna vecka får aldrig lead_potential 4-5, oavsett hur stor den är.
 
 Din bedömning påverkar direkt vilka nyheter som publiceras. Var noggrann och motivera kort."""
 
@@ -190,6 +215,7 @@ Svara endast med JSON-format, ingen annan text:
       "id": 0,
       "news_value": 1-10,
       "lead_potential": 1-5,
+      "actionable": true/false,
       "swedish_relevance": 0-3,
       "category": "Modeller|Politik|Verktyg|Forskning|Företag|Säkerhet|Övrigt",
       "reason": "kort motivering (max 15 ord)"
@@ -223,6 +249,7 @@ def parse_scores(response: str, batch: list[dict], start_idx: int) -> list[dict]
             results.append({
                 "score": _clamp(s.get("news_value", 5), 1, 10),
                 "lead_potential": _clamp(s.get("lead_potential", 3), 1, 5),
+                "actionable": bool(s.get("actionable", False)),
                 "swedish_relevance": _clamp(s.get("swedish_relevance", 0), 0, 3),
                 "category": s.get("category", "Övrigt"),
                 "reason": s.get("reason", ""),
@@ -244,12 +271,22 @@ def _clamp(val, lo, hi):
 def _default_scores(batch: list[dict], start_idx: int) -> list[dict]:
     """Default scores om API-anropet misslyckas."""
     return [
-        {"score": 5, "lead_potential": 3, "swedish_relevance": 0, "category": "Övrigt", "reason": "API-fallback"}
+        {"score": 5, "lead_potential": 3, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "reason": "API-fallback"}
         for _ in batch
     ]
 
 
 # ─── Slutgiltig scoring (viktad) ──────────────────────────────────────────────
+
+
+# Kategori-vikter: verktyg/modeller är det läsarna bygger med — de ska vinna
+# lead-platsen. Allmän policy/forskning är brief-material och justeras ned.
+KATEGORI_BONUS = {
+    "Modeller": 4,
+    "Verktyg": 4,
+    "Politik": -3,
+    "Forskning": -2,
+}
 
 
 def final_score(c: dict) -> float:
@@ -260,16 +297,24 @@ def final_score(c: dict) -> float:
 
     news = ai.get("score", 5)
     lead = ai.get("lead_potential", 3)
+    actionable = ai.get("actionable", False)
     swedish = ai.get("swedish_relevance", 0)
+    category = ai.get("category", "Övrigt")
+
+    # Aktionabilitet in i lead-potentialen: en nyhet som ändrar läsarens
+    # AI-vardag denna vecka lyfts; en som inte gör det dämpas.
+    lead_eff = min(5, lead + 2) if actionable else max(1, lead - 1)
 
     # Viktning:
     # news_value (0-10) ×3
-    # lead_potential (0-5) ×2
+    # lead_potential inkl. aktionabilitet (0-5) ×2
     # swedish (0-3) ×4
+    # kategori-bonus: Modeller/Verktyg +4, Politik -3, Forskning -2
     # tier-bonus: Tier 1 +2, Tier 2 +1, Tier 3 +0, Tier 4 -1
     tier_bonus = {1: 2, 2: 1, 3: 0}.get(tier, -1)
+    kategori_bonus = KATEGORI_BONUS.get(category, 0)
 
-    raw = (news * 3) + (lead * 2) + (swedish * 4) + tier_bonus
+    raw = (news * 3) + (lead_eff * 2) + (swedish * 4) + tier_bonus + kategori_bonus
 
     # Temporal decay: nyare = högre, äldre = lägre
     published = c.get("published")
@@ -348,7 +393,7 @@ def score(input_path: Path, output_path: Path) -> dict:
 
     # Default scores för resten (inte i AI-batch)
     for c in candidates[len(scoring_batch):]:
-        c["_ai_score"] = {"score": 3, "lead_potential": 1, "swedish_relevance": 0, "category": "Övrigt", "reason": "Ej i topp 100"}
+        c["_ai_score"] = {"score": 3, "lead_potential": 1, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "reason": "Ej i topp 100"}
 
     # Beräkna final score
     for c in candidates:

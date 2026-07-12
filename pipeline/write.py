@@ -101,6 +101,26 @@ Din röst: ledig men trovärdig — tabloid i energi, sansad i sak. Tänk DN/SvD
 Inga uppmaningar till läsaren, ingen "i den här artikeln", inga emojis, inget marknadsföringsspråk.
 Svenska, genomgående. Varje huvudstory skrivs på 200-300 ord enligt strukturkravet (regel 10).
 
+Läsaren är en person som BYGGER med AI dagligen. Frågan varje utgåva besvarar:
+"Vad påverkar min AI-vardag den här veckan?"
+
+SEGMENTSTRUKTUR — varje utgåva har EXAKT dessa tre segment, i EXAKT denna ordning:
+
+1. VECKANS VERKTYG (lead + 1-3 stories, segment: "verktyg")
+   Modeller, releaser, open source-verktyg — det läsaren faktiskt bygger med.
+   Exempel: Claude/GPT/Gemini/Grok/DeepSeek/Hermes/Copilot/nya verktyg och releaser.
+   Leaden är ALLTID en verktygsstory (regel 18). Segmentet har alltid minst leaden.
+
+2. BRANSCH I KORTHET (2-4 briefs i briefs_bransch, max 1 full story med segment: "bransch")
+   Politik, reglering, förvärv, datacenter, kapitalrundor.
+   Varje bransch-brief OCH bransch-story avslutas med "Vad betyder det för dig:"
+   följt av en konkret konsekvensmening för AI-byggare (regel 19).
+   Kan du inte skriva den meningen trovärdigt utan att hitta på — stryk storyn.
+
+3. VÄRT ATT VETA (0-3 briefs i briefs_vart_att_veta)
+   Forskning, metod, papers. En rad per item. Bara när något faktiskt förtjänar plats.
+   Tomma veckor: utelämna listan helt — ett tomt segment är bättre än utfyllnad.
+
 REDAKTIONELLA REGLER — inga undantag:
 
 0. ANTI-HALLUCINATION — VIKTIGASTE REGELN
@@ -230,7 +250,24 @@ REDAKTIONELLA REGLER — inga undantag:
    poäng. Ett varierat nyhetsbrev är bättre än ett som bara rapporterar
    om ett företag. Lead-artikeln får vara om det dominerande företaget,
    men de sekundära storiesna måste komma från andra ämnen.
-   Har du bara 3-4 stories totalt i research: välj max 1 per företag."""
+   Har du bara 3-4 stories totalt i research: välj max 1 per företag.
+
+18. LEAD ALLTID OM VERKTYG
+   Leaden är ALLTID en story ur segmentet Veckans verktyg (kategori Modeller
+   eller Verktyg). En branschnyhet (politik/reglering/förvärv) får ALDRIG vara
+   lead om den inte har direkt, konkret påverkan på AI-verktyg som läsaren
+   använder — och då skrivs den som verktygsstory med den påverkan i fokus.
+   Metaforskning och policyanalys är aldrig lead, oavsett score. Finns ingen
+   stark verktygsstory: ta veckans mest konkreta modell/release och skriv den
+   rakt — en liten men verklig verktygsnyhet slår en stor abstrakt bransch-story.
+
+19. "VAD BETYDER DET FÖR DIG" — OBLIGATORISK KONSEKVENSRAD
+   Varje bransch-story (segment: "bransch") avslutar sin body med ett eget
+   stycke som börjar exakt "Vad betyder det för dig:" följt av en konkret
+   konsekvensmening för någon som bygger med AI. Varje brief i briefs_bransch
+   avslutas med samma fras och en konsekvenssats. Raden måste vara grundad i
+   research (regel 0 och 7 gäller) — kan du inte skriva den trovärdigt,
+   degradera storyn till brief eller stryk den helt."""
 
 def build_prompt(stories: list[dict], week: str, year: int,
                  published_date: str) -> str:
@@ -257,9 +294,14 @@ def build_prompt(stories: list[dict], week: str, year: int,
         image = s.get("image_url", "")
         credit = s.get("image_credit", "")
 
+        actionable = s.get("actionable", s.get("ai_score", {}).get("actionable", False))
+        # Markörer byggs utanför f-stringen — non-ASCII i f-string-uttryck
+        # kraschar macOS Python 3.11 (se loggbok 2026-07-12)
+        lead_mark = "[LEAD CANDIDATE]" if lead >= 4 else ""
+        aktion_mark = "[AKTIONABEL — ändrar AI-byggares vardag denna vecka]" if actionable else ""
         stories_text += f"""
 ## STORY {i+1} — Score: {score} | Kategori: {category}
-{'[LEAD CANDIDATE]' if lead >= 4 else ''}
+{lead_mark}{aktion_mark}
 
 Titel: {title}
 Källa: {source}
@@ -294,16 +336,23 @@ RESEARCHADE ARTIKLAR (scores från DeepSeek V4 Pro):
 
 INSTRUKTIONER:
 
-1. Välj lead-story (veckans viktigaste). LEAD-märkta stories har hög lead-potential.
+1. Välj lead-story: veckans viktigaste VERKTYGSNYHET (kategori Modeller/Verktyg).
+   LEAD- och AKTIONABEL-märkta stories är kandidater. Regel 18 gäller — politik,
+   förvärv och forskning kan ALDRIG vara lead.
 
-2. Välj 3-6 sekundära stories. Rangordna efter betydelse.
+2. Välj 1-3 ytterligare verktygsstories (segment: "verktyg"). Rangordna efter
+   hur mycket de påverkar läsarens AI-vardag.
 
-3. Välj 0-8 kortnytt-briefs från återstående stories (en mening var).
-   Kortnytt är för notiser som inte förtjänar en full artikel men är värda att nämna.
+3. Välj max 1 full bransch-story (segment: "bransch") och 2-4 bransch-briefs
+   (briefs_bransch). Bransch = politik, reglering, förvärv, datacenter.
+   ALLA avslutas med "Vad betyder det för dig:" + konsekvensmening (regel 19).
 
-4. Skriv i svensk ledig tidningston. Faktabaserat - hitta inte på något som inte finns i research.
+4. Välj 0-3 forsknings-/metodbriefs (briefs_vart_att_veta). Bara det som
+   faktiskt förtjänar plats — utelämna listan hellre än fyll ut.
 
-5. OUTPUT - exakt detta format, inget annat före eller efter.
+5. Skriv i svensk ledig tidningston. Faktabaserat - hitta inte på något som inte finns i research.
+
+6. OUTPUT - exakt detta format, inget annat före eller efter.
    OBS: För flerradiga fält (analysis, body) använd YAML literal block scalar (|).
    För enradiga fält använd double-quoted strings ("...").
 
@@ -314,8 +363,9 @@ date: {date_str}
 title: "Redaktionell rubrik för HELA utgåvan (max 70 tecken)"
 summary: "En mening som säljer veckan (max 140 tecken)"
 lead:
-  kicker: "VECKANS STÖRSTA"
-  headline: "#1-nyhetens rubrik (inte exakt samma som research-titeln)"
+  kicker: "KATEGORI (Modeller eller Verktyg — segmentheadern visar redan 'Veckans verktyg')"
+  segment: "verktyg"
+  headline: "Veckans största verktygs-/modellnyhets rubrik (inte exakt samma som research-titeln)"
   ingress: "2-3 meningar som säljer storyn"
   analysis: |
     AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11).
@@ -323,7 +373,8 @@ lead:
   image: "Klistra in Bild-URL:en EXAKT från den valda lead-storyn. Utelämna raden helt om storyn saknar bild."
   credit: "Klistra in Byline EXAKT från den valda lead-storyn (t.ex. 'Foto · X / CC BY 2.0'). Utelämna om bild saknas."
 stories:
-  - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
+  - segment: "verktyg"
+    kicker: "KATEGORI (Modeller eller Verktyg för segment verktyg)"
     headline: "Rubrik - gärna fyndig/säljande, men 100% förankrad i research (regel 7 + 13)"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
     image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
@@ -338,16 +389,27 @@ stories:
       Andra stycket - varför det spelar roll, kontext (~100 ord). Blankrad mellan stycken.
 
       Tredje stycket - Sverige/EU-vinkel ENDAST om research stöder det (~50 ord).
-briefs:
-  - "Kort enradare"
-  - "Ännu en kort enradare"
+  - segment: "bransch"
+    kicker: "KATEGORI (Politik, Företag, Säkerhet, Sverige)"
+    headline: "Max EN bransch-story per nummer — utelämna blocket om ingen förtjänar full story"
+    ingress: "40-60 ord"
+    body: |
+      Vad hände + kontext enligt regel 10.
+
+      Vad betyder det för dig: konkret konsekvensmening för AI-byggare (regel 19). Sista stycket.
+briefs_bransch:
+  - "Branschnotis 2-4 meningar. Vad betyder det för dig: konkret konsekvens för AI-byggare."
+  - "Ännu en branschnotis. Vad betyder det för dig: konsekvensen."
+briefs_vart_att_veta:
+  - "Forsknings-/metodnotis, en rad. Utelämna hela listan om inget förtjänar plats."
 categories: [Kategori1, Kategori2]
 sources: {len(stories)}
 ---
 
-Varje stories.body skrivs på 200-300 ord enligt strukturen i regel 10 (vad hände /
-varför det spelar roll / Sverige-EU där relevant). lead.ingress + varje story.ingress
-hålls korta (2-3 meningar resp. 40-60 ord)."""
+Segmentordningen i stories-listan: ALLA verktygsstories först, sedan max en
+bransch-story. Varje stories.body skrivs på 200-300 ord enligt strukturen i
+regel 10 (vad hände / varför det spelar roll / Sverige-EU där relevant).
+lead.ingress + varje story.ingress hålls korta (2-3 meningar resp. 40-60 ord)."""
 
     return prompt
 
@@ -447,11 +509,11 @@ def write_issue(input_path: Path, output_path: Path, feedback: str = "") -> dict
 
     # Räkna ord
     word_count = len(output.split())
-    stories_count = output.count("- kicker:")
+    stories_count = output.count("headline:") - 1  # minus lead
     briefs_count = 0
-    briefs_match = re.search(r"briefs:\n((?:  - .*\n)+)", output)
-    if briefs_match:
-        briefs_count = len(re.findall(r"^- ", briefs_match.group(1), re.MULTILINE))
+    # Räkna briefs i alla listor (briefs_bransch, briefs_vart_att_veta, legacy briefs)
+    for m in re.finditer(r"^briefs(?:_bransch|_vart_att_veta)?:\n((?:\s+- .*\n)+)", output, re.MULTILINE):
+        briefs_count += len(re.findall(r"^\s+- ", m.group(1), re.MULTILINE))
 
     print(f"\n{'─'*40}")
     print(f"📰 UTGÅVA SKRIVEN ✅")

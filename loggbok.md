@@ -1,5 +1,45 @@
 # AI-Bladet — Loggbok
 
+## 2026-07-12 — [Claude Code] Redaktionell pivot: fasta segment + aktionabilitets-scoring
+
+Bakgrund: v28 hade fel lead (metaforskning istället för verktyg). Rotorsaken var scoringen,
+inte strukturen. Lösning: fasta segment i EN sida (inte flikar) + aktionabilitets-kriterium.
+
+- **score.py:** Nytt `actionable`-fält i AI-scoringen ("skulle en AI-byggare ändra något
+  i sitt arbete den här veckan?"). Aktionabel → lead_potential +2, ej aktionabel → -1 i
+  final_score. Kategori-bonus: Modeller/Verktyg +4, Politik -3, Forskning -2. Pre-filtret
+  släpper nu igenom HF-modeller från små aktörer om titeln har release-/verktygssignal.
+- **write.py:** Segmenterad prompt — fast ordning: 1) Veckans verktyg (lead + 1-3 stories,
+  `segment: "verktyg"`), 2) Bransch i korthet (max 1 story `segment: "bransch"` + 2-4
+  `briefs_bransch`), 3) Värt att veta (0-3 `briefs_vart_att_veta`). Nya regler: 18 (lead
+  ALLTID verktyg, aldrig politik/forskning) och 19 (varje bransch-story/brief avslutas med
+  "Vad betyder det för dig:" + konsekvensmening — annars stryks storyn). OBS: f-string-
+  markörer byggda utanför uttrycken (ASCII-fällan från morgonens fix).
+- **research.py:** flattar ut `actionable` till write-inputen.
+- **validate.py:** Parsar `segment`/`briefs_bransch`/`briefs_vart_att_veta`. Två nya hårda
+  gates (endast segmenterade nummer — gamla format passerar orörda): `_check_lead_verktyg`
+  (lead.segment/kicker + fuzzy-match mot research-kategori; Politik/Forskning-lead → FAIL)
+  och `_check_konsekvensrad` (saknad "Vad betyder det för dig:"-rad → FAIL).
+- **issue.js:** Segmentrendering med numrerade avdelningsheaders (01 Veckans verktyg /
+  02 Bransch i korthet / 03 Värt att veta) i broadsheet-stil. Konsekvensrader stylade som
+  accentblock. Gamla nummer utan segmentdata renderas exakt som förut (verifierat).
+  Bonus: "Relaterade artiklar" var helt ostylad — nu kort i samma stil som Tidigare nummer.
+- **style.css:** `.segment-header` (dubbellinje + röd nummerplåt + kursiv underrad),
+  `.story-konsekvens`/`.brief-konsekvens`, `.briefs-list--bransch`, `.related-*`, responsivt.
+- **Test:** `node build.js` grönt med gamla nummer (identisk output, 0 segmentheaders) och
+  med syntetisk segmenterad testutgåva (3 headers, rätt ordning, konsekvensrader). validate-
+  parsning + båda nya gates enhetstestade positivt/negativt med pipeline-venv:ens Python.
+- **lutra behöver veta:** Nästa söndagskörning producerar nya frontmatter-fält. Om Sonnet
+  failar på regel 18 skickar retry-loopen valideringsfelet som feedback precis som förut.
+  Inga CLI-ändringar i något pipeline-steg.
+
+## 2026-07-12 — [lutra] write.py fix + deploy vecka 28
+
+- **write.py:** 3 syntaxfel i f-string (⭐ U+2B50, — U+2014 på 6 ställen, föräldralös `"""` på rad 234). macOS Python 3.11 Clang tål inte non-ASCII i f-string expressions. Alla ersatta med ASCII.
+- **Kronan:** write.py failade kl 07:00 → cron re-run 18:16 → validation flaggade HIGH hallucination i lead → deploy blockerades. Anton godkände manuellt.
+- **Deploy:** `node build.js` → git push main → Cloudflare deployar.
+- **Nästa:** Claude Code: inget nytt. write.py fungerar nu för framtida söndagskörningar.
+
 > **Delad logg för båda agenterna (Claude Code + lutra).** Läs de översta posterna
 > innan du börjar; lägg en ny post högst upp när du är klar och tagga `[vem]`.
 > Spelregler: se `AGENTS.md`.

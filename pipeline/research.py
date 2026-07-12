@@ -246,6 +246,7 @@ def research(input_path: Path, output_path: Path, max_stories: int = MAX_STORIES
             "ai_score": ai_score,
             "category": ai_score.get("category", "Övrigt"),
             "lead_potential": ai_score.get("lead_potential", 1),
+            "actionable": ai_score.get("actionable", False),
             "title": title,
             "url": fetch_result["fetched_url"],
             "full_text_excerpt": full_text[:500] if full_text else "",
