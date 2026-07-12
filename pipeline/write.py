@@ -231,7 +231,6 @@ REDAKTIONELLA REGLER — inga undantag:
    om ett företag. Lead-artikeln får vara om det dominerande företaget,
    men de sekundära storiesna måste komma från andra ämnen.
    Har du bara 3-4 stories totalt i research: välj max 1 per företag."""
-"""
 
 def build_prompt(stories: list[dict], week: str, year: int,
                  published_date: str) -> str:
@@ -260,7 +259,7 @@ def build_prompt(stories: list[dict], week: str, year: int,
 
         stories_text += f"""
 ## STORY {i+1} — Score: {score} | Kategori: {category}
-{'⭐ LEAD CANDIDATE' if lead >= 4 else ''}
+{'[LEAD CANDIDATE]' if lead >= 4 else ''}
 
 Titel: {title}
 Källa: {source}
@@ -295,16 +294,16 @@ RESEARCHADE ARTIKLAR (scores från DeepSeek V4 Pro):
 
 INSTRUKTIONER:
 
-1. Välj lead-story (veckans viktigaste). ⭐-märkta stories har hög lead-potential.
+1. Välj lead-story (veckans viktigaste). LEAD-märkta stories har hög lead-potential.
 
 2. Välj 3-6 sekundära stories. Rangordna efter betydelse.
 
 3. Välj 0-8 kortnytt-briefs från återstående stories (en mening var).
    Kortnytt är för notiser som inte förtjänar en full artikel men är värda att nämna.
 
-4. Skriv i svensk ledig tidningston. Faktabaserat — hitta inte på något som inte finns i research.
+4. Skriv i svensk ledig tidningston. Faktabaserat - hitta inte på något som inte finns i research.
 
-5. OUTPUT — exakt detta format, inget annat före eller efter.
+5. OUTPUT - exakt detta format, inget annat före eller efter.
    OBS: För flerradiga fält (analysis, body) använd YAML literal block scalar (|).
    För enradiga fält använd double-quoted strings ("...").
 
@@ -325,7 +324,7 @@ lead:
   credit: "Klistra in Byline EXAKT från den valda lead-storyn (t.ex. 'Foto · X / CC BY 2.0'). Utelämna om bild saknas."
 stories:
   - kicker: "KATEGORI (Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Sverige)"
-    headline: "Rubrik — gärna fyndig/säljande, men 100% förankrad i research (regel 7 + 13)"
+    headline: "Rubrik - gärna fyndig/säljande, men 100% förankrad i research (regel 7 + 13)"
     ingress: "40-60 ord: vad hände + varför det spelar roll. Egen formulering, INTE de första meningarna av body."
     image: "Klistra in Bild-URL:en EXAKT från den valda storyn. Utelämna raden helt om storyn saknar bild."
     credit: "Klistra in Byline EXAKT från den valda storyn. Utelämna om bild saknas."
@@ -334,11 +333,11 @@ stories:
     #     text: "Citatet, troget översatt till svenska om originalet är engelskt"
     #     speaker: "Exakt talare ur research, t.ex. OpenAI (aldrig en påhittad person)"
     body: |
-      Första stycket — vad hände, fakta och detaljer (~80 ord). Indentera med 6 mellanslag.
+      Första stycket - vad hände, fakta och detaljer (~80 ord). Indentera med 6 mellanslag.
 
-      Andra stycket — varför det spelar roll, kontext (~100 ord). Blankrad mellan stycken.
+      Andra stycket - varför det spelar roll, kontext (~100 ord). Blankrad mellan stycken.
 
-      Tredje stycket — Sverige/EU-vinkel ENDAST om research stöder det (~50 ord).
+      Tredje stycket - Sverige/EU-vinkel ENDAST om research stöder det (~50 ord).
 briefs:
   - "Kort enradare"
   - "Ännu en kort enradare"
