@@ -7,7 +7,7 @@ den bästa versionen per kluster.
 
 Två-stegs process:
 1. Regex-baserad entitetsextraktion (billig, snabb)
-2. DeepSeek V4 Pro för osäkra gränsfall (precisionshöjning)
+2. GPT-5.6 Sol via Codex CLI för osäkra gränsfall (precisionshöjning)
 
 Input:  output/candidates/{YYYY-WW}.json (från collect.py)
 Output: output/deduped/{YYYY-WW}.json
@@ -23,6 +23,8 @@ from typing import Optional
 
 import requests
 import yaml
+
+from llm import llm_call
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -173,37 +175,11 @@ def entities_match(e1: dict, e2: dict, threshold: int = 2) -> bool:
     return False
 
 
-# ─── DeepSeek V4 Pro för osäkra fall ─────────────────────────────────────────
-
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = None
+# ─── GPT-5.6 Sol via Codex CLI för osäkra fall ─────────────────────────────
 
 
-def _get_deepseek_key() -> Optional[str]:
-    global DEEPSEEK_API_KEY
-    if DEEPSEEK_API_KEY:
-        return DEEPSEEK_API_KEY
-
-    # Kolla env först
-    import os
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        DEEPSEEK_API_KEY = key
-        return key
-
-    # Fallback: .env
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                key = line.split("=", 1)[1]
-                DEEPSEEK_API_KEY = key
-                return key
-    return None
-
-
-def deepseek_verify_cluster(candidates: list[dict]) -> list[dict]:
-    """Använd DeepSeek V4 Pro för att verifiera ett kluster.
+def llm_verify_cluster(candidates: list[dict]) -> list[dict]:
+    """Använd GPT-5.6 Sol för att verifiera ett kluster.
     Returnerar kandidaterna med cluster_id satt."""
     if len(candidates) < 2:
         for c in candidates:
@@ -211,7 +187,6 @@ def deepseek_verify_cluster(candidates: list[dict]) -> list[dict]:
             c["cluster_size"] = 1
         return candidates
 
-    # Bygg en prompt för DeepSeek
     items_text = "\n".join(
         f"{i+1}. [{c['source_label']}] {c['title']}"
         for i, c in enumerate(candidates)
@@ -228,31 +203,15 @@ Svara endast med ett JSON-objekt:
 
 Där article_ids är index (1-baserat) för artiklar som hör ihop."""
 
-    key = _get_deepseek_key()
-    if not key:
-        raise ValueError("DEEPSEEK_API_KEY saknas")
-
     try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "Du klustrar AI-nyheter. Svara endast med JSON."},
-                    {"role": "user", "content": prompt},
-                ],
-                "temperature": 0,
-                "max_tokens": 500,
-            },
-            timeout=REQUEST_TIMEOUT
+        content = llm_call(
+            prompt,
+            system="Du klustrar AI-nyheter. Svara endast med JSON.",
+            max_tokens=500,
+            temperature=0,
         )
-        r.raise_for_status()
-        result = r.json()
-        content = result["choices"][0]["message"]["content"]
+        if not content:
+            raise ValueError("Tomt svar från Codex CLI")
 
         # Extract JSON — städa bort kodblock
         cleaned = re.sub(r"```(?:json)?\s*", "", content).strip()
@@ -283,7 +242,7 @@ Där article_ids är index (1-baserat) för artiklar som hör ihop."""
             )
 
     except Exception as e:
-        print(f"  ⚠️  DeepSeek verify misslyckades: {e}", file=sys.stderr)
+        print(f"  ⚠️  GPT-5.6 verify misslyckades: {e}", file=sys.stderr)
         # Fallback: allt i ett kluster
         cluster_id = candidates[0].get("content_hash", "0")
         for c in candidates:
@@ -332,14 +291,14 @@ def dedup(input_path: Path, output_path: Path, use_ai: bool = True) -> dict:
     avg_size = sum(len(cl) for cl in clusters) / len(clusters) if clusters else 0
     print(f"  ⌀ Genomsnittlig klusterstorlek: {avg_size:.1f}")
 
-    # Steg 3: DeepSeek V4 Pro för stora/komplexa kluster
-    if use_ai and _get_deepseek_key():
+    # Steg 3: GPT-5.6 Sol för stora/komplexa kluster
+    if use_ai:
         large_clusters = [cl for cl in clusters if len(cl) > 3]
         if large_clusters:
-            print(f"  🧠  DeepSeek V4 Pro granskar {len(large_clusters)} stora kluster...")
+            print(f"  🧠  GPT-5.6 Sol granskar {len(large_clusters)} stora kluster...")
             for cl in large_clusters:
                 cluster_candidates = [candidates[i] for i in cl]
-                deepseek_verify_cluster(cluster_candidates)
+                llm_verify_cluster(cluster_candidates)
                 for i, c_idx in enumerate(cl):
                     candidates[c_idx] = cluster_candidates[i]
 

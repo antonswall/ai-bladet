@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+
+from llm import llm_call
 import yaml
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -32,53 +34,13 @@ PIPELINE_DIR = Path(__file__).parent
 CONTENT_DIR = Path.home() / "ai-bladet" / "content"
 INPUT_DIR = PIPELINE_DIR / "output" / "images"
 OUTPUT_DIR = PIPELINE_DIR / "output" / "validated"
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 
 VALIDATION_THRESHOLD = 0.7  # minsta andel godkända claims för PASS
 MIN_STORY_WORDS = 150  # minsta antal ord per story.body (sänkt från 200 — Sonnet skriver 170-190 vid tunt material)
 
-
 # ─── DeepSeek helper ─────────────────────────────────────────────────────────
 
-
-def _get_deepseek_key() -> Optional[str]:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1]
-    return None
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 2000) -> Optional[str]:
-    key = _get_deepseek_key()
-    if not key:
-        raise ValueError("DEEPSEEK_API_KEY saknas")
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={"model": "deepseek-chat", "messages": messages,
-                  "temperature": 0.05, "max_tokens": max_tokens},
-            timeout=60,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️  DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
-
 # ─── Läs ut skriven utgåva ──────────────────────────────────────────────────
-
 
 def parse_issue(content_path: Path) -> dict | None:
     """Läs markdown-fil med YAML frontmatter — regex-baserad för att tolerera
@@ -183,9 +145,7 @@ def parse_issue(content_path: Path) -> dict | None:
 
     return {"frontmatter": fm, "body": body, "full_text": text}
 
-
 # ─── Claim validation (DeepSeek V4 Pro) ──────────────────────────────────────
-
 
 def validate_issue(issue: dict, research_stories: list[dict]) -> dict:
     """Kör validering på hela utgåvan."""
@@ -307,7 +267,7 @@ Svara endast med JSON:
   "summary": "kort bedömning"
 }}"""
 
-    response = deepseek_call(prompt, "Du verifierar faktapåståenden. Var strikt men rimlig. Leta efter hallucinationer, hittade siffror och påståenden som inte stöds.", max_tokens=2000)
+    response = llm_call(prompt, "Du verifierar faktapåståenden. Var strikt men rimlig. Leta efter hallucinationer, hittade siffror och påståenden som inte stöds.", max_tokens=2000)
 
     result = _parse_validation(response)
 
@@ -346,9 +306,7 @@ Svara endast med JSON:
 
     return result
 
-
 # ─── Segmentkontroller ────────────────────────────────────────────────────────
-
 
 def _ar_segmenterad(fm: dict) -> bool:
     """Är utgåvan skriven med den nya segmentstrukturen?"""
@@ -357,7 +315,6 @@ def _ar_segmenterad(fm: dict) -> bool:
     if any(s.get("segment") for s in fm.get("stories", [])):
         return True
     return bool(fm.get("briefs_bransch") or fm.get("briefs_vart_att_veta"))
-
 
 def _check_lead_verktyg(issue: dict, research_stories: list[dict]) -> dict:
     """Regel 18: Leaden måste vara ett verktyg (kategori Modeller/Verktyg),
@@ -400,7 +357,6 @@ def _check_lead_verktyg(issue: dict, research_stories: list[dict]) -> dict:
 
     return {"ok": True, "reason": ""}
 
-
 def _check_konsekvensrad(issue: dict) -> dict:
     """Regel 19: Varje bransch-story och bransch-brief måste innehålla
     'Vad betyder det för dig:'. Gäller endast segmenterade nummer."""
@@ -426,7 +382,6 @@ def _check_konsekvensrad(issue: dict) -> dict:
                 "reason": "Saknar 'Vad betyder det för dig:'-rad (regel 19): " + "; ".join(missing)}
     return {"ok": True, "missing": [], "reason": ""}
 
-
 def _parse_json_from_text(text: str | None) -> dict | None:
     """Extrahera JSON från text som kan innehålla kodblock, prefix etc."""
     if not text:
@@ -444,7 +399,6 @@ def _parse_json_from_text(text: str | None) -> dict | None:
     except json.JSONDecodeError:
         pass
     return None
-
 
 def _parse_validation(response: str | None) -> dict:
     """Parsa DeepSeeks validerings-JSON."""
@@ -464,7 +418,6 @@ def _parse_validation(response: str | None) -> dict:
               file=sys.stderr)
 
     return default
-
 
 def _check_urls(research_stories: list[dict]) -> dict:
     """Kontrollera att käll-URLs fortfarande är levande."""
@@ -486,7 +439,6 @@ def _check_urls(research_stories: list[dict]) -> dict:
 
     return {"valid": valid, "invalid": invalid, "total": valid + invalid}
 
-
 def _check_lead_sources(research_stories: list[dict]) -> int:
     """Räkna antalet oberoende källor för lead-story."""
     unique_sources = set()
@@ -499,7 +451,6 @@ def _check_lead_sources(research_stories: list[dict]) -> int:
             sources.add(source_id)
         return len(sources)
     return 0
-
 
 def _check_duplication(issue: dict) -> dict:
     """Regel 2: Kolla att lead inte är samma story som en sektion.
@@ -533,7 +484,6 @@ def _check_duplication(issue: dict) -> dict:
             }
 
     return {"duplicate": False, "reason": ""}
-
 
 def _check_se_eu_angle(issue: dict, research_stories: list[dict]) -> dict:
     """Regel 5: Minst en story måste ha svensk eller EU-vinkel.
@@ -576,7 +526,6 @@ def _check_se_eu_angle(issue: dict, research_stories: list[dict]) -> dict:
 
     return {"found": False, "source": ""}
 
-
 def _check_word_counts(issue: dict) -> dict:
     """Kontrollera att varje story.body har minst MIN_STORY_WORDS ord."""
     fm = issue.get("frontmatter", {})
@@ -595,7 +544,6 @@ def _check_word_counts(issue: dict) -> dict:
             })
             print(f"  ⚠️  [{headline}] {wc} ord — under minimum {MIN_STORY_WORDS}")
     return {"all_ok": all_ok, "min_target": MIN_STORY_WORDS, "stories": results}
-
 
 # ─── Huvudfunktion ────────────────────────────────────────────────────────────
 def validate(content_path: Path, research_input_path: Path,
@@ -679,7 +627,6 @@ def validate(content_path: Path, research_input_path: Path,
     print(f"{'─'*40}")
 
     return {"success": True, "pass": result.get("pass", False)}
-
 
 if __name__ == "__main__":
     import argparse

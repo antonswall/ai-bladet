@@ -30,48 +30,9 @@ PROJECT_DIR = Path.home() / "ai-bladet"
 CONTENT_DIR = PROJECT_DIR / "content"
 SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+from llm import llm_call
 
 # ─── API Helper ───────────────────────────────────────────────────────────────
-
-def _get_deepseek_key() -> str:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1].strip()
-    raise ValueError("DEEPSEEK_API_KEY saknas")
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 800, temperature: float = 0.4) -> Optional[str]:
-    key = _get_deepseek_key()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️ DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
 
 # ─── Välj story att humanisera ────────────────────────────────────────────────
 
@@ -136,7 +97,7 @@ Här är veckans stories:
 
     system = "Du bedömer AI-nyheters relevans för vanliga människor. Välj den story som påverkar flest människors vardag."
 
-    result = deepseek_call(prompt, system=system, max_tokens=300, temperature=0.2)
+    result = llm_call(prompt, system=system, max_tokens=300, temperature=0.2)
     if not result:
         return candidates[0] if candidates else None
 
@@ -157,7 +118,6 @@ Här är veckans stories:
 
     # Fallback: första kandidaten
     return candidates[0] if candidates else None
-
 
 # ─── LinkedIn-post-generering ─────────────────────────────────────────────────
 
@@ -198,7 +158,7 @@ Skriv bara själva LinkedIn-posten, inget annat.
     system = ("Du är AI-Bladets redaktör på LinkedIn. Din röst är nyfiken, personlig och "
               "pedagogisk. Du förklarar AI för vanliga människor utan att förenkla för mycket.")
 
-    result = deepseek_call(prompt, system=system, max_tokens=800, temperature=0.5)
+    result = llm_call(prompt, system=system, max_tokens=800, temperature=0.5)
     if not result:
         return None
 
@@ -208,7 +168,6 @@ Skriv bara själva LinkedIn-posten, inget annat.
         result = result[:1497] + "..."
 
     return result
-
 
 # ─── Huvudfunktion ───────────────────────────────────────────────────────────
 
@@ -294,7 +253,6 @@ Länk: {SITE_URL}/{year}/{week}
 
     print(f"    ➡ Sparad: {output_path.name} ({len(post)} tecken)")
     return True
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Bladet — LinkedIn distribution")

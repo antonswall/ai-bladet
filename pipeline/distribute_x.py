@@ -24,54 +24,14 @@ from typing import Optional
 
 import requests
 
-# ─── Config ───────────────────────────────────────────────────────────────────
+from llm import llm_call
+
+# ─── API Helpers ──
 
 PIPELINE_DIR = Path(__file__).parent
 DIST_OUTPUT_DIR = PIPELINE_DIR / "output" / "distribution" / "x"
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
-
-
 # ─── API Helpers ──────────────────────────────────────────────────────────────
-
-def _get_deepseek_key() -> str:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1].strip()
-    raise ValueError("DEEPSEEK_API_KEY saknas")
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 1000, temperature: float = 0.4) -> Optional[str]:
-    key = _get_deepseek_key()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️ DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
 
 # ─── Thread-generering ────────────────────────────────────────────────────────
 
@@ -118,12 +78,11 @@ Returnera som:
 
     system = "Du är AI-Bladets redaktör på X. Skriv korta, engagerande tweets på svenska."
 
-    result = deepseek_call(prompt, system=system, max_tokens=800, temperature=0.5)
+    result = llm_call(prompt, system=system, max_tokens=800, temperature=0.5)
     if not result:
         return None
 
     return result
-
 
 # ─── AI-lögn-generering ──────────────────────────────────────────────────────
 
@@ -156,14 +115,13 @@ Returnera endast tweet-texten, inget annat.
 
     system = "Du är en kritisk AI-analytiker. Din uppgift är att avslöja hype och överdrifter med fakta."
 
-    result = deepseek_call(prompt, system=system, max_tokens=300, temperature=0.3)
+    result = llm_call(prompt, system=system, max_tokens=300, temperature=0.3)
     if not result:
         return None
 
     # Rensa output — ta bara själva tweeten
     clean = result.strip().strip('"').strip("'")
     return clean[:280]  # Max 280 tecken
-
 
 # ─── Huvudfunktion ───────────────────────────────────────────────────────────
 
@@ -259,7 +217,6 @@ Länk: https://aibladet.se/{year}/{week}
     print(f"  ✅ Thread: {'✅' if thread_ok else '❌'} · Lie: {'✅' if lie_ok else '❌'}")
 
     return thread_ok and lie_ok
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Bladet — X distribution")

@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+
+from llm import llm_call
 import trafilatura
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -25,52 +27,13 @@ import trafilatura
 PIPELINE_DIR = Path(__file__).parent
 INPUT_DIR = PIPELINE_DIR / "output" / "scored"
 OUTPUT_DIR = PIPELINE_DIR / "output" / "researched"
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 JINA_BASE = "https://r.jina.ai"
 
 MAX_STORIES = 15  # antal stories att researca
 MAX_TEXT_CHARS = 5000  # max tecken per fulltext (sparar tokens)
 
 
-# ─── DeepSeek helper ─────────────────────────────────────────────────────────
-
-
-def _get_deepseek_key() -> Optional[str]:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1]
-    return None
-
-
-def deepseek_call(prompt: str, system: str = None, max_tokens: int = 1000) -> Optional[str]:
-    key = _get_deepseek_key()
-    if not key:
-        raise ValueError("DEEPSEEK_API_KEY saknas")
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={"model": "deepseek-chat", "messages": messages,
-                  "temperature": 0.1, "max_tokens": max_tokens},
-            timeout=60
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️  DeepSeek API-fel: {e}", file=sys.stderr)
-        return None
-
-
-# ─── Fulltext extraction ─────────────────────────────────────────────────────
+# ─── Jina Reader ────────────────────────────────────────────────────────────
 
 
 def extract_text(url: str) -> str:
@@ -184,7 +147,7 @@ Svara med JSON-följande struktur:
 }}
 Om du inte hittar något datum, sätt source_date till "okänt"."""
 
-    response = deepseek_call(prompt, BRIEF_SYSTEM, max_tokens=800)
+    response = llm_call(prompt, BRIEF_SYSTEM, max_tokens=800)
     if not response:
         return None
 

@@ -87,37 +87,83 @@ def main():
 
         if vcode and challenge:
             print(f"moltbook: verifying...")
-            clean = challenge
-            for ch in "[]()/^,|~-":
-                clean = clean.replace(ch, " ")
-            clean = " ".join(clean.split())
-            # Collapse doubled letters in number words
+
+            # Moltbook obfuskerar: symboler + case-förvirring + dubblerade bokstäver +
+            # sifferord sönderdelade över tokens (tWwEeN tYy = "twenty").
+            # Strategi: behåll ordgränser (ersätt symboler med space), sen token+pair-matching.
+
             import re
-            for word in ["twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety",
-                         "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
-                         "eighteen", "nineteen", "ten", "one", "two", "three", "four", "five", "six",
-                         "seven", "eight", "nine", "hundred", "thousand", "point"]:
-                pattern = "".join(f"{c}+" for c in word)
-                clean = re.sub(pattern, word, clean, flags=re.IGNORECASE)
 
-            # Find numbers and operator
-            import re as re2
-            nums = [float(x) for x in re2.findall(r'\d+\.?\d*', challenge)]
+            # Steg 1: tokens
+            spaced = re.sub(r'[^a-zA-Z\s]', ' ', challenge)
+            tokens = [t for t in spaced.split() if t]
 
-            # Determine operation from text
-            lower = challenge.lower()
-            if "total force" in lower or "total" in lower:
-                answer = sum(nums)
-            elif "pushes back" in lower or "adds" in lower or "exerts" in lower or "and another" in lower:
-                answer = sum(nums) if nums else 0
-            elif "slows by" in lower or "loses" in lower or "removes" in lower or "drag" in lower:
-                answer = nums[0] - nums[1] if len(nums) >= 2 else nums[0]
-            elif "snaps" in lower and "times" in lower:
-                answer = nums[0] * nums[1] if len(nums) >= 2 else nums[0]
-            elif "swims" in lower and ("accelerates" in lower or "gains" in lower):
-                answer = nums[0] + nums[1] if len(nums) >= 2 else nums[0]
+            w2n = {
+                "twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"seventy":70,"eighty":80,"ninety":90,
+                "eleven":11,"twelve":12,"thirteen":13,"fourteen":14,"fifteen":15,"sixteen":16,"seventeen":17,
+                "eighteen":18,"nineteen":19,"ten":10,"nine":9,"eight":8,"seven":7,"six":6,"five":5,
+                "four":4,"three":3,"two":2,"one":1,"zero":0,"hundred":100,"thousand":1000,
+            }
+            pats = {w: re.compile("".join(f"{c}+" for c in w), re.IGNORECASE) for w in w2n}
+            sw = sorted(w2n.keys(), key=len, reverse=True)
+
+            used = set()
+            numbers = []
+
+            # Pass 1: individuella tokens
+            for i, tok in enumerate(tokens):
+                for w in sw:
+                    if pats[w].fullmatch(tok):
+                        used.add(i)
+                        numbers.append((i, w2n[w]))
+                        break
+
+            # Pass 2: par (i, i+1) — hoppa om båda tokens ≤2 chars (false positive-risk)
+            i = 0
+            while i < len(tokens) - 1:
+                if i not in used and (i+1) not in used:
+                    if len(tokens[i]) <= 2 and len(tokens[i+1]) <= 2:
+                        i += 1
+                        continue
+                    comb = tokens[i] + tokens[i+1]
+                    for w in sw:
+                        m = pats[w].match(comb)
+                        if m and m.end() == len(comb):
+                            used.add(i); used.add(i+1)
+                            numbers.append((i, w2n[w]))
+                            break
+                i += 1
+
+            # Sortera efter token-index och extrahera values
+            numbers.sort(key=lambda x: x[0])
+            values = [v for _, v in numbers]
+
+            # Merge tens+units: t.ex. [20, 4] → [24]
+            merged = []
+            i = 0
+            tens = [20,30,40,50,60,70,80,90]
+            units = [1,2,3,4,5,6,7,8,9]
+            while i < len(values):
+                v = values[i]
+                if v in tens and i+1 < len(values) and values[i+1] in units:
+                    merged.append(v + values[i+1])
+                    i += 2
+                else:
+                    merged.append(v)
+                    i += 1
+
+            # Operator detection: kollapsa dubletter för att hantera "speeeedsup" → "speedsup"
+            sig = re.sub(r'(.)\1+', r'\1', re.sub(r'[^a-z]', '', challenge.lower()))
+            if "speedsup" in sig or "accelerates" in sig or "gains" in sig:
+                answer = merged[0] + merged[1] if len(merged) >= 2 else merged[0]
+            elif "slowsby" in sig:
+                answer = merged[0] - merged[1] if len(merged) >= 2 else merged[0]
+            elif "reduces" in sig or "loses" in sig or "removes" in sig:
+                answer = merged[0] - merged[1] if len(merged) >= 2 else merged[0]
+            elif "combined" in sig or "total" in sig or "exerts" in sig:
+                answer = sum(merged) if merged else 0
             else:
-                answer = sum(nums) if nums else 0
+                answer = sum(merged) if merged else 0
 
             verify_result = api_post("/verify", {
                 "verification_code": vcode,

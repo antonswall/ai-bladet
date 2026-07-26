@@ -24,11 +24,13 @@ import time
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from pathlib import Path
 
 import requests
 
-# ─── Config ───────────────────────────────────────────────────────────────────
+from llm import llm_call
+
+# ─── Config ──
 
 PIPELINE_DIR = Path(__file__).parent
 DIST_OUTPUT_DIR = PIPELINE_DIR / "output" / "distribution" / "memes"
@@ -36,50 +38,9 @@ PROJECT_DIR = Path.home() / "ai-bladet"
 PUBLIC_DIR = PROJECT_DIR / "public"
 MEMES_DIR = PUBLIC_DIR / "memes"
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 POLLINATIONS_URL = "https://image.pollinations.ai/prompt"
 
-
 # ─── API Helpers ──────────────────────────────────────────────────────────────
-
-def _get_deepseek_key() -> str:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1].strip()
-    raise ValueError("DEEPSEEK_API_KEY saknas")
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 500, temperature: float = 0.5) -> Optional[str]:
-    key = _get_deepseek_key()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️ DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
 
 # ─── Meme-generering ──────────────────────────────────────────────────────────
 
@@ -124,7 +85,7 @@ Här är veckans stories:
 
     system = "Du är en kreativ meme-skapare. Skapa roliga, delbara memes om AI-nyheter."
 
-    result = deepseek_call(prompt, system=system, max_tokens=500, temperature=0.5)
+    result = llm_call(prompt, system=system, max_tokens=500, temperature=0.5)
     if not result:
         return None
 
@@ -137,7 +98,6 @@ Här är veckans stories:
         return json.loads(cleaned[start:end + 1])
     except json.JSONDecodeError:
         return None
-
 
 # ─── Bildgenerering ───────────────────────────────────────────────────────────
 
@@ -156,7 +116,6 @@ def generate_meme_image(prompt: str) -> Optional[bytes]:
     except Exception as e:
         print(f"  ⚠️ Pollinations API error: {e}", file=sys.stderr)
         return None
-
 
 def render_meme_with_text(image_path: Path, top_text: str, bottom_text: str,
                           output_path: Path) -> bool:
@@ -235,7 +194,6 @@ img {{
             os.unlink(html_path)
         except Exception:
             pass
-
 
 # ─── Huvudfunktion ───────────────────────────────────────────────────────────
 
@@ -325,7 +283,6 @@ def distribute_meme(issue_path: str, dry_run: bool = False) -> bool:
     else:
         print("❌ Misslyckades (rendering)")
         return False
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Bladet — Meme distribution")

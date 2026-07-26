@@ -24,6 +24,8 @@ from typing import Optional
 
 import requests
 
+from llm import llm_call
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 PIPELINE_DIR = Path(__file__).parent
@@ -34,49 +36,7 @@ GLOSSARY_DIR = PUBLIC_DIR / "ordbok"
 
 SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
-
-
 # ─── API Helper ───────────────────────────────────────────────────────────────
-
-def _get_deepseek_key() -> str:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1].strip()
-    raise ValueError("DEEPSEEK_API_KEY saknas")
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 600, temperature: float = 0.3) -> Optional[str]:
-    key = _get_deepseek_key()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️ DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
 
 # ─── Term-generering ─────────────────────────────────────────────────────────
 
@@ -122,7 +82,7 @@ Här är veckans innehåll:
 
     system = "Du är en svensk teknikpedagog. Förklara AI-begrepp enkelt och koncist."
 
-    result = deepseek_call(prompt, system=system, max_tokens=600, temperature=0.3)
+    result = llm_call(prompt, system=system, max_tokens=600, temperature=0.3)
     if not result:
         return None
 
@@ -137,7 +97,6 @@ Här är veckans innehåll:
         return json.loads(cleaned[start:end + 1])
     except json.JSONDecodeError:
         return None
-
 
 # ─── HTML-generering ─────────────────────────────────────────────────────────
 
@@ -185,7 +144,6 @@ _TERM_TEMPLATE = """<!DOCTYPE html>
 </body>
 </html>"""
 
-
 def build_term_page(term_data: dict, week: int) -> str:
     """Generera HTML-sida för en ordboksterm."""
     example_html = ""
@@ -210,7 +168,6 @@ def build_term_page(term_data: dict, week: int) -> str:
         source_story=term_data.get("source_story", ""),
         SITE_URL=SITE_URL,
     )
-
 
 _INDEX_TEMPLATE = """<!DOCTYPE html>
 <html lang="sv">
@@ -255,7 +212,6 @@ _INDEX_TEMPLATE = """<!DOCTYPE html>
 </body>
 </html>"""
 
-
 def build_index(all_terms: list) -> str:
     """Bygg ordboksindex med alla termer."""
     terms_html = ""
@@ -266,7 +222,6 @@ def build_index(all_terms: list) -> str:
         terms_html=terms_html,
         SITE_URL=SITE_URL,
     )
-
 
 # ─── Huvudfunktion ───────────────────────────────────────────────────────────
 
@@ -341,7 +296,6 @@ def distribute_glossary(issue_path: str, dry_run: bool = False) -> bool:
 
     print(f"    ➡ /ordbok/{term_data['slug']}.html + index")
     return True
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Bladet — Glossary distribution")

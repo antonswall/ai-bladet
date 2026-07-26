@@ -22,12 +22,13 @@ from typing import Optional
 
 import requests
 
+from llm import llm_call
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 PIPELINE_DIR = Path(__file__).parent
 INPUT_DIR = PIPELINE_DIR / "output" / "deduped"
 OUTPUT_DIR = PIPELINE_DIR / "output" / "scored"
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 BATCH_SIZE = 25  # kandidater per API-anrop
 
 # Temporal decay — nyare nyheter får högre score
@@ -46,54 +47,6 @@ KNOWN_HF_ORGS = [
     "apple", "ibm", "samsung",
     "upstage", "kakaobrain", "naver",
 ]
-
-# ─── DeepSeek API ──────────────────────────────────────────────────────────
-
-
-def _get_deepseek_key() -> Optional[str]:
-    key = os.getenv("DEEPSEEK_API_KEY", "")
-    if key:
-        return key
-    env_path = Path.home() / ".hermes" / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            if line.startswith("DEEPSEEK_API_KEY="):
-                return line.split("=", 1)[1]
-    return None
-
-
-def deepseek_call(prompt: str, system: str = None, max_tokens: int = 2000) -> Optional[str]:
-    """Gör API-anrop till DeepSeek V4 Pro."""
-    key = _get_deepseek_key()
-    if not key:
-        raise ValueError("DEEPSEEK_API_KEY saknas — kan inte scorea")
-
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": 0.1,
-                "max_tokens": max_tokens,
-            },
-            timeout=60
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️  DeepSeek API-fel: {e}", file=sys.stderr)
-        return None
-
 
 # ─── Pre-filter ───────────────────────────────────────────────────────────────
 
@@ -376,7 +329,7 @@ def score(input_path: Path, output_path: Path) -> dict:
               f"artikel {idx_start}-{idx_start + len(batch) - 1}...", end=" ", flush=True)
 
         prompt = build_scoring_prompt(batch, idx_start)
-        response = deepseek_call(prompt, SCORE_SYSTEM_PROMPT)
+        response = llm_call(prompt, SCORE_SYSTEM_PROMPT)
 
         if response:
             scores = parse_scores(response, batch, idx_start)

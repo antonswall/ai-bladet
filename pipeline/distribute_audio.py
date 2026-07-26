@@ -24,6 +24,8 @@ from xml.dom import minidom
 
 import requests
 
+from llm import llm_call
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 PIPELINE_DIR = Path(__file__).parent
@@ -36,14 +38,12 @@ CONTENT_DIR = PROJECT_DIR / "content"
 
 SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 ELEVENLABS_URL = "https://api.elevenlabs.io/v1/text-to-speech"
 
 # ElevenLabs röst-ID för svensk röst
 # "Freja" om den finns på kontot, annars fallerar vi till första
 SWEDISH_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Rachel (fallback — byt till svensk röst)
 SWEDISH_MODEL = "eleven_multilingual_v2"    # Multilingual stöder svenska
-
 
 # ─── API Helpers ──────────────────────────────────────────────────────────────
 
@@ -59,48 +59,11 @@ def _get_env(key: str) -> Optional[str]:
                 return line.split("=", 1)[1].strip()
     return None
 
-
-def _get_deepseek_key() -> str:
-    key = _get_env("DEEPSEEK_API_KEY")
-    if not key:
-        raise ValueError("DEEPSEEK_API_KEY saknas")
-    return key
-
-
 def _get_elevenlabs_key() -> str:
     key = _get_env("ELEVENLABS_API_KEY")
     if not key:
         raise ValueError("ELEVENLABS_API_KEY saknas")
     return key
-
-
-def deepseek_call(prompt: str, system: str = None,
-                  max_tokens: int = 1000, temperature: float = 0.3) -> Optional[str]:
-    """Anropa DeepSeek V4 Pro."""
-    key = _get_deepseek_key()
-    messages = []
-    if system:
-        messages.append({"role": "system", "content": system})
-    messages.append({"role": "user", "content": prompt})
-
-    try:
-        r = requests.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            },
-            timeout=30,
-        )
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"  ⚠️ DeepSeek API error: {e}", file=sys.stderr)
-        return None
-
 
 def elevenlabs_tts(text: str, voice_id: str = SWEDISH_VOICE_ID) -> Optional[bytes]:
     """Generera ljud från text med ElevenLabs TTS."""
@@ -131,7 +94,6 @@ def elevenlabs_tts(text: str, voice_id: str = SWEDISH_VOICE_ID) -> Optional[byte
     except Exception as e:
         print(f"  ⚠️ ElevenLabs API error: {e}", file=sys.stderr)
         return None
-
 
 # ─── Skriptgenerering ────────────────────────────────────────────────────────
 
@@ -175,14 +137,13 @@ Här är veckans stories:
 
     system = "Du är en svensk nyhetsankare. Skriv kortfattade manus för uppläsning. Använd enkel, tydlig svenska."
 
-    result = deepseek_call(prompt, system=system, max_tokens=800, temperature=0.4)
+    result = llm_call(prompt, system=system, max_tokens=800, temperature=0.4)
     if not result:
         return None
 
     # Rensa bort eventuella tidsstämplar från svaret
     clean = re.sub(r'\[\d+:\d+-\d+:\d+\]', '', result).strip()
     return clean
-
 
 # ─── Podcast-RSS ──────────────────────────────────────────────────────────────
 
@@ -246,7 +207,6 @@ def update_podcast_rss(year: int, week: int, date_str: str,
 
     return rss_path
 
-
 def get_audio_duration(mp3_path: Path) -> int:
     """Uppskatta längd på mp3 i sekunder (90s default om vi inte kan läsa)."""
     try:
@@ -258,7 +218,6 @@ def get_audio_duration(mp3_path: Path) -> int:
     except Exception:
         pass
     return 90  # Default — manuset är designat för 90s
-
 
 # ─── Huvudfunktion ───────────────────────────────────────────────────────────
 
@@ -357,7 +316,6 @@ def distribute_audio(issue_path: str, dry_run: bool = False) -> bool:
 
     print(f"  ✅ Distribution audio klar: /audio/{year}-{week}.mp3")
     return True
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AI-Bladet — Audio distribution")

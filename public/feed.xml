@@ -7,6 +7,13 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>Grok tar plats i Excel — och OpenAI svarar i telefon — Vecka 30 2026</title>
+  <description>xAI rullar ut Grok i Microsoft Excel, OpenAI visar att agenter klarar 75 % av supportärendena.</description>
+  <link>https://aibladet.se/v/2026/30/</link>
+  <guid>https://aibladet.se/v/2026/30/</guid>
+  <pubDate>Sun, 19 Jul 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Grok Build öppen källkod — och AI angriper Hugging Face — Vecka 29 2026</title>
   <description>xAI släpper kodningsagenten som öppen källkod, medan Hugging Face avslöjar ett autonomt agentangrepp.</description>
   <link>https://aibladet.se/v/2026/29/</link>
