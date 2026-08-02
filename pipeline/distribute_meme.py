@@ -24,7 +24,7 @@ import time
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
-from pathlib import Path
+from typing import Optional
 
 import requests
 

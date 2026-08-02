@@ -37,6 +37,10 @@ FEED_DIR = PUBLIC_DIR / "feed"
 CONTENT_DIR = PROJECT_DIR / "content"
 
 SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
+ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
+CONTENT_NS = "http://purl.org/rss/1.0/modules/content/"
+ET.register_namespace("itunes", ITUNES_NS)
+ET.register_namespace("content", CONTENT_NS)
 
 ELEVENLABS_URL = "https://api.elevenlabs.io/v1/text-to-speech"
 
@@ -147,6 +151,19 @@ Här är veckans stories:
 
 # ─── Podcast-RSS ──────────────────────────────────────────────────────────────
 
+def normalize_date(value) -> str:
+    """Normalisera PyYAML date-objekt och strängar till ISO-datum."""
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def format_duration(duration_sec: int) -> str:
+    hours, remainder = divmod(max(0, int(duration_sec)), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
 def update_podcast_rss(year: int, week: int, date_str: str,
                         title: str, audio_url: str, duration_sec: int = 90):
     """Lägg till avsnitt i podcast-RSS eller skapa ny."""
@@ -155,10 +172,11 @@ def update_podcast_rss(year: int, week: int, date_str: str,
 
     episode_title = f"Vecka {week} — {title[:60]}"
     episode_desc = f"AI-Bladet vecka {week}. 90-sekunders sammanfattning av veckans AI-nyheter."
-    pub_date = datetime.fromisoformat(date_str).strftime("%a, %d %b %Y 09:00:00 +0000")
+    pub_date = datetime.fromisoformat(normalize_date(date_str)).strftime("%a, %d %b %Y 09:00:00 +0000")
     guid = f"ai-bladet-{year}-{week}"
-    duration_str = f"00:01:{duration_sec:02d}"
-    audio_size = 0  # uppdateras efter att filen sparats
+    duration_str = format_duration(duration_sec)
+    audio_path = AUDIO_DIR / os.path.basename(audio_url)
+    audio_size = audio_path.stat().st_size if audio_path.exists() else 0
 
     if rss_path.exists():
         # Läs befintlig RSS
@@ -167,21 +185,25 @@ def update_podcast_rss(year: int, week: int, date_str: str,
         channel = root.find("channel")
     else:
         # Skapa ny RSS
-        rss = ET.Element("rss", version="2.0",
-                         attrib={"xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
-                                 "xmlns:content": "http://purl.org/rss/1.0/modules/content/"})
+        rss = ET.Element("rss", {"version": "2.0"})
         channel = ET.SubElement(rss, "channel")
         ET.SubElement(channel, "title").text = "AI-Bladet"
         ET.SubElement(channel, "link").text = f"{SITE_URL}/"
         ET.SubElement(channel, "description").text = "Varje söndag — 90 sekunder om veckans viktigaste AI-nyheter på svenska."
         ET.SubElement(channel, "language").text = "sv"
-        ET.SubElement(channel, "itunes:author").text = "AI-Bladet"
-        ET.SubElement(channel, "itunes:category", text="Technology")
-        ET.SubElement(channel, "itunes:explicit").text = "false"
+        ET.SubElement(channel, f"{{{ITUNES_NS}}}author").text = "AI-Bladet"
+        ET.SubElement(channel, f"{{{ITUNES_NS}}}category", text="Technology")
+        ET.SubElement(channel, f"{{{ITUNES_NS}}}explicit").text = "false"
         # Image
-        image = ET.SubElement(channel, "itunes:image",
-                              href=f"{SITE_URL}/static/android-chrome-512x512.png")
+        ET.SubElement(channel, f"{{{ITUNES_NS}}}image",
+                      href=f"{SITE_URL}/static/android-chrome-512x512.png")
         tree = ET.ElementTree(rss)
+
+    # Gör RSS-uppdateringen idempotent vid recovery/omkörning.
+    for existing in list(channel.findall("item")):
+        existing_guid = existing.find("guid")
+        if existing_guid is not None and existing_guid.text == guid:
+            channel.remove(existing)
 
     # Nytt item HÖGST UPP (först)
     item = ET.Element("item")
@@ -194,7 +216,7 @@ def update_podcast_rss(year: int, week: int, date_str: str,
                   url=f"{SITE_URL}{audio_url}",
                   length=str(audio_size),
                   type="audio/mpeg")
-    ET.SubElement(item, "itunes:duration").text = duration_str
+    ET.SubElement(item, f"{{{ITUNES_NS}}}duration").text = duration_str
 
     # Sätt högst upp i kanalen (efter metadata, före tidigare items)
     channel.insert(len(list(channel)), item)
@@ -256,9 +278,21 @@ def distribute_audio(issue_path: str, dry_run: bool = False) -> bool:
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     DIST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Steg 1: Generera manus
+    # Steg 1: Generera eller återanvänd manus/ljud-checkpoint.
+    script_path = DIST_OUTPUT_DIR / f"{year}-{week}.txt"
+    mp3_path = AUDIO_DIR / f"{year}-{week}.mp3"
+    resume_existing = (
+        not dry_run
+        and script_path.exists()
+        and mp3_path.exists()
+        and mp3_path.stat().st_size > 0
+    )
+
     print("  🎙️ Genererar manus...", end=" ", flush=True)
-    if dry_run:
+    if resume_existing:
+        script = script_path.read_text(encoding="utf-8")
+        print(f"återanvänder checkpoint ({len(script.split())} ord)")
+    elif dry_run:
         script = "Detta är en test-sammanfattning för veckans AI-Bladet. (dry-run)"
         print("(dry-run)")
     else:
@@ -269,14 +303,15 @@ def distribute_audio(issue_path: str, dry_run: bool = False) -> bool:
         print(f"{len(script.split())} ord")
 
     # Spara manus för debugging
-    script_path = DIST_OUTPUT_DIR / f"{year}-{week}.txt"
     script_path.write_text(script, encoding="utf-8")
 
-    # Steg 2: Generera ljud
-    mp3_path = AUDIO_DIR / f"{year}-{week}.mp3"
+    # Steg 2: Generera eller återanvänd ljud
     print(f"  🔊 Genererar ljud...", end=" ", flush=True)
 
-    if dry_run:
+    if resume_existing:
+        duration = get_audio_duration(mp3_path)
+        print(f"återanvänder checkpoint ({mp3_path.stat().st_size / 1024:.0f}KB)")
+    elif dry_run:
         # Skapa en liten test-mp3
         mp3_path.write_bytes(b"")  # placeholder
         duration = 90

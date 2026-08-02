@@ -7,7 +7,7 @@ Kickar igång alla distribueringsmoduler parallellt.
 
 Anrop: python distribute.py --issue content/YYYY-WW.md [--dry-run]
 
-Exit-kod: 0 om minst hälften av stegen lyckades, 1 annars.
+Exit-kod: 0 endast om samtliga begärda steg lyckades, annars 1.
 """
 
 import argparse
@@ -66,14 +66,18 @@ def run_module(module_name: str, issue_path: str, dry_run: bool = False) -> tupl
             cmd,
             capture_output=True,
             text=True,
-            timeout=120,
+            timeout=300,
         )
         elapsed = time.time() - start
         success = result.returncode == 0
-        output = result.stdout.strip() if result.stdout else result.stderr.strip()
+        stdout = result.stdout.strip()
+        stderr = result.stderr.strip()
+        output = stdout
+        if stderr:
+            output = f"{stdout}\nSTDERR:\n{stderr}" if stdout else stderr
         return (module_name, success, f"{output} ({elapsed:.1f}s)")
     except subprocess.TimeoutExpired:
-        return (module_name, False, "Timeout (120s)")
+        return (module_name, False, "Timeout (300s)")
     except Exception as e:
         return (module_name, False, str(e))
 
@@ -131,12 +135,12 @@ def main():
     total = len(results)
     print(f"📊 Resultat: {successes}/{total} lyckades")
 
-    # Minst 50% måste lyckas för att distributionen ska räknas som ok
-    exit_code = 0 if successes >= total / 2 else 1
+    # Fail-closed: alla begärda distributionssteg måste lyckas.
+    exit_code = 0 if successes == total else 1
     if exit_code == 0:
-        print("✅ Distribution godkänd")
+        print("✅ Distribution komplett")
     else:
-        print("❌ Distribution misslyckades — för många fel")
+        print("❌ Distribution ofullständig — minst ett steg misslyckades")
 
     sys.exit(exit_code)
 

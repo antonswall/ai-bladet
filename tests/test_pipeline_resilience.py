@@ -3,6 +3,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from unittest import mock
 
@@ -11,6 +12,7 @@ PIPELINE = Path(__file__).resolve().parents[1] / "pipeline"
 sys.path.insert(0, str(PIPELINE))
 
 import collect
+import distribute_audio
 import llm
 
 
@@ -57,9 +59,35 @@ class MoltbookChallengeTests(unittest.TestCase):
         )
         self.assertEqual(self.module.solve_challenge(challenge), 68)
 
+    def test_snaps_times_multiplication(self):
+        challenge = "A ClAw ExErTs ThIrTy FoUr NoOtOnS and snaps TwO times"
+        self.assertEqual(self.module.solve_challenge(challenge), 68)
+
+    def test_week_31_recovery_challenge(self):
+        challenge = (
+            "A] Lo^OoB-StEr | ClAw Ex/ErTs TwEnTy ThReE NoOtOnS, "
+            "AnD AnOtHeR ClAw Ex\\ErTs SeVeN NoOtOnS ~ WhAt'S ThE ToTaL FoRcE?"
+        )
+        self.assertEqual(self.module.solve_challenge(challenge), 30)
+
+    def test_decimal_number(self):
+        challenge = "A lobster moves at two point five meters and speeds up by three"
+        self.assertEqual(self.module.solve_challenge(challenge), 5.5)
+
     def test_addition_and_subtraction(self):
         self.assertEqual(self.module.solve_challenge("twenty four speeds up by six"), 30)
         self.assertEqual(self.module.solve_challenge("forty slows by eleven"), 29)
+
+
+class AudioDistributionTests(unittest.TestCase):
+    def test_yaml_date_object_is_normalized_for_rss(self):
+        self.assertEqual(
+            distribute_audio.normalize_date(date(2026, 7, 26)),
+            "2026-07-26",
+        )
+
+    def test_audio_duration_is_valid_itunes_format(self):
+        self.assertEqual(distribute_audio.format_duration(90), "00:01:30")
 
 
 class RunnerControlFlowTests(unittest.TestCase):
@@ -70,6 +98,15 @@ class RunnerControlFlowTests(unittest.TestCase):
     def test_failed_run_can_reuse_current_candidates(self):
         runner = (PIPELINE / "run_weekly.sh").read_text()
         self.assertIn("Återupptar från sparade kandidater", runner)
+
+    def test_distribution_requires_all_modules(self):
+        distributor = (PIPELINE / "distribute.py").read_text()
+        self.assertIn("successes == total", distributor)
+
+    def test_distribution_preserves_stderr_on_failure(self):
+        distributor = (PIPELINE / "distribute.py").read_text()
+        self.assertIn("result.stdout", distributor)
+        self.assertIn("result.stderr", distributor)
 
 
 if __name__ == "__main__":

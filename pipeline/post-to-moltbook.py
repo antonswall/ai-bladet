@@ -10,10 +10,13 @@ import re
 import sys
 import urllib.request
 import urllib.error
+import urllib.parse
 
 CREDENTIALS_PATH = os.path.expanduser("~/.moltbot/credentials.json")
 API_BASE = "https://www.moltbook.com/api/v1"
 ISSUE_URL = "https://ai-bladet.pages.dev"
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MOLTBOOK_OUTPUT_DIR = os.path.join(PROJECT_DIR, "pipeline", "output", "moltbook")
 
 
 def load_credentials():
@@ -40,6 +43,43 @@ def api_post(path, data):
     except urllib.error.HTTPError as e:
         print(f"moltbook: HTTP {e.code}: {e.read().decode()}", file=sys.stderr)
         return None
+    except urllib.error.URLError as e:
+        print(f"moltbook: network error: {e}", file=sys.stderr)
+        return None
+
+
+def api_get(path, query=None):
+    creds = load_credentials()
+    if not creds:
+        return None
+    url = f"{API_BASE}{path}"
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {creds['api_key']}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            return json.loads(response.read())
+    except (urllib.error.HTTPError, urllib.error.URLError) as exc:
+        print(f"moltbook: GET failed: {exc}", file=sys.stderr)
+        return None
+
+
+def already_published(week):
+    result = api_get("/search", {"q": f"AI-Bladet Vecka {week}", "type": "posts", "limit": 20})
+    for item in (result or {}).get("results", []):
+        author = (item.get("author") or {}).get("name")
+        if author == "lutra_ai" and f"Vecka {week}" in item.get("title", ""):
+            return item.get("id")
+    return None
+
+
+def save_response(week, label, data, post_id="unknown"):
+    os.makedirs(MOLTBOOK_OUTPUT_DIR, exist_ok=True)
+    path = os.path.join(MOLTBOOK_OUTPUT_DIR, f"2026-{week}-{post_id}-{label}.json")
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(data, handle, ensure_ascii=False, indent=2)
+    print(f"moltbook: saved {label} response — {path}")
+    return path
 
 
 def get_week_number():
@@ -112,10 +152,13 @@ def solve_challenge(challenge: str) -> int:
             merged.append(value)
             index += 1
 
+    signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
+    if "point" in signal and len(merged) >= 2:
+        merged = [merged[0] + merged[1] / 10] + merged[2:]
+
     if not merged:
         raise ValueError("inga tal hittades i verifieringsutmaningen")
 
-    signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
     if "multiplies" in signal or "product" in signal or "times" in signal:
         if len(merged) < 2:
             raise ValueError("multiplikation saknar två tal")
@@ -133,6 +176,11 @@ def main():
         print("moltbook: could not determine week number — skipping", file=sys.stderr)
         return 1
 
+    existing_post_id = already_published(week)
+    if existing_post_id:
+        print(f"moltbook: vecka {week} already published — {existing_post_id}")
+        return 0
+
     # Fetch the page to get the lead story title
     title = f"AI-Bladet Vecka {week} — ny upplaga ute!"
     content = (
@@ -149,6 +197,7 @@ def main():
     })
     if result and result.get("success"):
         post_id = result.get("post", {}).get("id", "?")
+        save_response(week, "post", result, post_id)
         print(f"moltbook: post created — {post_id}")
 
         # Verify post (math challenge)
@@ -157,10 +206,11 @@ def main():
         challenge = verify.get("challenge_text", "")
 
         if vcode and challenge:
-            print(f"moltbook: verifying...")
+            print(f"moltbook: challenge — {challenge}")
 
             try:
                 answer = solve_challenge(challenge)
+                print(f"moltbook: parsed answer — {answer:.2f}")
             except ValueError as exc:
                 print(f"moltbook: verification parse FAILED: {exc}", file=sys.stderr)
                 return 1
@@ -169,6 +219,8 @@ def main():
                 "verification_code": vcode,
                 "answer": f"{answer:.2f}",
             })
+            if verify_result:
+                save_response(week, "verify", verify_result, post_id)
             if verify_result and verify_result.get("success"):
                 print(f"moltbook: verification OK — post published! 🦞")
             else:
