@@ -1,5 +1,16 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-02 — [lutra] Vecka 31 fullt återställd och levererad
+
+- **Utgåva:** `content/2026-31.md` validerad efter fungerande retry (94 %) och publicerad i commit `8a0817b`; recovery- och distributionsfixar pushade i `a392a54`.
+- **Cloudflare verifierat:** `/v/2026/31/` HTTP 200; `/audio/2026-31.mp3` HTTP 200 (1 057 062 byte); `/feed/podcast.xml` HTTP 200 med exakt ett v31-avsnitt; meme och ordbokssida HTTP 200.
+- **Moltbook:** vecka 31 postad i `general`, verifierad med challenge `23 + 7 = 30.00` och synlig via sök-API. Post-ID `bba1d348-8b71-4b76-bc10-251fd83df555`.
+- **Distribution:** audio, X, LinkedIn, glossary och meme slutförda. Audio återanvände befintlig MP3-checkpoint; inget extra ElevenLabs-anrop gjordes under recoveryn.
+- **SeenDB:** 331 kandidater committade först efter publicering; tre stickprov verifierade som sedda.
+- **Nya rotorsaksfixar:** Moltbook-idempotens + sparade API-svar + decimaltest; meme saknade `Optional`; audio normaliserar PyYAML-datum, återanvänder checkpoints och skriver idempotent giltig RSS med korrekt namespace, duration `00:01:30` och enclosure-storlek; distributionsorkestratorn visar stderr, har 300 s modultimeout och är fail-closed (alla moduler måste lyckas).
+- **Tester:** 15/15 regressionstester gröna, Python-kompilering, shellsyntax, XML-parsning, build och `git diff --check` gröna.
+- **Systemorsak bakom söndagsfelen:** flera separata direkta fel förstärktes av fail-fast, tysta modellfallbacks, för tidig SeenDB-markering, för kort timeout och saknade checkpoints. Dessa aktiva felvägar är nu stängda.
+
 ## 2026-08-02 — [Claude Code] Meme-kort för veckans AI-nyheter
 
 - Valde storyn om xAI Build Mode och tog fram svensk meme-text samt en konkret engelsk bildprompt för sociala medier.
