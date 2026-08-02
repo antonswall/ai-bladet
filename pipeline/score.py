@@ -193,6 +193,12 @@ def parse_scores(response: str, batch: list[dict], start_idx: int) -> list[dict]
 
         data = json.loads(json_match.group(0))
         scores = data.get("scores", [])
+        if len(scores) < len(batch):
+            print(
+                f"  ⚠️  Ofullständigt scoresvar: {len(scores)}/{len(batch)}",
+                file=sys.stderr,
+            )
+            return _default_scores(batch, start_idx)
         by_id = {s["id"]: s for s in scores}
 
         results = []
@@ -338,6 +344,14 @@ def score(input_path: Path, output_path: Path) -> dict:
         else:
             all_scores.extend(_default_scores(batch, idx_start))
             print("failed ⚠️")
+
+    fallback_count = sum(1 for s in all_scores if s.get("reason") == "API-fallback")
+    fallback_ratio = fallback_count / len(scoring_batch) if scoring_batch else 1.0
+    if fallback_ratio > 0.25:
+        raise RuntimeError(
+            f"AI-scoring underkänd: {fallback_count}/{len(scoring_batch)} "
+            "kandidater fick API-fallback"
+        )
 
     # Applicera AI-scores
     for i, c in enumerate(scoring_batch):

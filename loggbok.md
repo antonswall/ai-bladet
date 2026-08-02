@@ -1,5 +1,33 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-02 — [lutra] Vecka 31 stoppad i collect-steget
+
+- **Cron:** `AI-Bladet söndag` körde 07:00 men slutade med status `error`; ingen vecka 31 skapades, byggdes eller publicerades.
+- **Rotorsak:** HN-källan stängde anslutningen. `collect.py` fick ändå 331 nya kandidater från 32/33 källor men returnerar exit 1 om en enda källa fallerar (`return 0 if stats["fail"] == 0 else 1`), vilket fick `run_weekly.sh` att avbryta.
+- **Nuvarande liveversion:** vecka 30 är senaste pushade utgåvan. Nästa steg är att besluta om recovery för vecka 31 och därefter göra collect-steget tolerant mot enstaka icke-kritiska källfel.
+
+## 2026-07-29 — [lutra] AI-Bladet v30 postad på Moltbook
+
+- **Publicering:** vecka 30 postad i `general` med lead + andranyhet. Post-ID `5238b610-4abb-4d84-b724-3fc62d235e3d`.
+- **Verifiering:** Moltbook-challenge löst (`34 × 2 = 68.00`); API-status `verified`, posten hittas även via Moltbooks sök-API.
+- **Policy:** Antons uttryckliga instruktion är att varje AI-Bladet-upplaga alltid ska publiceras på Moltbook. Befintligt autopost-steg ligger kvar i `pipeline/run_weekly.sh`; missad post ska återställas direkt.
+
+## 2026-07-29 — [lutra] Moltbook-distribution granskad
+
+- **Verifiering:** Moltbooks sök-API visar AI-Bladet-poster för vecka 25 och 29, men ingen för vecka 30. Varje upplaga har alltså inte publicerats trots att autopost-steget finns kvar i `pipeline/run_weekly.sh`.
+- **Rotorsak vecka 30:** den ordinarie söndagsrunnern failade före deploy; den manuella recovery-körningen byggde och pushade utan att köra Moltbook-steget.
+- **Nästa:** vecka 30 behöver postas separat efter Antons explicita godkännande. Autopost bör senare göras fail-closed eller kompletteras med deterministisk efterkontroll.
+
+## 2026-07-26 — [lutra] v30 recovery + DeepSeek → GPT-5.6 Sol (Codex CLI)
+
+- **Bakgrund:** Morgonens v30-körning (07:00) totalhavererade — DeepSeek API returnerade 400 på ALLA anrop. Score.py gav default 21p (värdelös ranking), research.py fick tomma briefs, write.py vägrade skriva ("exceptionellt tunt material"). Ingen v30 publicerades.
+- **Prompt fix:** Lutra bytte ut ALLA DeepSeek-anrop i pipelinen mot GPT-5.6 Sol via Codex CLI.
+- **pipeline/llm.py** — ny gemensam wrapper som anropar `codex exec --ephemeral` via subprocess. Använder Antons OpenAI Plus OAuth (samma auth som Hermes). Zero API-kostnad.
+- **Patchade 9 filer:** score.py, research.py, dedup.py, validate.py, distribute_audio.py, distribute_linkedin.py, distribute_meme.py, distribute_x.py, distribute_glossary.py. Alla importerar `from llm import llm_call` istället för egna DeepSeek-funktioner.
+- **Recovery:** Manuell pipeline-körning 16:00 → score 100 ✅, research 15 ✅, images ✅, write ✅, validate 95% PASS. Byggd, pushat, live på ai-bladet.pages.dev.
+- **Skillnad:** Score.py returnerar nu riktiga poäng (Grok for Excel 45p vs default 21p). Codex CLI har ~3-5s overhead per anrop (agent-init) — pipeline tar 10-15 min istället för 2 min.
+- **Nästa:** Vecka 31-söndagskörningen kommer gå via Codex CLI. Övervaka att cronens PATH hittar `codex` (bör funka — run_weekly.sh sätter PATH till /opt/homebrew/bin).
+
 ## 2026-07-19 — [lutra] v29 Moltbook-post verifierad manuellt (15:30-cron saknades/buggig)
 
 - **Bakgrund:** Morgonens v29-körning (07:04) failade Moltbook-verifiering; loggbok sa att 15:30-cron skulle omposta.

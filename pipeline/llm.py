@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -29,6 +30,7 @@ def llm_call(
     temperature: float = 0.1,
     model: str = CODEX_MODEL,
     timeout: int = CODEX_TIMEOUT,
+    attempts: int = 2,
 ) -> Optional[str]:
     """Anropa GPT-5.6 Sol via Codex CLI (subprocess).
 
@@ -45,40 +47,51 @@ def llm_call(
     os.close(output_fd)
 
     try:
-        # codex exec läser prompt från stdin, skriver sista meddelandet till -o
-        result = subprocess.run(
-            [
-                "codex", "exec",
-                "-m", model,
-                "--ephemeral",
-                "--dangerously-bypass-approvals-and-sandbox",
-                "--skip-git-repo-check",
-                "-o", output_path,
-                "-",  # läs prompt från stdin
-            ],
-            input=full_prompt,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
+        for attempt in range(1, max(1, attempts) + 1):
+            # Förhindra att output från ett misslyckat försök återanvänds.
+            Path(output_path).write_text("")
+            try:
+                result = subprocess.run(
+                    [
+                        "codex", "exec",
+                        "-m", model,
+                        "--ephemeral",
+                        "--dangerously-bypass-approvals-and-sandbox",
+                        "--skip-git-repo-check",
+                        "-o", output_path,
+                        "-",
+                    ],
+                    input=full_prompt,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                )
+            except subprocess.TimeoutExpired:
+                print(
+                    f"  ⚠️  Codex CLI timeout efter {timeout}s "
+                    f"(försök {attempt}/{attempts})",
+                    file=sys.stderr,
+                )
+                result = None
 
-        # Läs output från tempfil
-        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            with open(output_path) as f:
-                return f.read().strip()
+            if result is not None and result.returncode == 0:
+                if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                    with open(output_path) as f:
+                        return f.read().strip()
+                if result.stdout.strip():
+                    return result.stdout.strip().split("\n")[-1]
 
-        # Fallback: kolla stdout (JSONL mode)
-        if result.stdout.strip():
-            return result.stdout.strip().split("\n")[-1]
-
-        # Fel
-        if result.stderr:
-            print(f"  ⚠️  Codex CLI stderr: {result.stderr[:200]}", file=sys.stderr)
+            if result is not None:
+                detail = (result.stderr or result.stdout or "okänt fel").strip()[:300]
+                print(
+                    f"  ⚠️  Codex CLI exit {result.returncode} "
+                    f"(försök {attempt}/{attempts}): {detail}",
+                    file=sys.stderr,
+                )
+            if attempt < attempts:
+                time.sleep(attempt * 2)
         return None
 
-    except subprocess.TimeoutExpired:
-        print(f"  ⚠️  Codex CLI timeout efter {timeout}s", file=sys.stderr)
-        return None
     except FileNotFoundError:
         print("  ❌  Codex CLI ('codex') inte installerat eller inte i PATH", file=sys.stderr)
         raise

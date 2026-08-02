@@ -26,6 +26,8 @@ CONFIG_PATH = Path(__file__).parent / "config" / "sources.yaml"
 OUTPUT_DIR = Path(__file__).parent / "output" / "candidates"
 REQUEST_TIMEOUT = 20  # sekunder per feed
 USER_AGENT = "AI-Bladet/1.0 (+https://aibladet.se; news-collector)"
+MIN_SOURCE_SUCCESS_RATIO = 0.75
+MIN_CANDIDATES = 50
 
 # ─── Imports (utanför funktioner) ────────────────────────────────────────
 
@@ -51,6 +53,28 @@ def safe_get(url: str, **kwargs) -> requests.Response | None:
     except requests.RequestException as e:
         print(f"  ⚠️  HTTP-fel ({url[:60]}): {e}", file=sys.stderr)
         return None
+
+
+def collection_is_healthy(sources_ok: int, total_sources: int, candidate_count: int) -> bool:
+    """Tillåt isolerade källfel, men stoppa vid systemiskt bortfall."""
+    if total_sources <= 0:
+        return False
+    return (
+        sources_ok / total_sources >= MIN_SOURCE_SUCCESS_RATIO
+        and candidate_count >= MIN_CANDIDATES
+    )
+
+
+def commit_seen(candidate_path: Path) -> int:
+    """Markera kandidater först efter att veckans utgåva faktiskt publicerats."""
+    with open(candidate_path, encoding="utf-8") as f:
+        candidates = json.load(f).get("candidates", [])
+    seen = SeenDB()
+    seen.init()
+    seen.mark_seen_batch(candidates)
+    seen.close()
+    print(f"✅ SeenDB uppdaterad efter publicering: {len(candidates)} kandidater")
+    return 0
 
 # ─── Collectors ───────────────────────────────────────────────────────────────
 
@@ -320,9 +344,8 @@ def main():
             new_candidates.append(c)
     all_candidates = new_candidates
 
-    # Markera nya som sedda
-    if all_candidates:
-        seen.mark_seen_batch(all_candidates)
+    # Kandidater markeras inte i SeenDB här. Det görs transaktionellt först
+    # efter lyckad publicering via --commit-seen, så en omkörning kan återupptas.
 
     # Sortera: tier (1-4) → weight descending → published
     feed_map = {f["id"]: f["weight"] for f in feeds}
@@ -370,9 +393,20 @@ def main():
     print(f"\n  Output:             {output_path}")
     print(f"{'─'*40}")
 
+    healthy = collection_is_healthy(stats["ok"], len(feeds), len(all_candidates))
+    if healthy and stats["fail"]:
+        print(f"⚠️  Degraderad insamling godkänd: {stats['fail']} isolerade källfel")
+    elif not healthy:
+        print(
+            f"⛔ Otillräcklig insamling: {stats['ok']}/{len(feeds)} källor, "
+            f"{len(all_candidates)} kandidater",
+            file=sys.stderr,
+        )
     seen.close()
-    return 0 if stats["fail"] == 0 else 1
+    return 0 if healthy else 1
 
 
 if __name__ == "__main__":
+    if len(sys.argv) == 3 and sys.argv[1] == "--commit-seen":
+        sys.exit(commit_seen(Path(sys.argv[2])))
     sys.exit(main())

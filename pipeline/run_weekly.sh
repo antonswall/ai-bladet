@@ -36,7 +36,7 @@ fi
 
 # ── Preflight: faila TIDIGT och TYDLIGT (till Telegram) om miljön saknar något ──
 preflight_fail=0
-for bin in python node git; do
+for bin in python node git codex; do
     command -v "$bin" >/dev/null 2>&1 || { echo "❌ PREFLIGHT: '$bin' saknas i PATH"; preflight_fail=1; }
 done
 # Hela dep-setet som pipelinen importerar (collect→write). Missade feedparser
@@ -49,10 +49,23 @@ if [ "$preflight_fail" -ne 0 ]; then
     echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
     exit 1
 fi
-echo "✅ Preflight OK — python=$(command -v python), node $(node -v)"
+python -c "from llm import llm_call; raise SystemExit(0 if llm_call('Svara exakt OK', attempts=1, timeout=60) else 1)" \
+    || { echo "❌ PREFLIGHT: GPT-5.6 Sol/Codex OAuth svarar inte"; exit 1; }
+echo "✅ Preflight OK — python=$(command -v python), node $(node -v), codex=$(codex --version)"
 
-# Kör pipeline (utan rm seen.db — vi vill minnas tidigare)
-python collect.py || { echo "❌ collect failade"; exit 1; }
+# Återanvänd checkpoint från samma vecka. Collect kan ha lyckats även om
+# ett senare steg eller cronens timeout stoppade körningen.
+WEEK_STEM=$(python -c "from datetime import date; y,w,_=date.today().isocalendar(); print(f'{y}-{w:02d}')")
+CANDIDATE_FILE="$PIPELINE_DIR/output/candidates/$WEEK_STEM.json"
+CANDIDATE_COUNT=0
+if [ -f "$CANDIDATE_FILE" ]; then
+    CANDIDATE_COUNT=$(python -c "import json; print(len(json.load(open('$CANDIDATE_FILE')).get('candidates', [])))" 2>/dev/null || echo 0)
+fi
+if [ "$CANDIDATE_COUNT" -gt 0 ]; then
+    echo "♻️  Återupptar från sparade kandidater: $CANDIDATE_FILE ($CANDIDATE_COUNT st)"
+else
+    python collect.py || { echo "❌ collect failade"; exit 1; }
+fi
 python dedup.py || { echo "❌ dedup failade"; exit 1; }
 python score.py || { echo "❌ score failade"; exit 1; }
 python research.py --limit 15 || { echo "❌ research failade"; exit 1; }
@@ -74,8 +87,11 @@ while [ "$ATTEMPT" -lt "$MAX_RETRIES" ]; do
     echo ""
     echo "  ── Försök $ATTEMPT/$MAX_RETRIES ──"
 
-    python validate.py
-    VALIDATE_EXIT=$?
+    if python validate.py; then
+        VALIDATE_EXIT=0
+    else
+        VALIDATE_EXIT=$?
+    fi
 
     # Hämta resultat
     WEEK=$(ls -t "$PIPELINE_DIR/output/validated/"*.json 2>/dev/null | head -1)
@@ -164,24 +180,30 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         # Posta till Moltbook
         echo ""
         echo "🦞 Postar till Moltbook..."
-        python3 "$PIPELINE_DIR/post-to-moltbook.py" || echo "⚠️ Moltbook-post misslyckades (fortsätter)"
+        python3 "$PIPELINE_DIR/post-to-moltbook.py" \
+            || { echo "❌ Moltbook-post eller verifiering misslyckades"; exit 1; }
 
         # Distribution — generera audio, X-content, etc.
         echo ""
         echo "📢 Distribuerar veckans nummer..."
-        ISSUE_FILE="$PROJECT_DIR/content/$(date +%Y)-${WEEK_NUM:-$(date +%W)}.md"
+        ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
         if [ -f "$ISSUE_FILE" ]; then
             python3 "$PIPELINE_DIR/distribute.py" --issue "$ISSUE_FILE" \
                 || echo "⚠️ Distribution misslyckades (fortsätter)"
             # Bygg om sajten med nya assets (audio etc.)
             cd "$PROJECT_DIR"
-            node build.js || echo "⚠️ Re-build efter distribution misslyckades"
+            node build.js || { echo "❌ Re-build efter distribution misslyckades"; exit 1; }
             git add -A
             git commit -m "distribute: vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d)" || true
-            git push origin main || echo "⚠️ Distribution push misslyckades"
+            git push origin main || { echo "❌ Distribution push misslyckades"; exit 1; }
         else
-            echo "⚠️ Ingen issue-fil hittad för distribution: $ISSUE_FILE"
+            echo "❌ Ingen issue-fil hittad för distribution: $ISSUE_FILE"
+            exit 1
         fi
+
+        # Först nu är publiceringen komplett; gör kandidaterna permanenta i SeenDB.
+        python "$PIPELINE_DIR/collect.py" --commit-seen "$CANDIDATE_FILE" \
+            || { echo "❌ SeenDB-commit misslyckades"; exit 1; }
 
         echo ""
         echo "══════════════════════════════════════"

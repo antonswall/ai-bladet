@@ -7,6 +7,13 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>xAI fyller på Copilot — och bygger webbappar i chatten — Vecka 31 2026</title>
+  <description>Grok 4.5 i GitHub Copilot, Build Mode för webbprojekt och en ny röstmodell — xAI dominerar veckans verktygsflöde.</description>
+  <link>https://aibladet.se/v/2026/31/</link>
+  <guid>https://aibladet.se/v/2026/31/</guid>
+  <pubDate>Sun, 26 Jul 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Grok tar plats i Excel — och OpenAI svarar i telefon — Vecka 30 2026</title>
   <description>xAI rullar ut Grok i Microsoft Excel, OpenAI visar att agenter klarar 75 % av supportärendena.</description>
   <link>https://aibladet.se/v/2026/30/</link>

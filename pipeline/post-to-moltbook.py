@@ -6,6 +6,7 @@ Kräver: environ API_KEY från credentials.json, eller skickas som argument.
 """
 import json
 import os
+import re
 import sys
 import urllib.request
 import urllib.error
@@ -56,6 +57,76 @@ def get_week_number():
         return None
 
 
+def solve_challenge(challenge: str) -> int:
+    """Lös Moltbooks obfuskerade textproblem deterministiskt."""
+    spaced = re.sub(r"[^a-zA-Z\s]", " ", challenge)
+    tokens = [token for token in spaced.split() if token]
+    word_to_number = {
+        "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+        "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+        "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+        "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+        "nineteen": 19, "ten": 10, "nine": 9, "eight": 8, "seven": 7,
+        "six": 6, "five": 5, "four": 4, "three": 3, "two": 2,
+        "one": 1, "zero": 0, "hundred": 100, "thousand": 1000,
+    }
+    patterns = {
+        word: re.compile("".join(f"{char}+" for char in word), re.IGNORECASE)
+        for word in word_to_number
+    }
+    sorted_words = sorted(word_to_number, key=len, reverse=True)
+    used = set()
+    numbers = []
+
+    for index, token in enumerate(tokens):
+        for word in sorted_words:
+            if patterns[word].fullmatch(token):
+                used.add(index)
+                numbers.append((index, word_to_number[word]))
+                break
+
+    for index in range(len(tokens) - 1):
+        if index in used or index + 1 in used:
+            continue
+        if len(tokens[index]) <= 2 and len(tokens[index + 1]) <= 2:
+            continue
+        combined = tokens[index] + tokens[index + 1]
+        for word in sorted_words:
+            if patterns[word].fullmatch(combined):
+                used.update((index, index + 1))
+                numbers.append((index, word_to_number[word]))
+                break
+
+    numbers.sort(key=lambda item: item[0])
+    values = [value for _, value in numbers]
+    merged = []
+    index = 0
+    tens = {20, 30, 40, 50, 60, 70, 80, 90}
+    units = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+    while index < len(values):
+        value = values[index]
+        if value in tens and index + 1 < len(values) and values[index + 1] in units:
+            merged.append(value + values[index + 1])
+            index += 2
+        else:
+            merged.append(value)
+            index += 1
+
+    if not merged:
+        raise ValueError("inga tal hittades i verifieringsutmaningen")
+
+    signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
+    if "multiplies" in signal or "product" in signal or "times" in signal:
+        if len(merged) < 2:
+            raise ValueError("multiplikation saknar två tal")
+        return merged[0] * merged[1]
+    if "slowsby" in signal or "reduces" in signal or "loses" in signal or "removes" in signal:
+        return merged[0] - merged[1] if len(merged) >= 2 else merged[0]
+    if "speedsup" in signal or "accelerates" in signal or "gains" in signal:
+        return merged[0] + merged[1] if len(merged) >= 2 else merged[0]
+    return sum(merged)
+
+
 def main():
     week = get_week_number()
     if not week:
@@ -88,82 +159,11 @@ def main():
         if vcode and challenge:
             print(f"moltbook: verifying...")
 
-            # Moltbook obfuskerar: symboler + case-förvirring + dubblerade bokstäver +
-            # sifferord sönderdelade över tokens (tWwEeN tYy = "twenty").
-            # Strategi: behåll ordgränser (ersätt symboler med space), sen token+pair-matching.
-
-            import re
-
-            # Steg 1: tokens
-            spaced = re.sub(r'[^a-zA-Z\s]', ' ', challenge)
-            tokens = [t for t in spaced.split() if t]
-
-            w2n = {
-                "twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"seventy":70,"eighty":80,"ninety":90,
-                "eleven":11,"twelve":12,"thirteen":13,"fourteen":14,"fifteen":15,"sixteen":16,"seventeen":17,
-                "eighteen":18,"nineteen":19,"ten":10,"nine":9,"eight":8,"seven":7,"six":6,"five":5,
-                "four":4,"three":3,"two":2,"one":1,"zero":0,"hundred":100,"thousand":1000,
-            }
-            pats = {w: re.compile("".join(f"{c}+" for c in w), re.IGNORECASE) for w in w2n}
-            sw = sorted(w2n.keys(), key=len, reverse=True)
-
-            used = set()
-            numbers = []
-
-            # Pass 1: individuella tokens
-            for i, tok in enumerate(tokens):
-                for w in sw:
-                    if pats[w].fullmatch(tok):
-                        used.add(i)
-                        numbers.append((i, w2n[w]))
-                        break
-
-            # Pass 2: par (i, i+1) — hoppa om båda tokens ≤2 chars (false positive-risk)
-            i = 0
-            while i < len(tokens) - 1:
-                if i not in used and (i+1) not in used:
-                    if len(tokens[i]) <= 2 and len(tokens[i+1]) <= 2:
-                        i += 1
-                        continue
-                    comb = tokens[i] + tokens[i+1]
-                    for w in sw:
-                        m = pats[w].match(comb)
-                        if m and m.end() == len(comb):
-                            used.add(i); used.add(i+1)
-                            numbers.append((i, w2n[w]))
-                            break
-                i += 1
-
-            # Sortera efter token-index och extrahera values
-            numbers.sort(key=lambda x: x[0])
-            values = [v for _, v in numbers]
-
-            # Merge tens+units: t.ex. [20, 4] → [24]
-            merged = []
-            i = 0
-            tens = [20,30,40,50,60,70,80,90]
-            units = [1,2,3,4,5,6,7,8,9]
-            while i < len(values):
-                v = values[i]
-                if v in tens and i+1 < len(values) and values[i+1] in units:
-                    merged.append(v + values[i+1])
-                    i += 2
-                else:
-                    merged.append(v)
-                    i += 1
-
-            # Operator detection: kollapsa dubletter för att hantera "speeeedsup" → "speedsup"
-            sig = re.sub(r'(.)\1+', r'\1', re.sub(r'[^a-z]', '', challenge.lower()))
-            if "speedsup" in sig or "accelerates" in sig or "gains" in sig:
-                answer = merged[0] + merged[1] if len(merged) >= 2 else merged[0]
-            elif "slowsby" in sig:
-                answer = merged[0] - merged[1] if len(merged) >= 2 else merged[0]
-            elif "reduces" in sig or "loses" in sig or "removes" in sig:
-                answer = merged[0] - merged[1] if len(merged) >= 2 else merged[0]
-            elif "combined" in sig or "total" in sig or "exerts" in sig:
-                answer = sum(merged) if merged else 0
-            else:
-                answer = sum(merged) if merged else 0
+            try:
+                answer = solve_challenge(challenge)
+            except ValueError as exc:
+                print(f"moltbook: verification parse FAILED: {exc}", file=sys.stderr)
+                return 1
 
             verify_result = api_post("/verify", {
                 "verification_code": vcode,
@@ -173,6 +173,7 @@ def main():
                 print(f"moltbook: verification OK — post published! 🦞")
             else:
                 print(f"moltbook: verification FAILED (answer={answer:.2f}) — post pending", file=sys.stderr)
+                return 1
         return 0
     else:
         print("moltbook: failed to create post", file=sys.stderr)

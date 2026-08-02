@@ -159,11 +159,7 @@ Om du inte hittar något datum, sätt source_date till "okänt"."""
     except (json.JSONDecodeError, Exception) as e:
         print(f"    ⚠️  Brief parse error: {e}", file=sys.stderr)
 
-    return {
-        "summary": full_text[:200],
-        "key_facts": ["Kunde inte extrahera struktur"],
-        "source_quality": "unknown"
-    }
+    return None
 
 
 # ─── Huvudfunktion ────────────────────────────────────────────────────────────
@@ -214,6 +210,7 @@ def research(input_path: Path, output_path: Path, max_stories: int = MAX_STORIES
             "url": fetch_result["fetched_url"],
             "full_text_excerpt": full_text[:500] if full_text else "",
             "fetch_success": fetch_result["fetch_success"],
+            "brief_success": brief is not None,
             "fact_brief": brief or {"summary": "Kunde inte extrahera text", "key_facts": []},
         })
 
@@ -224,6 +221,7 @@ def research(input_path: Path, output_path: Path, max_stories: int = MAX_STORIES
             "week": input_path.stem,
             "stories_researched": len(researched),
             "fetch_success": sum(1 for r in researched if r["fetch_success"]),
+            "brief_success": sum(1 for r in researched if r["brief_success"]),
             "research_time": datetime.now(timezone.utc).isoformat(),
         },
         "stories": researched,
@@ -234,15 +232,16 @@ def research(input_path: Path, output_path: Path, max_stories: int = MAX_STORIES
 
     # Sammanfattning
     success = output["meta"]["fetch_success"]
+    brief_success = output["meta"]["brief_success"]
     print(f"\n{'─'*40}")
     print(f"📊 RESEARCH RESULTAT")
     print(f"  Stories researchade: {len(researched)}")
     print(f"  Fulltext hämtad:     {success}/{len(researched)}")
-    print(f"  Fact briefs:         {sum(1 for r in researched if r.get('fact_brief'))}")
+    print(f"  Giltiga fact briefs: {brief_success}/{len(researched)}")
     print(f"  Output:              {output_path}")
     print(f"{'─'*40}")
 
-    return {"researched": len(researched), "success": success}
+    return {"researched": len(researched), "success": success, "brief_success": brief_success}
 
 
 if __name__ == "__main__":
@@ -266,4 +265,12 @@ if __name__ == "__main__":
     output_path = OUTPUT_DIR / f"{week}.json"
 
     result = research(input_path, output_path, args.limit)
+    minimum_briefs = min(6, args.limit)
+    if result["brief_success"] < minimum_briefs:
+        print(
+            f"⛔ Research underkänd: {result['brief_success']}/{minimum_briefs} "
+            "giltiga fact briefs",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     sys.exit(0)

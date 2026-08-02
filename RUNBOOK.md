@@ -8,16 +8,18 @@ vad du gör när något går fel, och hur du kör manuellt.
 - **Schemaläggning:** Hermes-agenten *lutra* (INTE system-cron/GitHub Actions).
   Jobb "AI-Bladet söndag", `0 7 * * 0` (söndagar 07:00), `deliver=telegram`.
   Konfig: `~/.hermes/cron/jobs.json`. **Anton ändrar cron själv via lutra.**
-- **Runner:** `pipeline/run_weekly.sh` (källa, versionshanterad). Hermes kör en kopia
-  i `~/.hermes/scripts/ai-bladet-weekly.sh`.
-  ⚠️ **Single source of truth:** håll Hermes-kopian som symlänk till repo:t så de
-  aldrig driftar isär:
-  ```bash
-  ln -sf ~/ai-bladet/pipeline/run_weekly.sh ~/.hermes/scripts/ai-bladet-weekly.sh
-  ```
-- **Flöde:** preflight → pipeline (collect→dedup→score→research→images→write) →
-  validering (max 3 försök, Sonnet-retry) → `node build.js` → `git commit && push`
-  → Cloudflare Pages deployar `public/` → https://ai-bladet.pages.dev/
+- **Runner:** `pipeline/run_weekly.sh` (källa, versionshanterad). Hermes kör wrappern
+  `~/.hermes/scripts/ai-bladet-weekly.sh`, som gör `exec` av repo-skriptet.
+  Hermes blockerar symlänkar som pekar utanför scripts-katalogen; använd därför
+  **inte** symlänk här.
+- **Timeout:** `cron.script_timeout_seconds: 1800` i `~/.hermes/config.yaml`.
+- **Flöde:** preflight (inkl. Codex-smoke) → checkpoint/collect → dedup → score →
+  research → images → write → validering (max 3 fungerande feedback-retries) →
+  build → git push → Moltbook + verifiering → distribution → slut-push → SeenDB-commit
+  → Cloudflare Pages på https://ai-bladet.pages.dev/
+- **Feltolerans:** enstaka källfel tillåts om minst 75 % av källorna och minst 50
+  nya kandidater återstår. Kandidater markeras inte som sedda förrän hela
+  publiceringen lyckats. En omkörning samma vecka återupptar sparad kandidatfil.
 - **Loggar:** `pipeline/output/runner-ÅÅÅÅ-MM-DD_HHMM.log` + leverans till Telegram.
 
 ## Manuell körning
