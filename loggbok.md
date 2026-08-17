@@ -25,7 +25,7 @@
 ## 2026-08-17 — [lutra] Vecka 33 recovery startad efter OpenRouter 401
 
 - Söndagscron 2026-08-16 stoppade i `write.py`: OpenRouter/Sonnet returnerade `401 User not found`; `content/2026-33.md` saknades trots friska checkpoints genom `images`.
-- Patchade `pipeline/write.py` med Codex-fallback via `pipeline/llm.py` när OpenRouter saknar/fellar auth. Backup: `backups/recovery-2026-08-17/write.py.before-codex-fallback`.
+- Patchade `pipeline/write.py` med Codex-fallback via `pipeline/llm.py` när OpenRouter saknar/fellar auth. Backup flyttad till `/tmp/ai-bladet-recovery-2026-08-17/write.py.before-codex-fallback`.
 - Genererade `content/2026-33.md` från `pipeline/output/images/2026-33.json`; validering PASS 95 % med 1 low issue. Nästa steg: deploy, Moltbook, distribution och SeenDB-commit.
 
 ## 2026-08-15 — [lutra] Cronmodell ändrad, AI-Bladet undantaget
