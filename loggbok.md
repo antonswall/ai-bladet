@@ -1,5 +1,10 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-17 — [Claude Code] LinkedIn-text om Sheets canvas
+
+- Skrev en svensk LinkedIn-post som förklarar hur Gemini kan göra interaktiva miniappar av kalkylblad utan kod eller formler.
+- Ingen sajt- eller pipelinekod ändrades.
+
 ## 2026-08-17 — [Claude Code] Meme-kort om Sheets canvas
 
 - Valde storyn om Google Sheets som miniapp och tog fram svensk meme-text samt en konkret engelsk bildprompt för sociala medier.
