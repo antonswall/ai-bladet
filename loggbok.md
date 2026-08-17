@@ -1,5 +1,10 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-17 — [Claude Code] Meme-idé om Sheets som miniapp
+
+- Valde Google Sheets canvas som veckans mest meme-vänliga story och formulerade kort svensk meme-text samt en konkret engelsk bildprompt.
+- Ingen sajt- eller pipelinekod ändrades.
+
 ## 2026-08-17 — [Claude Code] LinkedIn-text om Sheets canvas
 
 - Skrev en svensk LinkedIn-post som förklarar hur Gemini kan göra interaktiva miniappar av kalkylblad utan kod eller formler.
