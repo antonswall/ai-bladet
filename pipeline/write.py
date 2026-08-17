@@ -19,6 +19,11 @@ from typing import Optional
 import requests
 import yaml
 
+try:
+    from llm import llm_call
+except Exception:
+    llm_call = None
+
 # ─── Config ───────────────────────────────────────────────────────────────────
 
 PIPELINE_DIR = Path(__file__).parent
@@ -56,10 +61,11 @@ def _get_openrouter_key() -> Optional[str]:
 
 def sonnet_call(prompt: str, system: str = None,
                 max_tokens: int = MAX_OUTPUT_TOKENS) -> Optional[str]:
-    """Anropa Claude Sonnet 4.6 via OpenRouter."""
+    """Anropa Claude Sonnet 4.6 via OpenRouter, fallback till Codex CLI vid auth-fel."""
     key = _get_openrouter_key()
     if not key:
-        raise ValueError("OPENROUTER_API_KEY saknas")
+        print("  ⚠️  OPENROUTER_API_KEY saknas — försöker Codex-fallback", file=sys.stderr)
+        return codex_write_fallback(prompt, system, max_tokens=max_tokens)
 
     messages = []
     if system:
@@ -89,7 +95,33 @@ def sonnet_call(prompt: str, system: str = None,
         print(f"  ⚠️  OpenRouter/Sonnet error: {e}", file=sys.stderr)
         if hasattr(e, 'response') and e.response is not None:
             print(f"     Response: {e.response.text[:300]}", file=sys.stderr)
+        print("  ↪ Försöker Codex-fallback (GPT-5.6 Sol, $0 API-kostnad)", file=sys.stderr)
+        return codex_write_fallback(prompt, system, max_tokens=max_tokens)
+
+
+def codex_write_fallback(prompt: str, system: str = None,
+                         max_tokens: int = MAX_OUTPUT_TOKENS) -> Optional[str]:
+    """Skrivstegs-fallback via pipeline/llm.py när OpenRouter/Sonnet är otillgängligt."""
+    if llm_call is None:
+        print("  ❌ Codex-fallback saknas: kunde inte importera llm_call", file=sys.stderr)
         return None
+    strict_system = (system or "") + """
+
+VIKTIGT I DETTA FALL: Du ersätter tillfälligt Claude Sonnet eftersom OpenRouter returnerar 401.
+Din output måste därför vara exakt samma råa AI-Bladet-frontmatter-format som efterfrågas:
+- börja direkt med ---
+- ingen markdown-fence
+- inga förklaringar före eller efter
+- följ anti-hallucination och YAML-reglerna strikt.
+"""
+    return llm_call(
+        prompt,
+        system=strict_system,
+        max_tokens=max_tokens,
+        temperature=0.4,
+        timeout=300,
+        attempts=2,
+    )
 
 
 # ─── Prompt building ─────────────────────────────────────────────────────────

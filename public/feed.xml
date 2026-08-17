@@ -7,6 +7,13 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>Grok går längre – och kalkylblad blir appar — Vecka 33 2026</title>
+  <description>Grok 4.6 tar sikte på uthålliga agenter medan Google och Hugging Face bygger om praktiska arbetsflöden.</description>
+  <link>https://aibladet.se/v/2026/33/</link>
+  <guid>https://aibladet.se/v/2026/33/</guid>
+  <pubDate>Sun, 16 Aug 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>GPT-5.6 skärper faktan — och xAI vill in i kreativa flöden — Vecka 32 2026</title>
   <description>OpenAI uppdaterar Sol och Luna med färre faktafel, xAI lanserar bildgenerering 2.0 och Prime Agent ger agenter minne mellan sessioner.</description>
   <link>https://aibladet.se/v/2026/32/</link>

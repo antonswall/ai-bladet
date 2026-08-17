@@ -1,5 +1,31 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-17 — [lutra] Vecka 33 recovery startad efter OpenRouter 401
+
+- Söndagscron 2026-08-16 stoppade i `write.py`: OpenRouter/Sonnet returnerade `401 User not found`; `content/2026-33.md` saknades trots friska checkpoints genom `images`.
+- Patchade `pipeline/write.py` med Codex-fallback via `pipeline/llm.py` när OpenRouter saknar/fellar auth. Backup: `backups/recovery-2026-08-17/write.py.before-codex-fallback`.
+- Genererade `content/2026-33.md` från `pipeline/output/images/2026-33.json`; validering PASS 95 % med 1 low issue. Nästa steg: deploy, Moltbook, distribution och SeenDB-commit.
+
+## 2026-08-15 — [lutra] Cronmodell ändrad, AI-Bladet undantaget
+
+- Hermes agent-crons använder nu `openai-codex/gpt-5.4`; AI-Bladets pipeline är oförändrad och använder fortsatt GPT-5.6 Sol via Codex CLI för dedup, scoring, research, validation och distribution.
+- AI-Bladet använder dessutom Claude Sonnet 4.6 via OpenRouter för skrivsteget; Claude Opus används manuellt för cross-verification. ElevenLabs används separat för TTS.
+- Ingen AI-Bladet-kod ändrades.
+
+## 2026-08-13 — [lutra] Modellbehov kartlagt
+
+- Verifierade pipelinekoden: GPT-5.6 Sol via Codex CLI används av `pipeline/llm.py` för dedup, scoring, research, validation och distributionssteg; Claude Sonnet 4.6 via OpenRouter används endast av `write.py`; Claude Opus används manuellt för cross-verification; ElevenLabs används för TTS.
+- Hermes-routingen till GLM 5.2 påverkar inte AI-Bladets pipeline.
+- Nästa steg: ingen GLM-ändring i AI-Bladet utan separat benchmark/fallback-beslut.
+
+
+## 2026-08-09 — [lutra] Vecka 32 Moltbook-distribution återställd
+
+- Söndagsrunnern publicerade commit `4209bf2`, men Moltbook-verifieringen misslyckades: parsern räknade distansuttrycket `3 × 5` som `8.00`; post `ee57c652-4a12-4e4e-ae20-63cd93111ca9` blev pending.
+- Recovery-post `a67f63ce-4ad9-4d95-9e48-0c98379d1cf5` skapades i `general`, verifierades med `35 + 22 = 57.00` och bekräftades via sök-API samt `sort=new`.
+- Nästa steg: patcha `pipeline/post-to-moltbook.py` med test för hastighet × tid / `how far` innan vecka 33; nuvarande parser saknar denna multiplikationsvariant.
+
+
 ## 2026-08-02 — [lutra] Vecka 31 fullt återställd och levererad
 
 - **Utgåva:** `content/2026-31.md` validerad efter fungerande retry (94 %) och publicerad i commit `8a0817b`; recovery- och distributionsfixar pushade i `a392a54`.
