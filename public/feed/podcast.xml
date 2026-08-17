@@ -1,44 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
-  
-  
+
+
+
+
   <channel>
-    
-    
+
+
+
+
     <title>AI-Bladet</title>
-    
-    
+
+
+
+
     <link>https://aibladet.se/</link>
-    
-    
+
+
+
+
     <description>Varje söndag — 90 sekunder om veckans viktigaste AI-nyheter på svenska.</description>
-    
-    
+
+
+
+
     <language>sv</language>
-    
-    
+
+
+
+
     <itunes:author>AI-Bladet</itunes:author>
-    
-    
+
+
+
+
     <itunes:category text="Technology"/>
-    
-    
+
+
+
+
     <itunes:explicit>false</itunes:explicit>
-    
-    
+
+
+
+
     <itunes:image href="https://aibladet.se/static/android-chrome-512x512.png"/>
-    
-    
+
+
+
+
     <item>
+
+
       <title>Vecka 31 — xAI fyller på Copilot — och bygger webbappar i chatten</title>
+
+
       <description>AI-Bladet vecka 31. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+
+
       <link>https://aibladet.se/audio/2026-31.mp3</link>
+
+
       <guid>ai-bladet-2026-31</guid>
+
+
       <pubDate>Sun, 26 Jul 2026 09:00:00 +0000</pubDate>
+
+
       <enclosure url="https://aibladet.se/audio/2026-31.mp3" length="1057062" type="audio/mpeg"/>
+
+
+      <itunes:duration>00:01:30</itunes:duration>
+
+
+    </item>
+
+
+    <item>
+      <title>Vecka 33 — Grok går längre – och kalkylblad blir appar</title>
+      <description>AI-Bladet vecka 33. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      <link>https://aibladet.se/audio/2026-33.mp3</link>
+      <guid>ai-bladet-2026-33</guid>
+      <pubDate>Sun, 16 Aug 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://aibladet.se/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
       <itunes:duration>00:01:30</itunes:duration>
     </item>
   </channel>
-  
+
+
+
 
 </rss>

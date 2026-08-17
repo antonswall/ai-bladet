@@ -1,5 +1,12 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-17 — [lutra] Vecka 33 recovery levererad
+
+- Publicerade `content/2026-33.md` i commit `fea73fa`; Cloudflare-deploy väntar/verifieras efter slutpush.
+- Moltbook-post `42872ea4-be37-4389-8ebc-25c374c8756a` skapad och verifierad (`126.00`).
+- Distribution körd: audio, X, LinkedIn och ordbok OK. `distribute_meme.py` timeoutade i wrappern men standalone skapade giltig `public/memes/2026-33.png`; Chrome-processen dödades efter att screenshotfilen verifierats.
+- Nästa steg: slutbuild, commit/push av distributionsassets och SeenDB-commit för `pipeline/output/candidates/2026-33.json`.
+
 ## 2026-08-17 — [Claude Code] Meme-idé om Sheets som miniapp
 
 - Valde Google Sheets canvas som veckans mest meme-vänliga story och formulerade kort svensk meme-text samt en konkret engelsk bildprompt.
