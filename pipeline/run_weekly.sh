@@ -43,8 +43,9 @@ done
 # i v1 → torrkörningen 2026-06-18 kraschade i collect.py i stället för i preflight.
 python -c "import requests, bs4, lxml, feedparser, trafilatura, yaml" 2>/dev/null \
     || { echo "❌ PREFLIGHT: python-deps saknas (kräver requests/bs4/lxml/feedparser/trafilatura/yaml) i $(command -v python || echo python)"; preflight_fail=1; }
-[ -n "${OPENROUTER_API_KEY:-}" ] \
-    || { echo "❌ PREFLIGHT: OPENROUTER_API_KEY saknas (källa: ~/.hermes/.env)"; preflight_fail=1; }
+if [ -z "${OPENROUTER_API_KEY:-}" ]; then
+    echo "⚠️ PREFLIGHT: OPENROUTER_API_KEY saknas — write.py använder Codex-fallback"
+fi
 if [ "$preflight_fail" -ne 0 ]; then
     echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
     exit 1
@@ -189,7 +190,7 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
         if [ -f "$ISSUE_FILE" ]; then
             python3 "$PIPELINE_DIR/distribute.py" --issue "$ISSUE_FILE" \
-                || echo "⚠️ Distribution misslyckades (fortsätter)"
+                || { echo "❌ Distribution misslyckades — stoppar före slutpush och SeenDB-commit"; exit 1; }
             # Bygg om sajten med nya assets (audio etc.)
             cd "$PROJECT_DIR"
             node build.js || { echo "❌ Re-build efter distribution misslyckades"; exit 1; }

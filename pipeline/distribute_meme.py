@@ -18,6 +18,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -184,11 +185,19 @@ img {{
             "--disable-gpu",
             f"file://{html_path}",
         ]
-        result = os.system(" ".join(f"'{c}'" for c in cmd))
-        if result != 0:
-            print(f"  ⚠️ Chrome exit code: {result}", file=sys.stderr)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            print(f"  ⚠️ Chrome exit code: {result.returncode}", file=sys.stderr)
+            if result.stderr:
+                print(f"     {result.stderr[:500]}", file=sys.stderr)
             return False
         return output_path.exists()
+    except subprocess.TimeoutExpired:
+        if output_path.exists():
+            print("  ⚠️ Chrome timeout efter PNG-skrivning — accepterar verifierbar fil", file=sys.stderr)
+            return True
+        print("  ⚠️ Chrome timeout utan färdig PNG", file=sys.stderr)
+        return False
     finally:
         try:
             os.unlink(html_path)
@@ -247,9 +256,7 @@ def distribute_meme(issue_path: str, dry_run: bool = False) -> bool:
     meme_img = MEMES_DIR / f"{year}-{week}.png"
 
     if dry_run:
-        # Skapa en liten placeholder-bild
-        meme_img.write_bytes(b"")
-        print(f"    ➡ Sparad (placeholder): {meme_img.name}")
+        print(f"    ➡ Dry-run OK: skulle skriva {meme_img.name}")
         return True
 
     print(f"  🎨 Genererar bild...", end=" ", flush=True)

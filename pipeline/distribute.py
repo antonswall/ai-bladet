@@ -62,11 +62,12 @@ def run_module(module_name: str, issue_path: str, dry_run: bool = False) -> tupl
         cmd.append("--dry-run")
 
     try:
+        module_timeout = int(os.getenv("AI_BLADET_DISTRIBUTION_TIMEOUT", "600"))
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=module_timeout,
         )
         elapsed = time.time() - start
         success = result.returncode == 0
@@ -77,7 +78,8 @@ def run_module(module_name: str, issue_path: str, dry_run: bool = False) -> tupl
             output = f"{stdout}\nSTDERR:\n{stderr}" if stdout else stderr
         return (module_name, success, f"{output} ({elapsed:.1f}s)")
     except subprocess.TimeoutExpired:
-        return (module_name, False, "Timeout (300s)")
+        module_timeout = int(os.getenv("AI_BLADET_DISTRIBUTION_TIMEOUT", "600"))
+        return (module_name, False, f"Timeout ({module_timeout}s)")
     except Exception as e:
         return (module_name, False, str(e))
 

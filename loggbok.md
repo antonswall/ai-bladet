@@ -1,5 +1,13 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-22 — [lutra] Readiness-check inför vecka 34
+
+- Verifierade att cronjobbet `AI-Bladet söndag` är enabled och schemalagt till `2026-08-23 07:00`; wrappern `~/.hermes/scripts/ai-bladet-weekly.sh` är executable och timeouten är `cron.script_timeout_seconds: 1800`.
+- Smoke-testade miljön: Python-deps OK, `codex-cli 0.144.5`, `llm_call('OK')` OK, `node build.js` OK och live assets för vecka 33 svarar HTTP 200.
+- Härdade `pipeline/run_weekly.sh`: saknad `OPENROUTER_API_KEY` är inte längre blockerande eftersom `write.py` har Codex-fallback; distribution failar nu stängt och stoppar före slutpush + SeenDB-commit.
+- Härdade `pipeline/distribute.py` + `pipeline/distribute_meme.py`: distributionsmoduler får 600 s timeout; Chrome-screenshot körs via `subprocess.run(timeout=60)` och dry-run skriver inte längre över befintlig meme-PNG.
+- Verifiering: `bash -n`, `py_compile`, `git diff --check`, distribution dry-run, fail-test för saknad distributionsmodul, hash-kontroll av befintlig `public/memes/2026-33.png`, Codex-smoke och `node build.js` OK.
+
 ## 2026-08-17 — [lutra] Vecka 33 recovery levererad
 
 - Publicerade `content/2026-33.md` i commit `fea73fa`; Cloudflare-deploy väntar/verifieras efter slutpush.
