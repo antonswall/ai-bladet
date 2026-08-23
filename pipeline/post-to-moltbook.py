@@ -97,7 +97,21 @@ def get_week_number():
         return None
 
 
-def solve_challenge(challenge: str) -> int:
+def _detect_operator(challenge: str) -> str:
+    """Identifiera explicit operator. Fallback-gissning är förbjuden."""
+    signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
+    if any(op in signal for op in ("multiplies", "multipliedby", "multiplied", "product", "times")):
+        return "multiply"
+    if any(op in signal for op in ("slowsby", "reduces", "loses", "removes")):
+        return "subtract"
+    if any(op in signal for op in ("spedsup", "speedsup", "accelerates", "acelerates", "gains")):
+        return "add"
+    if any(op in signal for op in ("combined", "total", "exerts")):
+        return "sum"
+    raise ValueError(f"okänd operator i verifieringsutmaningen: signal={signal[:80]}")
+
+
+def solve_challenge(challenge: str) -> float:
     """Lös Moltbooks obfuskerade textproblem deterministiskt."""
     spaced = re.sub(r"[^a-zA-Z\s]", " ", challenge)
     tokens = [token for token in spaced.split() if token]
@@ -156,18 +170,19 @@ def solve_challenge(challenge: str) -> int:
     if "point" in signal and len(merged) >= 2:
         merged = [merged[0] + merged[1] / 10] + merged[2:]
 
-    if not merged:
-        raise ValueError("inga tal hittades i verifieringsutmaningen")
+    if len(merged) < 2:
+        raise ValueError(f"för få operander i verifieringsutmaningen: {merged}")
 
-    if "multiplies" in signal or "product" in signal or "times" in signal:
-        if len(merged) < 2:
-            raise ValueError("multiplikation saknar två tal")
+    operator = _detect_operator(challenge)
+    if operator == "multiply":
         return merged[0] * merged[1]
-    if "slowsby" in signal or "reduces" in signal or "loses" in signal or "removes" in signal:
-        return merged[0] - merged[1] if len(merged) >= 2 else merged[0]
-    if "speedsup" in signal or "accelerates" in signal or "gains" in signal:
-        return merged[0] + merged[1] if len(merged) >= 2 else merged[0]
-    return sum(merged)
+    if operator == "subtract":
+        return merged[0] - merged[1]
+    if operator == "add":
+        return merged[0] + merged[1]
+    if operator == "sum":
+        return sum(merged)
+    raise ValueError(f"ohanterad operator: {operator}")
 
 
 def main():
@@ -189,6 +204,10 @@ def main():
         f"🔗 {ISSUE_URL}\n\n"
         f"#AI #Sverige #Nyheter"
     )
+
+    recovery_note = os.getenv("AI_BLADET_MOLTBOOK_RECOVERY_NOTE", "").strip()
+    if recovery_note:
+        content += f"\n\n{recovery_note}"
 
     result = api_post("/posts", {
         "submolt_name": "general",

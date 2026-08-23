@@ -35,6 +35,13 @@ BATCH_SIZE = 25  # kandidater per API-anrop
 # inspiration från promptdeep på Moltbook 🦞
 TEMPORAL_DECAY_PER_DAY = 0.85  # ~0.72 efter 2 dagar, ~0.32 efter 7 dagar
 
+# Editorial fatigue — samma leverantör får inte äga leaden vecka efter vecka.
+# Om en entity varit lead minst två av de senaste fyra numren får nya kandidater
+# från samma entity en tydlig score-sänkning. Detta fångar t.ex. Grok/xAI-spåret.
+RECENT_LEAD_WINDOW = 4
+RECENT_LEAD_REPEAT_THRESHOLD = 2
+RECENT_LEAD_FATIGUE_PENALTY = 12
+
 # ─── Kända labb-organisationer på HF ─────────────────────────────────────────
 
 KNOWN_HF_ORGS = [
@@ -97,7 +104,7 @@ def pre_filter(candidates: list[dict]) -> list[dict]:
             # Behåll om den även finns i HF Daily Papers (har upvotes) eller nämner kända saker
             known_keywords = ["gpt", "llm", "transformer", "diffusion", "rlhf", "rag",
                               "agent", "alignment", "safety", "benchmark",
-                              "openai", "anthropic", "google", "deepmind", "meta",
+                              "openai", "anthropic", "google", "deepmind", "gemini", "meta",
                               "fine-tuning", "pretraining", "attention"]
             if not any(kw in text for kw in known_keywords):
                 removed += 1
@@ -287,7 +294,8 @@ def final_score(c: dict) -> float:
         except (ValueError, TypeError):
             pass  # ingen decay om datumet inte går att parsea
 
-    return round(raw * decay, 1)
+    fatigue_penalty = c.get("_lead_fatigue_penalty", 0)
+    return round((raw - fatigue_penalty) * decay, 1)
 
 
 # ─── Huvudfunktion ────────────────────────────────────────────────────────────
@@ -362,6 +370,20 @@ def score(input_path: Path, output_path: Path) -> dict:
     for c in candidates[len(scoring_batch):]:
         c["_ai_score"] = {"score": 3, "lead_potential": 1, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "reason": "Ej i topp 100"}
 
+    # Beräkna editorial fatigue innan final score. Detta hindrar att samma
+    # leverantör (t.ex. Grok/xAI) blir huvudspår vecka efter vecka när andra
+    # starka modell-/verktygsnyheter finns i batchen.
+    recent_lead_counts = _recent_lead_entity_counts()
+    fatigued_entities = {
+        _entity_group(entity) for entity, count in recent_lead_counts.items()
+        if count >= RECENT_LEAD_REPEAT_THRESHOLD
+    }
+    for c in candidates:
+        entities = set(_candidate_entity_groups(c.get("title", "")))
+        c["_lead_fatigue_penalty"] = (
+            RECENT_LEAD_FATIGUE_PENALTY if entities & fatigued_entities else 0
+        )
+
     # Beräkna final score
     for c in candidates:
         c["final_score"] = final_score(c)
@@ -411,8 +433,8 @@ def score(input_path: Path, output_path: Path) -> dict:
 
 # Kända företagsnyckelord för att identifiera ämneskoncentration
 _ENTITY_KEYWORDS = [
-    "openai", "anthropic", "google", "deepmind", "meta", "microsoft",
-    "nvidia", "xai", "elon musk", "grok", "apple", "ibm", "amazon",
+    "openai", "anthropic", "google", "deepmind", "gemini", "meta", "microsoft",
+    "nvidia", "xai", "grok", "elon musk", "apple", "ibm", "amazon",
     "aws", "azure", "oracle", "salesforce", "samsung", "intel",
     "amd", "arm", "tsmc", "qualcomm", "broadcom", "micron",
     "mistral", "deepseek", "qwen", "alibaba", "baidu", "tencent",
@@ -432,6 +454,46 @@ def _extract_entities(title: str) -> list[str]:
             found.append(kw)
     return found
 
+
+def _recent_lead_entity_counts() -> dict[str, int]:
+    """Räkna vilka entities som varit lead i de senaste publicerade numren."""
+    content_dir = Path.home() / "ai-bladet" / "content"
+    if not content_dir.exists():
+        return {}
+
+    files = sorted(content_dir.glob("20*.md"))[-RECENT_LEAD_WINDOW:]
+    counts: dict[str, int] = {}
+    for path in files:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        # Frontmatter-lead räcker. Begränsa till innan stories för att inte räkna
+        # hela numrets företagsmix som lead.
+        lead_match = re.search(r"lead:\s*\n(.*?)(?:\nstories:|\nbriefs_)", text, re.DOTALL)
+        lead_text = lead_match.group(1) if lead_match else text[:1200]
+        for entity in set(_extract_entities(lead_text)):
+            counts[entity] = counts.get(entity, 0) + 1
+    return counts
+
+
+def _entity_group(entity: str) -> str:
+    """Normalisera alias till samma redaktionella entity."""
+    aliases = {
+        "grok": "xai",
+        "elon musk": "xai",
+        "deepmind": "google",
+        "gemini": "google",
+        "aws": "amazon",
+        "azure": "microsoft",
+    }
+    return aliases.get(entity, entity)
+
+
+def _candidate_entity_groups(title: str) -> list[str]:
+    return [_entity_group(entity) for entity in _extract_entities(title)]
+
+
 def _diversify_top(candidates: list[dict], top_n: int = 20, max_per_entity: int = 2) -> list[dict]:
     """Diversifiera topp-N så att inget företag/ämne har mer än max_per_entity stories.
     Behåll originalordning inom varje grupp — pusha ner överskjutande stories till efter topp-N."""
@@ -447,7 +509,7 @@ def _diversify_top(candidates: list[dict], top_n: int = 20, max_per_entity: int 
 
     for c in top:
         title = c.get("title", "")
-        entities = _extract_entities(title)
+        entities = _candidate_entity_groups(title)
         if not entities:
             # Inget företagsnamn — behåll alltid
             continue

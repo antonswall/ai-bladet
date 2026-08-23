@@ -36,6 +36,13 @@ feeds:
     label: "Google AI"
     weight: 25
 
+  - id: google-deepmind
+    tier: 1
+    type: rss
+    url: "https://deepmind.google/blog/rss.xml"
+    label: "Google DeepMind"
+    weight: 27
+
   - id: microsoft-ai
     tier: 1
     type: rss

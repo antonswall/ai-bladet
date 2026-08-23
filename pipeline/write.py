@@ -275,13 +275,18 @@ REDAKTIONELLA REGLER — inga undantag:
    code block wrappers. Din output börjar direkt med "---" och slutar
    med brödtext efter den avslutande "---".
 
-17. DIVERSIFIERING — INTE ETT FÖRETAG PER NUMMER
+17. DIVERSIFIERING — INTE ETT FÖRETAG PER NUMMER, INTE SAMMA LEAD VECKA EFTER VECKA
    Om fler än 2 av de 10 skickade storiesna handlar om samma företag
    (xAI, OpenAI, Google, etc): välj MAX 2 av dem. Fyll resten av
    numret med stories från ANDRA företag/ämnen, även om de har lägre
    poäng. Ett varierat nyhetsbrev är bättre än ett som bara rapporterar
-   om ett företag. Lead-artikeln får vara om det dominerande företaget,
-   men de sekundära storiesna måste komma från andra ämnen.
+   om ett företag. Lead-artikeln får vara om det dominerande företaget
+   bara om den är överlägset viktig; annars ska sekundära starka verktygsnyheter
+   från andra leverantörer lyftas. Har xAI/Grok nyligen varit huvudrubrik flera
+   veckor i rad: välj INTE xAI/Grok som lead igen om det finns en trovärdig
+   alternativ verktygsstory, särskilt Gemini/Google, Claude/Anthropic,
+   OpenAI, open source-modeller eller utvecklarverktyg. Gemini-lanseringar
+   ska granskas aktivt och får inte drunkna bakom Grok om de är aktuella.
    Har du bara 3-4 stories totalt i research: välj max 1 per företag.
 
 18. LEAD ALLTID OM VERKTYG

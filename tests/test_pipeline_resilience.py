@@ -63,6 +63,14 @@ class MoltbookChallengeTests(unittest.TestCase):
         challenge = "A ClAw ExErTs ThIrTy FoUr NoOtOnS and snaps TwO times"
         self.assertEqual(self.module.solve_challenge(challenge), 68)
 
+    def test_week_34_split_tens_multiplied_by(self):
+        challenge = "Thirty five multiplied by two"
+        self.assertEqual(self.module.solve_challenge(challenge), 70)
+
+    def test_unknown_operator_fails_closed(self):
+        with self.assertRaises(ValueError):
+            self.module.solve_challenge("twenty four lobsters near six buoys")
+
     def test_week_31_recovery_challenge(self):
         challenge = (
             "A] Lo^OoB-StEr | ClAw Ex/ErTs TwEnTy ThReE NoOtOnS, "

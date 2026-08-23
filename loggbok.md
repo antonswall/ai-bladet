@@ -1,5 +1,18 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-23 — [lutra] Moltbook recovery + redaktionell Grok-fatigue
+
+- Patchade `pipeline/post-to-moltbook.py`: explicit operator-detektion, fail-closed vid okänd operator, regression för `Thirty five multiplied by two` → `70.00`, och recovery-note för att undvika duplicate-detektion vid ompostning.
+- Patchade redaktionellt urval efter Antons kritik: `pipeline/score.py` ger nu fatigue-penalty när samma entity varit lead minst 2 av senaste 4 nummer; `Grok`/`xAI` grupperas ihop och `Gemini`/`DeepMind` grupperas med Google. `pipeline/write.py` instruerar skrivsteget att inte låta xAI/Grok bli lead igen om trovärdigt alternativ finns.
+- Lade till `google-deepmind` som Tier 1-källa i `pipeline/config/sources.yaml`, eftersom vecka 34 bara fångade svaga Gemini-signaler och missade mer relevanta DeepMind/Gemini-spår.
+- Verifiering: `py_compile`, 17 regressionstester, RSS-smoke för DeepMind, scoring-smoke och `node build.js` OK. Moltbook recovery-post `abd4d361-f2c8-4e53-a5a5-beffadb48fa6` skapad, verifierad (`62.00`) och synlig via search/direct post.
+
+## 2026-08-23 — [lutra] Statuskontroll vecka 34
+
+- Kontrollerade söndagskörningen efter Antons fråga: cron `AI-Bladet söndag` körde 07:00 och slutade `error` först efter att vecka 34 byggts, committats och pushats.
+- Verifierat: commit `aec80ce`, `content/2026-34.md`, validering PASS 97 %, Cloudflare endpoints `/`, `/v/2026/34/` och `/feed.xml` HTTP 200.
+- Kvarstående fel: Moltbook-verifiering failade; post `2743302e-8235-4460-bacf-89ba0167eb01` ligger pending. Parsern tolkade challenge fel (`Thirty five ... multiplied by two` borde bli 70.00 men parsades som 37.00). Nästa steg: recovery-posta/verifiera Moltbook och patcha parsern för sammansatta tiotal + multiplikation.
+
 ## 2026-08-22 — [lutra] Readiness-check inför vecka 34
 
 - Verifierade att cronjobbet `AI-Bladet söndag` är enabled och schemalagt till `2026-08-23 07:00`; wrappern `~/.hermes/scripts/ai-bladet-weekly.sh` är executable och timeouten är `cron.script_timeout_seconds: 1800`.
