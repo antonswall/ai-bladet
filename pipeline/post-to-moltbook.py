@@ -68,7 +68,9 @@ def already_published(week):
     result = api_get("/search", {"q": f"AI-Bladet Vecka {week}", "type": "posts", "limit": 20})
     for item in (result or {}).get("results", []):
         author = (item.get("author") or {}).get("name")
-        if author == "lutra_ai" and f"Vecka {week}" in item.get("title", ""):
+        title = item.get("title", "")
+        status = item.get("verification_status") or item.get("verificationStatus")
+        if author == "lutra_ai" and f"Vecka {week}" in title and status == "verified":
             return item.get("id")
     return None
 
@@ -102,17 +104,19 @@ def _detect_operator(challenge: str) -> str:
     signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
     if any(op in signal for op in ("multiplies", "multipliedby", "multiplied", "product", "times")):
         return "multiply"
+    if "howfar" in signal and ("persecond" in signal or "perhour" in signal):
+        return "multiply"
     if any(op in signal for op in ("slowsby", "reduces", "loses", "removes")):
         return "subtract"
-    if any(op in signal for op in ("spedsup", "speedsup", "accelerates", "acelerates", "gains")):
+    if any(op in signal for op in ("spedsup", "speedsup", "accelerates", "acelerates", "gains", "increases", "increasesby")):
         return "add"
     if any(op in signal for op in ("combined", "total", "exerts")):
         return "sum"
     raise ValueError(f"okänd operator i verifieringsutmaningen: signal={signal[:80]}")
 
 
-def solve_challenge(challenge: str) -> float:
-    """Lös Moltbooks obfuskerade textproblem deterministiskt."""
+def _extract_number_tokens(challenge: str) -> list[tuple[int, int]]:
+    """Extrahera number-words från tokens och splittrade adjacent tokens."""
     spaced = re.sub(r"[^a-zA-Z\s]", " ", challenge)
     tokens = [token for token in spaced.split() if token]
     word_to_number = {
@@ -151,20 +155,99 @@ def solve_challenge(challenge: str) -> float:
                 numbers.append((index, word_to_number[word]))
                 break
 
-    numbers.sort(key=lambda item: item[0])
-    values = [value for _, value in numbers]
+    return sorted(numbers, key=lambda item: item[0])
+
+
+def _extract_numbers_from_compact(challenge: str) -> list[int]:
+    """Fallback för ord som splittrats över fler än två noise-tokens."""
+    compact = re.sub(r"[^a-z]", "", challenge.lower())
+    word_to_number = {
+        "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+        "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90,
+        "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+        "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18,
+        "nineteen": 19, "ten": 10, "nine": 9, "eight": 8, "seven": 7,
+        "six": 6, "five": 5, "four": 4, "three": 3, "two": 2,
+        "one": 1, "zero": 0,
+    }
+    tens_words = {"twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"}
+    unit_words = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
+    words = sorted(word_to_number, key=len, reverse=True)
+    patterns = {
+        word: re.compile("".join(f"{char}+" for char in word), re.IGNORECASE)
+        for word in word_to_number
+    }
+    boundaries = (
+        "meterspersecond", "meterpersecond", "centimeterspersecond", "centimeterpersecond",
+        "kilometersperhour", "meters", "meter", "centimeters", "centimeter", "seconds",
+        "second", "velocity", "speed", "multipliedby", "multiplied", "times", "product",
+        "gains", "increasesby", "increases", "speedsup", "slowsby", "reduces", "loses",
+        "combined", "total", "and", "what", "is", "the", "at", "per", "by", "after",
+    )
+    out = []
+    i = 0
+    while i < len(compact):
+        matched = False
+        for word in words:
+            m = patterns[word].match(compact, i)
+            if not m:
+                continue
+            after = compact[m.end():]
+            if word in tens_words:
+                for unit in sorted(unit_words, key=len, reverse=True):
+                    um = patterns[unit].match(compact, m.end())
+                    if um:
+                        after_unit = compact[um.end():]
+                        if not after_unit or any(after_unit.startswith(b) for b in boundaries):
+                            out.append(word_to_number[word] + word_to_number[unit])
+                            i = um.end()
+                            matched = True
+                            break
+                if matched:
+                    break
+            if after and not any(after.startswith(b) for b in boundaries):
+                continue
+            out.append(word_to_number[word])
+            i = m.end()
+            matched = True
+            break
+        if not matched:
+            i += 1
+    return out
+
+
+def _merge_number_phrases(numbers: list[tuple[int, int]]) -> list[int]:
+    """Slå bara ihop tens+units när orden ligger intill varandra i texten."""
     merged = []
     index = 0
     tens = {20, 30, 40, 50, 60, 70, 80, 90}
     units = {1, 2, 3, 4, 5, 6, 7, 8, 9}
-    while index < len(values):
-        value = values[index]
-        if value in tens and index + 1 < len(values) and values[index + 1] in units:
-            merged.append(value + values[index + 1])
+    while index < len(numbers):
+        pos, value = numbers[index]
+        if (
+            value in tens
+            and index + 1 < len(numbers)
+            and numbers[index + 1][1] in units
+            and numbers[index + 1][0] == pos + 1
+        ):
+            merged.append(value + numbers[index + 1][1])
             index += 2
         else:
             merged.append(value)
             index += 1
+    return merged
+
+
+def solve_challenge(challenge: str) -> float:
+    """Lös Moltbooks obfuskerade textproblem deterministiskt."""
+    token_numbers = _merge_number_phrases(_extract_number_tokens(challenge))
+    compact_numbers = _extract_numbers_from_compact(challenge)
+    if len(compact_numbers) > len(token_numbers):
+        merged = compact_numbers
+    elif len(compact_numbers) == len(token_numbers) and compact_numbers != token_numbers:
+        merged = compact_numbers
+    else:
+        merged = token_numbers
 
     signal = re.sub(r"(.)\1+", r"\1", re.sub(r"[^a-z]", "", challenge.lower()))
     if "point" in signal and len(merged) >= 2:
@@ -183,7 +266,6 @@ def solve_challenge(challenge: str) -> float:
     if operator == "sum":
         return sum(merged)
     raise ValueError(f"ohanterad operator: {operator}")
-
 
 def main():
     week = get_week_number()

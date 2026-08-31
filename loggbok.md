@@ -1,5 +1,19 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-31 — [lutra] Vecka 35 recovery publicerad
+
+- Rättade `content/2026-35.md` datum till `2026-08-30` och patchade Moltbook-parsern för splittrade number-words över flera noise-tokens samt operatorn `increases by`.
+- Moltbook: ny recovery-post `baa37415-28ea-47a7-96fd-48f793957453` verifierad med svaret `30.00`; tidigare pending-post `f5bff90f-38c5-4e8f-a163-a039db11027a` lämnad oförändrad.
+- Distribution körd OK 5/5: audio, X-threadtext, AI-lögn, LinkedIn-text, ordbok och meme genererade. `node build.js` OK och SeenDB commit körd för 458 kandidater.
+- Verifiering: `py_compile`, parser-regressioner för vecka 35-challenges, `node build.js`, `git diff --check` OK.
+
+## 2026-08-31 — [lutra] Statuskontroll vecka 35 efter söndagsfel
+
+- Söndagscron 2026-08-30 körde pipeline OK: collect 679→458 kandidater, dedup 360, research 15/15, images 15/15, write via Codex-fallback efter OpenRouter 401, validate PASS 92% och commit/push `ba69390` för `content/2026-35.md`.
+- Felet kom efter deploy: Moltbook-post `f5bff90f-38c5-4e8f-a163-a039db11027a` skapades men verifieringen failade. Parsern hittade bara `[25]` i challenge `twenty meters per second ... gains five meters per second` och stoppade fail-closed.
+- Korrigering 20:23: Anton förtydligade att canonical domän alltid är `ai-bladet.pages.dev`; ingen DNS/Cloudflare-ändring ska göras. Verifierad status: `ai-bladet.pages.dev` visar vecka 35, men Moltbook-posten var pending/ej verifierad och distribution hade inte körts, så `public/audio/2026-35.mp3`, `public/memes/2026-35.png` och distributionsrapport saknades. SeenDB commit hade inte körts.
+- Extra fynd: `content/2026-35.md` har fel frontmatterdatum `2026-08-23` trots söndagskörning 2026-08-30. Behöver rättas vid recovery.
+
 ## 2026-08-23 — [lutra] Moltbook recovery + redaktionell Grok-fatigue
 
 - Patchade `pipeline/post-to-moltbook.py`: explicit operator-detektion, fail-closed vid okänd operator, regression för `Thirty five multiplied by two` → `70.00`, och recovery-note för att undvika duplicate-detektion vid ompostning.

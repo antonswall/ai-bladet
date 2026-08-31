@@ -4,7 +4,11 @@
 
 
 
+
+
   <channel>
+
+
 
 
 
@@ -14,7 +18,11 @@
 
 
 
+
+
     <link>https://aibladet.se/</link>
+
+
 
 
 
@@ -24,7 +32,11 @@
 
 
 
+
+
     <language>sv</language>
+
+
 
 
 
@@ -34,7 +46,11 @@
 
 
 
+
+
     <itunes:category text="Technology"/>
+
+
 
 
 
@@ -44,30 +60,79 @@
 
 
 
+
+
     <itunes:image href="https://aibladet.se/static/android-chrome-512x512.png"/>
 
 
 
 
+
+
     <item>
+
+
 
 
       <title>Vecka 31 — xAI fyller på Copilot — och bygger webbappar i chatten</title>
 
 
+
+
       <description>AI-Bladet vecka 31. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+
+
 
 
       <link>https://aibladet.se/audio/2026-31.mp3</link>
 
 
+
+
       <guid>ai-bladet-2026-31</guid>
+
+
 
 
       <pubDate>Sun, 26 Jul 2026 09:00:00 +0000</pubDate>
 
 
+
+
       <enclosure url="https://aibladet.se/audio/2026-31.mp3" length="1057062" type="audio/mpeg"/>
+
+
+
+
+      <itunes:duration>00:01:30</itunes:duration>
+
+
+
+
+    </item>
+
+
+
+
+    <item>
+
+
+      <title>Vecka 33 — Grok går längre – och kalkylblad blir appar</title>
+
+
+      <description>AI-Bladet vecka 33. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+
+
+      <link>https://aibladet.se/audio/2026-33.mp3</link>
+
+
+      <guid>ai-bladet-2026-33</guid>
+
+
+      <pubDate>Sun, 16 Aug 2026 09:00:00 +0000</pubDate>
+
+
+      <enclosure url="https://aibladet.se/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
 
 
       <itunes:duration>00:01:30</itunes:duration>
@@ -77,15 +142,17 @@
 
 
     <item>
-      <title>Vecka 33 — Grok går längre – och kalkylblad blir appar</title>
-      <description>AI-Bladet vecka 33. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
-      <link>https://aibladet.se/audio/2026-33.mp3</link>
-      <guid>ai-bladet-2026-33</guid>
-      <pubDate>Sun, 16 Aug 2026 09:00:00 +0000</pubDate>
-      <enclosure url="https://aibladet.se/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
+      <title>Vecka 35 — Grok 4.6 flyttar in i Amazons modellhall</title>
+      <description>AI-Bladet vecka 35. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      <link>https://aibladet.se/audio/2026-35.mp3</link>
+      <guid>ai-bladet-2026-35</guid>
+      <pubDate>Sun, 30 Aug 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://aibladet.se/audio/2026-35.mp3" length="1203348" type="audio/mpeg"/>
       <itunes:duration>00:01:30</itunes:duration>
     </item>
   </channel>
+
+
 
 
 
