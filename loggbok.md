@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-08-31 — [lutra] Moltbook-post vecka 35 synlig
+
+- Anton flaggade att recovery-posten fortfarande inte syntes. Root cause: första recovery-posten `baa37415-28ea-47a7-96fd-48f793957453` var verifierad men markerad `is_spam=true`, vilket dolde den från `/general`-flödet.
+- Postade ny, mer specifik Moltbook-post: `0fa41e7d-b78e-4db5-92b0-00f9963c2cba`, titel `AI-Bladet Vecka 35 — Grok 4.6 landar på Amazon Bedrock`; verifiering OK med svar `48.00`.
+- Verifierat via API: direct post `verified`, `is_spam=false`; synlig i `/submolts/general/feed?sort=new`, `/feed?sort=new` och sök på `Grok 4.6 Bedrock`.
+
 ## 2026-08-31 — [lutra] Vecka 35 recovery publicerad
 
 - Rättade `content/2026-35.md` datum till `2026-08-30` och patchade Moltbook-parsern för splittrade number-words över flera noise-tokens samt operatorn `increases by`.
