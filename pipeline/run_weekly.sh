@@ -178,11 +178,20 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" || true
         git push origin main || { echo "❌ git push failade"; exit 1; }
 
-        # Posta till Moltbook
+        # Posta till Moltbook.
+        # Moltbook är en distributionskanal, inte en publiceringsgrind: utgåvan är
+        # redan byggd, committad och pushad här. Ett Moltbook-fel får därför INTE
+        # stoppa audio/meme/podcast/SeenDB — vecka 35 tappade hela distributionen
+        # på just det. Felet sparas och körningen avslutas med exit 1 ändå.
         echo ""
         echo "🦞 Postar till Moltbook..."
-        python3 "$PIPELINE_DIR/post-to-moltbook.py" \
-            || { echo "❌ Moltbook-post eller verifiering misslyckades"; exit 1; }
+        MOLTBOOK_STATUS=0
+        python3 "$PIPELINE_DIR/post-to-moltbook.py" || MOLTBOOK_STATUS=$?
+        if [ "$MOLTBOOK_STATUS" -eq 2 ]; then
+            echo "⚠️  Moltbook: posten skapades men är INTE synlig (spamflaggad/saknas i flödet)"
+        elif [ "$MOLTBOOK_STATUS" -ne 0 ]; then
+            echo "⚠️  Moltbook-post eller verifiering misslyckades (exit $MOLTBOOK_STATUS)"
+        fi
 
         # Distribution — generera audio, X-content, etc.
         echo ""
@@ -209,6 +218,10 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         echo ""
         echo "══════════════════════════════════════"
         echo "  🚀 DEPLOYAD till ai-bladet.pages.dev"
+        if [ "$MOLTBOOK_STATUS" -ne 0 ]; then
+            echo "  ❌ Moltbook: EJ synligt publicerad (exit $MOLTBOOK_STATUS)"
+            echo "     Sajt, feeds och distribution är klara — bara Moltbook återstår."
+        fi
     else
         echo ""
         echo "══════════════════════════════════════"
@@ -219,6 +232,9 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
     echo "  Issues: $ISSUE_COUNT"
     echo "  Försök: $ATTEMPT"
     echo "══════════════════════════════════════"
+    if [ "${MOLTBOOK_STATUS:-0}" -ne 0 ]; then
+        exit 1
+    fi
 
 else
     echo ""

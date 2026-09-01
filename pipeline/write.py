@@ -12,7 +12,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone, date, timedelta
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -309,9 +309,12 @@ REDAKTIONELLA REGLER — inga undantag:
 def build_prompt(stories: list[dict], week: str, year: int,
                  published_date: str) -> str:
     """Bygg prompten för Sonnet med alla researchade stories."""
-    now = datetime.now(timezone.utc)
     week_num = int(week.split("-")[1])
-    date_obj = now - timedelta(days=now.weekday() + 1)  # senaste söndag
+    # Utgåvans datum är söndagen i utgåvans EGEN ISO-vecka, inte något som räknas
+    # ut från körtidpunkten. Den gamla formeln (now - (weekday+1) dagar) drog av
+    # sju dagar på söndagar och daterade därför varje söndagskört nummer en vecka
+    # för tidigt; en recovery-körning en annan veckodag gav dessutom fel datum.
+    date_obj = date.fromisocalendar(year, week_num, 7)
     date_str = date_obj.strftime("%Y-%m-%d")
 
     # Bygg context för varje story

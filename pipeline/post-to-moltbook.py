@@ -64,13 +64,56 @@ def api_get(path, query=None):
         return None
 
 
+def get_post(post_id):
+    """Hämta en post med fulla fält (sökträffar saknar verification_status/is_spam)."""
+    result = api_get(f"/posts/{post_id}")
+    if not result:
+        return None
+    return result.get("post") or result
+
+
+def post_is_visible(post_id):
+    """Sant bara om posten är verifierad OCH inte spamflaggad.
+
+    Moltbook döljer spamflaggade poster från /general och /feed utan att
+    verifieringen failar. Sökträffar saknar båda fälten, så posten måste
+    hämtas separat.
+    """
+    post = get_post(post_id)
+    if not post:
+        return False, "kunde inte hämta posten från Moltbook"
+    status = post.get("verification_status") or post.get("verificationStatus")
+    is_spam = bool(post.get("is_spam"))
+    if status != "verified":
+        return False, f"verification_status={status!r}"
+    if is_spam:
+        return False, "is_spam=true — posten är dold från /general och /feed"
+    return True, "verified, is_spam=false"
+
+
+def in_public_feed(post_id, limit=50):
+    """Kontrollera att posten faktiskt syns i general-flödet."""
+    result = api_get("/submolts/general/feed", {"sort": "new", "limit": limit})
+    if result is None:
+        return None  # okänt — nätfel, inte ett bevis på motsatsen
+    posts = result.get("posts") or result.get("results") or []
+    return any(item.get("id") == post_id for item in posts)
+
+
 def already_published(week):
+    """Returnera id för en redan SYNLIG vecko-post, annars None.
+
+    En verifierad men spamflaggad post räknas inte som publicerad — då ska
+    recovery få posta om.
+    """
     result = api_get("/search", {"q": f"AI-Bladet Vecka {week}", "type": "posts", "limit": 20})
     for item in (result or {}).get("results", []):
         author = (item.get("author") or {}).get("name")
         title = item.get("title", "")
-        status = item.get("verification_status") or item.get("verificationStatus")
-        if author == "lutra_ai" and f"Vecka {week}" in title and status == "verified":
+        if author != "lutra_ai" or f"Vecka {week}" not in title:
+            continue
+        visible, _ = post_is_visible(item.get("id"))
+        if visible:
             return item.get("id")
     return None
 
@@ -322,11 +365,24 @@ def main():
             })
             if verify_result:
                 save_response(week, "verify", verify_result, post_id)
-            if verify_result and verify_result.get("success"):
-                print(f"moltbook: verification OK — post published! 🦞")
-            else:
+            if not (verify_result and verify_result.get("success")):
                 print(f"moltbook: verification FAILED (answer={answer:.2f}) — post pending", file=sys.stderr)
                 return 1
+            print("moltbook: verification OK 🦞")
+
+        # Verifiering räcker inte som leveransbevis: Moltbook kan flagga posten
+        # som spam och dölja den från /general utan att verifieringen failar.
+        visible, reason = post_is_visible(post_id)
+        if not visible:
+            print(f"moltbook: post {post_id} är INTE synlig — {reason}", file=sys.stderr)
+            return 2
+        feed_hit = in_public_feed(post_id)
+        if feed_hit is False:
+            print(f"moltbook: post {post_id} saknas i /submolts/general/feed?sort=new", file=sys.stderr)
+            return 2
+        if feed_hit is None:
+            print("moltbook: kunde inte läsa general-flödet — hoppar över flödeskontrollen", file=sys.stderr)
+        print(f"moltbook: post {post_id} synlig och publicerad — {reason}")
         return 0
     else:
         print("moltbook: failed to create post", file=sys.stderr)

@@ -36,7 +36,7 @@ AUDIO_DIR = PUBLIC_DIR / "audio"
 FEED_DIR = PUBLIC_DIR / "feed"
 CONTENT_DIR = PROJECT_DIR / "content"
 
-SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
+SITE_URL = os.getenv("SITE_URL", "https://ai-bladet.pages.dev")
 ITUNES_NS = "http://www.itunes.com/dtds/podcast-1.0.dtd"
 CONTENT_NS = "http://purl.org/rss/1.0/modules/content/"
 ET.register_namespace("itunes", ITUNES_NS)

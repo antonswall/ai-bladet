@@ -20,7 +20,7 @@
 
 
 
-    <link>https://aibladet.se/</link>
+    <link>https://ai-bladet.pages.dev/</link>
 
 
 
@@ -62,7 +62,7 @@
 
 
 
-    <itunes:image href="https://aibladet.se/static/android-chrome-512x512.png"/>
+    <itunes:image href="https://ai-bladet.pages.dev/static/android-chrome-512x512.png"/>
 
 
 
@@ -84,7 +84,7 @@
 
 
 
-      <link>https://aibladet.se/audio/2026-31.mp3</link>
+      <link>https://ai-bladet.pages.dev/audio/2026-31.mp3</link>
 
 
 
@@ -99,7 +99,7 @@
 
 
 
-      <enclosure url="https://aibladet.se/audio/2026-31.mp3" length="1057062" type="audio/mpeg"/>
+      <enclosure url="https://ai-bladet.pages.dev/audio/2026-31.mp3" length="1057062" type="audio/mpeg"/>
 
 
 
@@ -123,7 +123,7 @@
       <description>AI-Bladet vecka 33. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
 
 
-      <link>https://aibladet.se/audio/2026-33.mp3</link>
+      <link>https://ai-bladet.pages.dev/audio/2026-33.mp3</link>
 
 
       <guid>ai-bladet-2026-33</guid>
@@ -132,7 +132,7 @@
       <pubDate>Sun, 16 Aug 2026 09:00:00 +0000</pubDate>
 
 
-      <enclosure url="https://aibladet.se/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
+      <enclosure url="https://ai-bladet.pages.dev/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
 
 
       <itunes:duration>00:01:30</itunes:duration>
@@ -144,10 +144,10 @@
     <item>
       <title>Vecka 35 — Grok 4.6 flyttar in i Amazons modellhall</title>
       <description>AI-Bladet vecka 35. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
-      <link>https://aibladet.se/audio/2026-35.mp3</link>
+      <link>https://ai-bladet.pages.dev/audio/2026-35.mp3</link>
       <guid>ai-bladet-2026-35</guid>
       <pubDate>Sun, 30 Aug 2026 09:00:00 +0000</pubDate>
-      <enclosure url="https://aibladet.se/audio/2026-35.mp3" length="1203348" type="audio/mpeg"/>
+      <enclosure url="https://ai-bladet.pages.dev/audio/2026-35.mp3" length="1203348" type="audio/mpeg"/>
       <itunes:duration>00:01:30</itunes:duration>
     </item>
   </channel>

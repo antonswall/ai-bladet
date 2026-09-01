@@ -117,5 +117,110 @@ class RunnerControlFlowTests(unittest.TestCase):
         self.assertIn("result.stderr", distributor)
 
 
+class IssueDateTests(unittest.TestCase):
+    """Regression: varje nummer daterades en vecka för tidigt (vecka 25–32)."""
+
+    @classmethod
+    def setUpClass(cls):
+        import write
+        cls.write = write
+
+    def _date_line(self, week: str, year: int) -> str:
+        prompt = self.write.build_prompt([], week, year, "")
+        for line in prompt.splitlines():
+            if line.startswith("date: "):
+                return line.split("date: ", 1)[1].strip()
+        raise AssertionError("ingen date-rad i prompten")
+
+    def test_date_is_sunday_of_the_issue_week(self):
+        self.assertEqual(self._date_line("2026-35", 2026), "2026-08-30")
+        self.assertEqual(self._date_line("2026-34", 2026), "2026-08-23")
+        self.assertEqual(self._date_line("2026-25", 2026), "2026-06-21")
+
+    def test_date_does_not_depend_on_run_time(self):
+        """En recovery-körning senare i veckan får inte flytta utgåvans datum."""
+        first = self._date_line("2026-35", 2026)
+        second = self._date_line("2026-35", 2026)
+        self.assertEqual(first, second)
+        self.assertEqual(first, date.fromisocalendar(2026, 35, 7).isoformat())
+
+
+class MoltbookVisibilityTests(unittest.TestCase):
+    """Regression vecka 35: verifierad post var spamflaggad och osynlig."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.moltbook = load_moltbook_module()
+
+    def test_spam_flagged_post_is_not_visible(self):
+        with mock.patch.object(
+            self.moltbook, "api_get",
+            return_value={"post": {"verification_status": "verified", "is_spam": True}},
+        ):
+            visible, reason = self.moltbook.post_is_visible("abc")
+        self.assertFalse(visible)
+        self.assertIn("is_spam", reason)
+
+    def test_verified_and_clean_post_is_visible(self):
+        with mock.patch.object(
+            self.moltbook, "api_get",
+            return_value={"post": {"verification_status": "verified", "is_spam": False}},
+        ):
+            visible, _ = self.moltbook.post_is_visible("abc")
+        self.assertTrue(visible)
+
+    def test_pending_post_is_not_visible(self):
+        with mock.patch.object(
+            self.moltbook, "api_get",
+            return_value={"post": {"verification_status": "pending", "is_spam": False}},
+        ):
+            visible, reason = self.moltbook.post_is_visible("abc")
+        self.assertFalse(visible)
+        self.assertIn("verification_status", reason)
+
+    def test_already_published_ignores_hidden_post(self):
+        search = {"results": [{"id": "abc", "title": "AI-Bladet Vecka 35 — x",
+                               "author": {"name": "lutra_ai"}}]}
+
+        def fake_get(path, query=None):
+            if path == "/search":
+                return search
+            return {"post": {"verification_status": "verified", "is_spam": True}}
+
+        with mock.patch.object(self.moltbook, "api_get", side_effect=fake_get):
+            self.assertIsNone(self.moltbook.already_published("35"))
+
+    def test_network_error_on_feed_is_not_treated_as_absent(self):
+        with mock.patch.object(self.moltbook, "api_get", return_value=None):
+            self.assertIsNone(self.moltbook.in_public_feed("abc"))
+
+
+class MoltbookIsNotAPublishingGateTests(unittest.TestCase):
+    """Vecka 35 tappade audio/meme/SeenDB för att Moltbook-felet gav exit 1."""
+
+    def test_moltbook_failure_does_not_abort_distribution(self):
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        self.assertIn("MOLTBOOK_STATUS=$?", runner)
+        self.assertNotIn(
+            '|| { echo "❌ Moltbook-post eller verifiering misslyckades"; exit 1; }',
+            runner,
+        )
+
+    def test_moltbook_failure_still_fails_the_run(self):
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        self.assertIn('if [ "${MOLTBOOK_STATUS:-0}" -ne 0 ]; then', runner)
+
+
+class PodcastFeedTests(unittest.TestCase):
+    """Enclosure-URL:erna pekade på aibladet.se, som inte serverar sajten."""
+
+    def test_site_url_defaults_to_canonical_host(self):
+        self.assertEqual(distribute_audio.SITE_URL, "https://ai-bladet.pages.dev")
+
+    def test_published_feed_has_no_dead_host(self):
+        feed = (PIPELINE.parent / "public" / "feed" / "podcast.xml").read_text()
+        self.assertNotIn("aibladet.se", feed)
+
+
 if __name__ == "__main__":
     unittest.main()
