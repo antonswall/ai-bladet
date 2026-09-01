@@ -186,7 +186,7 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         echo ""
         echo "🦞 Postar till Moltbook..."
         MOLTBOOK_STATUS=0
-        python3 "$PIPELINE_DIR/post-to-moltbook.py" || MOLTBOOK_STATUS=$?
+        python "$PIPELINE_DIR/post-to-moltbook.py" || MOLTBOOK_STATUS=$?
         if [ "$MOLTBOOK_STATUS" -eq 2 ]; then
             echo "⚠️  Moltbook: posten skapades men är INTE synlig (spamflaggad/saknas i flödet)"
         elif [ "$MOLTBOOK_STATUS" -ne 0 ]; then
@@ -198,7 +198,11 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         echo "📢 Distribuerar veckans nummer..."
         ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
         if [ -f "$ISSUE_FILE" ]; then
-            python3 "$PIPELINE_DIR/distribute.py" --issue "$ISSUE_FILE" \
+            # `python` = venv-tolken som preflight validerar. `python3` pekar på
+            # homebrew 3.14 utan requests/yaml och med trasig pyexpat, och
+            # distribute.py startar sina moduler med sys.executable — hela
+            # distributionen dog alltså på fel tolk.
+            python "$PIPELINE_DIR/distribute.py" --issue "$ISSUE_FILE" \
                 || { echo "❌ Distribution misslyckades — stoppar före slutpush och SeenDB-commit"; exit 1; }
             # Bygg om sajten med nya assets (audio etc.)
             cd "$PROJECT_DIR"

@@ -211,6 +211,26 @@ class MoltbookIsNotAPublishingGateTests(unittest.TestCase):
         self.assertIn('if [ "${MOLTBOOK_STATUS:-0}" -ne 0 ]; then', runner)
 
 
+class InterpreterTests(unittest.TestCase):
+    """`python3` = homebrew 3.14 utan requests/yaml; `python` = venv-tolken."""
+
+    def test_distribution_uses_the_preflight_validated_interpreter(self):
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        self.assertIn('python "$PIPELINE_DIR/distribute.py"', runner)
+        self.assertNotIn('python3 "$PIPELINE_DIR/distribute.py"', runner)
+
+    def test_moltbook_uses_the_preflight_validated_interpreter(self):
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        self.assertIn('python "$PIPELINE_DIR/post-to-moltbook.py"', runner)
+        self.assertNotIn('python3 "$PIPELINE_DIR/post-to-moltbook.py"', runner)
+
+    def test_distribution_modules_inherit_the_parent_interpreter(self):
+        """distribute.py startar modulerna med sys.executable — därför spelar
+        anropstolken i runnern roll hela vägen ner."""
+        distributor = (PIPELINE / "distribute.py").read_text()
+        self.assertIn("sys.executable", distributor)
+
+
 class PodcastFeedTests(unittest.TestCase):
     """Enclosure-URL:erna pekade på aibladet.se, som inte serverar sajten."""
 
