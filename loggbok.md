@@ -1,5 +1,14 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-01 — [lutra] Vecka 35 rättad + Moltbook avkopplad
+
+- Rotorsak: `content/2026-35.md` (rätt innehåll: Cursor/OpenAI) var aldrig pushad; Cloudflare körde gammal build med Grok 4.6 Bedrock-lead — nästan identisk med vecka 34.
+- Körde `node build.js`, verifierade h1-titlar lokalt, committade och pushade (`e0e7d8e`).
+- Live-verifiering: `ai-bladet.pages.dev/v/2026/35/` visar nu "OpenAI vill stoppa modellerna i Cursor den 12 november".
+- Moltbook bortkopplad ur `pipeline/run_weekly.sh` — all Moltbook-kod ersatt med `MOLTBOOK_STATUS=0` (kommentar: spamfilter, inget appeal-API).
+- Nästa steg: söndagscron 2026-09-06 kör vecka 36 utan Moltbook.
+
+
 ## 2026-09-01 — [lutra] Omverifiering: sajten live, Moltbook fortfarande dold
 
 - Kontroll 17:05 CEST: `https://ai-bladet.pages.dev/v/2026/35/` svarar HTTP 200 och innehåller Vecka 35, 30 augusti 2026 och rätt Grok 4.6-titel.
