@@ -178,20 +178,14 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" || true
         git push origin main || { echo "❌ git push failade"; exit 1; }
 
-        # Posta till Moltbook.
-        # Moltbook är en distributionskanal, inte en publiceringsgrind: utgåvan är
-        # redan byggd, committad och pushad här. Ett Moltbook-fel får därför INTE
-        # stoppa audio/meme/podcast/SeenDB — vecka 35 tappade hela distributionen
-        # på just det. Felet sparas och körningen avslutas med exit 1 ändå.
-        echo ""
-        echo "🦞 Postar till Moltbook..."
+        # Sajten är nu publicerad. Lås därför veckans kandidater i SeenDB direkt:
+        # externa distributionsfel får aldrig göra redan publicerade nyheter "nya"
+        # igen nästa vecka (vecka 34→35 återanvände annars samma Grok-lead).
+        python "$PIPELINE_DIR/collect.py" --commit-seen "$CANDIDATE_FILE" \
+            || { echo "❌ SeenDB-commit misslyckades efter sajtpublicering"; exit 1; }
+
+        # Moltbook: avkopplad 2026-09-01 (spamfilter blockerade alla poster, inget appeal-API).
         MOLTBOOK_STATUS=0
-        python "$PIPELINE_DIR/post-to-moltbook.py" || MOLTBOOK_STATUS=$?
-        if [ "$MOLTBOOK_STATUS" -eq 2 ]; then
-            echo "⚠️  Moltbook: posten skapades men är INTE synlig (spamflaggad/saknas i flödet)"
-        elif [ "$MOLTBOOK_STATUS" -ne 0 ]; then
-            echo "⚠️  Moltbook-post eller verifiering misslyckades (exit $MOLTBOOK_STATUS)"
-        fi
 
         # Distribution — generera audio, X-content, etc.
         echo ""
@@ -214,10 +208,6 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
             echo "❌ Ingen issue-fil hittad för distribution: $ISSUE_FILE"
             exit 1
         fi
-
-        # Först nu är publiceringen komplett; gör kandidaterna permanenta i SeenDB.
-        python "$PIPELINE_DIR/collect.py" --commit-seen "$CANDIDATE_FILE" \
-            || { echo "❌ SeenDB-commit misslyckades"; exit 1; }
 
         echo ""
         echo "══════════════════════════════════════"

@@ -145,9 +145,29 @@ def parse_issue(content_path: Path) -> dict | None:
 
     return {"frontmatter": fm, "body": body, "full_text": text}
 
+
+def _load_previous_issue(content_path: Path) -> dict | None:
+    """Läs närmast föregående YYYY-WW-utgåva för dublettkontroll."""
+    current_match = re.fullmatch(r"(\d{4})-(\d{2})", content_path.stem)
+    if not current_match:
+        return None
+    current_key = tuple(map(int, current_match.groups()))
+    candidates = []
+    for path in content_path.parent.glob("*.md"):
+        match = re.fullmatch(r"(\d{4})-(\d{2})", path.stem)
+        if not match:
+            continue
+        key = tuple(map(int, match.groups()))
+        if key < current_key:
+            candidates.append((key, path))
+    if not candidates:
+        return None
+    return parse_issue(max(candidates, key=lambda item: item[0])[1])
+
 # ─── Claim validation (DeepSeek V4 Pro) ──────────────────────────────────────
 
-def validate_issue(issue: dict, research_stories: list[dict]) -> dict:
+def validate_issue(issue: dict, research_stories: list[dict],
+                   previous_issue: dict | None = None) -> dict:
     """Kör validering på hela utgåvan."""
     fm = issue["frontmatter"]
     body = issue["body"]
@@ -276,7 +296,7 @@ Svara endast med JSON:
 
     # Sammantaget
     result["lead_sources"] = _check_lead_sources(research_stories)
-    result["duplication"] = _check_duplication(issue)
+    result["duplication"] = _check_duplication(issue, previous_issue=previous_issue)
     result["se_eu_angle"] = _check_se_eu_angle(issue, research_stories)
 
     # Word count-kontroll: varje story.body måste vara minst MIN_STORY_WORDS ord
@@ -452,16 +472,47 @@ def _check_lead_sources(research_stories: list[dict]) -> int:
         return len(sources)
     return 0
 
-def _check_duplication(issue: dict) -> dict:
-    """Regel 2: Kolla att lead inte är samma story som en sektion.
-
-    Fuzzy-match: jämför lead-headline mot alla section-headlines.
-    Flagga om >70% ordöverlapp eller gemensamt nyckelbolag/produkt.
-    """
+def _check_duplication(issue: dict, previous_issue: dict | None = None) -> dict:
+    """Blockera dubletter både inom numret och mot föregående utgåvas lead."""
     fm = issue.get("frontmatter", {})
     lead = fm.get("lead", {})
     lead_headline = (lead.get("headline", "") + " " + lead.get("kicker", "")).lower()
     stories = fm.get("stories", [])
+
+    if previous_issue:
+        previous_lead = previous_issue.get("frontmatter", {}).get("lead", {})
+        previous_headline = (
+            previous_lead.get("headline", "") + " " + previous_lead.get("kicker", "")
+        ).lower()
+        current_image = (lead.get("image") or "").strip()
+        previous_image = (previous_lead.get("image") or "").strip()
+
+        if current_image and current_image == previous_image:
+            return {
+                "duplicate": True,
+                "reason": "Lead återanvänder samma huvudbild som föregående utgåva — trolig återpublicering.",
+            }
+
+        stopwords = {"och", "att", "den", "det", "till", "från", "med", "som", "modeller", "verktyg"}
+        token_pattern = r"[a-zåäö0-9]+(?:\.[0-9]+)?"
+        current_words = {
+            word for word in re.findall(token_pattern, lead_headline)
+            if len(word) >= 3 and word not in stopwords
+        }
+        previous_words = {
+            word for word in re.findall(token_pattern, previous_headline)
+            if len(word) >= 3 and word not in stopwords
+        }
+        shared = current_words & previous_words
+        overlap = len(shared) / max(len(current_words), len(previous_words), 1)
+        if len(shared) >= 3 and overlap >= 0.6:
+            return {
+                "duplicate": True,
+                "reason": (
+                    f"Lead har {overlap:.0%} betydelsebärande ordöverlapp med föregående utgåva "
+                    f"({', '.join(sorted(shared))}) — trolig återpublicering."
+                ),
+            }
 
     if not lead_headline or not stories:
         return {"duplicate": False, "reason": ""}
@@ -562,9 +613,10 @@ def validate(content_path: Path, research_input_path: Path,
         research_data = json.load(f)
     research_stories = research_data.get("stories", [])[:10]
 
-    # Kör validering
+    # Kör validering, inklusive hård gate mot föregående utgåvas lead.
     fm = issue["frontmatter"]
-    result = validate_issue(issue, research_stories)
+    previous_issue = _load_previous_issue(content_path)
+    result = validate_issue(issue, research_stories, previous_issue=previous_issue)
 
     # Visa resultat
     verdict = "✅ PASS" if result.get("pass") else "❌ FLAGGED"

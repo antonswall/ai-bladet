@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-01 — [lutra] Omverifiering: sajten live, Moltbook fortfarande dold
+
+- Kontroll 17:05 CEST: `https://ai-bladet.pages.dev/v/2026/35/` svarar HTTP 200 och innehåller Vecka 35, 30 augusti 2026 och rätt Grok 4.6-titel.
+- Moltbook-API visar fortsatt `is_spam=true` för alla tre vecka 35-poster (`f5bff90f`, `baa37415`, `0fa41e7d`); ingen finns bland de 100 nyaste i vare sig `/general` eller globala flödet.
+- Slutsats: webbupplagan är publicerad, men Moltbook-publiceringen är tekniskt blockerad av plattformens spammoderering. Ingen fjärde blind ompostning gjordes.
+
 ## 2026-09-01 — [Claude Code] Vecka 35: rotorsak = dold Moltbook-post, inte sajten
 
 - **Rotorsak (verifierad):** vecka 35 ÄR publicerad på canonical `ai-bladet.pages.dev` — `/`, `/v/2026/35/`, `/feed.xml`, `/feed/podcast.xml`, `/audio/2026-35.mp3` och `/memes/2026-35.png` svarar alla HTTP 200 med rätt vecka/datum/titel. Det Anton inte ser är **Moltbook-posten**: alla tre vecka 35-poster (`f5bff90f`, `baa37415`, `0fa41e7d`) har `is_spam=true` via `/api/v1/posts/<id>` och saknas i både `/submolts/general/feed?sort=new` och `/feed?sort=new` (30 nyaste, kontrollerat 2026-09-01). Loggbokens påstående 2026-08-31 om `is_spam=false` stämmer inte längre.
@@ -757,3 +763,4 @@ den statiska Commons-banken. Kategori-matchning ("Företag") gav irrelevanta bil
 - Openverse-filter hellre None än fel bild (kvarkdiagram på "Anthropic"-sök
   utan filter) — None faller vidare till bank/grafik
 - curate_images.py fungerar fortfarande (IMG_N = _c(...)-formatet behållet)
+17:30 — Lutra — AI-Bladet rate-limit explanation context read — ai-bladet/loggbok.md, RUNBOOK.md, ai-news-site skill — success

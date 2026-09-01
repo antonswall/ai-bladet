@@ -14,6 +14,7 @@ sys.path.insert(0, str(PIPELINE))
 import collect
 import distribute_audio
 import llm
+import validate as pipeline_validate
 
 
 def load_moltbook_module():
@@ -115,6 +116,66 @@ class RunnerControlFlowTests(unittest.TestCase):
         distributor = (PIPELINE / "distribute.py").read_text()
         self.assertIn("result.stdout", distributor)
         self.assertIn("result.stderr", distributor)
+
+    def test_seen_db_is_committed_immediately_after_site_push(self):
+        """En distributionskanal får inte göra publicerade artiklar nya igen."""
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        seen_commit = runner.index('collect.py" --commit-seen')
+        moltbook = runner.index('post-to-moltbook.py')
+        self.assertLess(seen_commit, moltbook)
+
+
+class CrossIssueDuplicationTests(unittest.TestCase):
+    def _issue(self, headline, image):
+        return {
+            "frontmatter": {
+                "lead": {"headline": headline, "kicker": "Modeller", "image": image},
+                "stories": [{"headline": "En annan story", "kicker": "Verktyg"}],
+            }
+        }
+
+    def test_same_lead_image_as_previous_issue_is_blocked(self):
+        current = self._issue(
+            "Grok 4.6 landar på Amazon Bedrock",
+            "https://x.ai/images/news/og-grok-4-6-on-bedrock.webp",
+        )
+        previous = self._issue(
+            "Grok 4.6 flyttar in i Amazon Bedrock",
+            "https://x.ai/images/news/og-grok-4-6-on-bedrock.webp",
+        )
+        result = pipeline_validate._check_duplication(current, previous_issue=previous)
+        self.assertTrue(result["duplicate"])
+        self.assertIn("föregående utgåva", result["reason"])
+
+    def test_distinct_lead_from_previous_issue_is_allowed(self):
+        current = self._issue(
+            "OpenAI bryter modellavtalet med Cursor",
+            "https://openai.com/cursor.png",
+        )
+        previous = self._issue(
+            "Grok 4.6 flyttar in i Amazon Bedrock",
+            "https://x.ai/images/news/og-grok-4-6-on-bedrock.webp",
+        )
+        result = pipeline_validate._check_duplication(current, previous_issue=previous)
+        self.assertFalse(result["duplicate"])
+
+    def test_near_identical_lead_headline_is_blocked_even_if_image_changed(self):
+        current = self._issue(
+            "Grok 4.6 landar på Amazon Bedrock",
+            "https://cdn.example/new-image.webp",
+        )
+        previous = self._issue(
+            "Grok 4.6 flyttar in i Amazon Bedrock",
+            "https://x.ai/images/old-image.webp",
+        )
+        result = pipeline_validate._check_duplication(current, previous_issue=previous)
+        self.assertTrue(result["duplicate"])
+
+    def test_loader_finds_previous_number_for_cross_issue_gate(self):
+        current_path = PIPELINE.parent / "content" / "2026-35.md"
+        previous = pipeline_validate._load_previous_issue(current_path)
+        self.assertEqual(previous["frontmatter"]["week"], "34")
+        self.assertIn("Grok 4.6", previous["frontmatter"]["lead"]["headline"])
 
 
 class IssueDateTests(unittest.TestCase):
