@@ -151,9 +151,11 @@ Om du inte hittar något datum, sätt source_date till "okänt"."""
     if not response:
         return None
 
-    # Parse JSON
+    # Parse JSON — strippa markdown-block om Claude svarar med ```json
     try:
-        json_match = re.search(r"\{.*\}", response, re.DOTALL)
+        clean = re.sub(r"^```(?:json)?\s*", "", response.strip(), flags=re.IGNORECASE)
+        clean = re.sub(r"\s*```$", "", clean.strip())
+        json_match = re.search(r"\{.*\}", clean, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(0))
     except (json.JSONDecodeError, Exception) as e:

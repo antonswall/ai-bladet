@@ -190,8 +190,12 @@ Var strikt — ge inte höga poäng i onödan. En 7:a i nyhetsvärde är en rikt
 
 
 def parse_scores(response: str, batch: list[dict], start_idx: int) -> list[dict]:
-    """Parsa DeepSeeks JSON-svar till score på varje kandidat."""
+    """Parsa LLM-svar (kan vara markdown-omslaget JSON) till scores per kandidat."""
     try:
+        # Strippa eventuellt ```json ... ``` markdown-block från Claude/etc
+        stripped = re.sub(r"^```(?:json)?\s*", "", response.strip(), flags=re.IGNORECASE)
+        stripped = re.sub(r"\s*```$", "", stripped.strip())
+        response = stripped
         # Hitta JSON i svaret
         json_match = re.search(r"\{.*\}", response, re.DOTALL)
         if not json_match:
