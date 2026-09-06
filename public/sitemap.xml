@@ -104,6 +104,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://aibladet.se/ordbok/minneslager-for-ai-agenter</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://aibladet.se/ordbok/oppen-kallkod</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
@@ -141,6 +147,12 @@
   </url>
   <url>
     <loc>https://aibladet.se/audio/2026-35.mp3</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://aibladet.se/audio/2026-36.mp3</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
