@@ -1,26 +1,41 @@
 """
-pipeline/llm.py — Gemensam LLM-wrapper via Codex CLI (GPT-5.6 Sol).
+pipeline/llm.py — Gemensam LLM-wrapper via OpenRouter (Claude Haiku).
 
-Använder Anton's Codex CLI (OpenAI Plus OAuth) istället för direkt API.
-Codex CLI anropas som subprocess — samma auth som Hermes använder internt.
+Använder OPENROUTER_API_KEY (laddas från ~/.hermes/.env eller projektets .env).
+Standardmodell: anthropic/claude-haiku-4-5 — billig och snabb för scoring/dedup/research.
 
-Kostnad: 0 (ingår i OpenAI Plus). Overhead: ~3-5s per anrop (agent-init).
+Kostnad: direktfakturerat OpenRouter. Overhead: ~1-2s per anrop.
 
 Användning:
     from llm import llm_call
     result = llm_call("Scora dessa nyheter...", system="Du är en AI-redaktör.")
 """
 
-import subprocess
-import tempfile
 import os
 import sys
 import time
-from pathlib import Path
 from typing import Optional
 
-CODEX_MODEL = "gpt-5.6-sol"
-CODEX_TIMEOUT = 120  # sekunder — codex exec har agent-overhead
+import requests
+
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+CLAUDE_MODEL = "anthropic/claude-haiku-4-5"
+DEFAULT_TIMEOUT = 60
+
+
+def _get_api_key() -> str:
+    key = os.getenv("OPENROUTER_API_KEY", "")
+    if not key:
+        # Försök läsa från ~/.hermes/.env
+        env_path = os.path.expanduser("~/.hermes/.env")
+        if os.path.exists(env_path):
+            with open(env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("OPENROUTER_API_KEY=") and not line.startswith("#"):
+                        key = line.split("=", 1)[1].strip()
+                        break
+    return key
 
 
 def llm_call(
@@ -28,79 +43,75 @@ def llm_call(
     system: Optional[str] = None,
     max_tokens: int = 2000,
     temperature: float = 0.1,
-    model: str = CODEX_MODEL,
-    timeout: int = CODEX_TIMEOUT,
+    model: str = CLAUDE_MODEL,
+    timeout: int = DEFAULT_TIMEOUT,
     attempts: int = 2,
 ) -> Optional[str]:
-    """Anropa GPT-5.6 Sol via Codex CLI (subprocess).
+    """Anropa Claude Haiku via OpenRouter.
 
-    Kombinerar system prompt + user prompt och skickar som stdin till `codex exec`.
-    Returnerar sista meddelandet från agenten, eller None vid fel.
+    Returnerar svarssträngen, eller None vid fel.
     """
-    # Bygg full prompt
-    full_prompt = prompt
+    api_key = _get_api_key()
+    if not api_key:
+        print("  ❌  OPENROUTER_API_KEY saknas", file=sys.stderr)
+        return None
+
+    messages = []
     if system:
-        full_prompt = f"{system}\n\n---\n\n{prompt}"
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
 
-    # Tempfil för output-last-message
-    output_fd, output_path = tempfile.mkstemp(suffix=".txt", prefix="codex_out_")
-    os.close(output_fd)
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://ai-bladet.pages.dev",
+        "X-Title": "AI-Bladet",
+    }
+    payload = {
+        "model": model,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "messages": messages,
+    }
 
-    try:
-        for attempt in range(1, max(1, attempts) + 1):
-            # Förhindra att output från ett misslyckat försök återanvänds.
-            Path(output_path).write_text("")
-            try:
-                result = subprocess.run(
-                    [
-                        "codex", "exec",
-                        "-m", model,
-                        "--ephemeral",
-                        "--dangerously-bypass-approvals-and-sandbox",
-                        "--skip-git-repo-check",
-                        "-o", output_path,
-                        "-",
-                    ],
-                    input=full_prompt,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                )
-            except subprocess.TimeoutExpired:
-                print(
-                    f"  ⚠️  Codex CLI timeout efter {timeout}s "
-                    f"(försök {attempt}/{attempts})",
-                    file=sys.stderr,
-                )
-                result = None
-
-            if result is not None and result.returncode == 0:
-                if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                    with open(output_path) as f:
-                        return f.read().strip()
-                if result.stdout.strip():
-                    return result.stdout.strip().split("\n")[-1]
-
-            if result is not None:
-                detail = (result.stderr or result.stdout or "okänt fel").strip()[:300]
-                print(
-                    f"  ⚠️  Codex CLI exit {result.returncode} "
-                    f"(försök {attempt}/{attempts}): {detail}",
-                    file=sys.stderr,
-                )
-            if attempt < attempts:
-                time.sleep(attempt * 2)
-        return None
-
-    except FileNotFoundError:
-        print("  ❌  Codex CLI ('codex') inte installerat eller inte i PATH", file=sys.stderr)
-        raise
-    except Exception as e:
-        print(f"  ⚠️  Codex CLI-fel: {e}", file=sys.stderr)
-        return None
-    finally:
-        # Städa tempfil
+    for attempt in range(1, max(1, attempts) + 1):
         try:
-            os.unlink(output_path)
-        except OSError:
-            pass
+            resp = requests.post(
+                OPENROUTER_URL,
+                headers=headers,
+                json=payload,
+                timeout=timeout,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                choices = data.get("choices", [])
+                if choices:
+                    return choices[0]["message"]["content"].strip()
+                print(f"  ⚠️  Tomt svar från OpenRouter: {data}", file=sys.stderr)
+                return None
+            else:
+                detail = resp.text[:300]
+                print(
+                    f"  ⚠️  OpenRouter HTTP {resp.status_code} (försök {attempt}/{attempts}): {detail}",
+                    file=sys.stderr,
+                )
+        except requests.Timeout:
+            print(
+                f"  ⚠️  OpenRouter timeout efter {timeout}s (försök {attempt}/{attempts})",
+                file=sys.stderr,
+            )
+        except Exception as e:
+            print(f"  ⚠️  OpenRouter-fel: {e}", file=sys.stderr)
+            return None
+
+        if attempt < attempts:
+            time.sleep(attempt * 2)
+
+    return None
+
+
+if __name__ == "__main__":
+    # Snabbtest
+    result = llm_call("Svara exakt OK", attempts=1)
+    print("result:", result)
+    raise SystemExit(0 if result else 1)
