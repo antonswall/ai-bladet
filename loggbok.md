@@ -1,5 +1,15 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-06 — [lutra] Vecka 36 live — LLM-byte GPT-5.6-sol → Claude Haiku
+
+- Rotorsak vecka 36 missad: `gpt-5.6-sol` har tagits bort från ChatGPT Plus OAuth-API. Preflight-check failade → pipeline aborterade utan att skriva ett ord.
+- Bytte `pipeline/llm.py` från Codex CLI/GPT-5.6-sol till direkt HTTP-anrop mot OpenRouter med `anthropic/claude-haiku-4-5`. OPENROUTER_API_KEY finns i `~/.hermes/.env`.
+- Buggs lösta på vägen: (1) Claude svarar med ```json-block → strippas nu i score.py + research.py; (2) trailing-komma i stora JSON-listor → `re.sub(r",\s*([}\]])", ...)` fix; (3) max_tokens=2000 i llm.py trunkerade 25-item scoring-batchar → höjt till 4000.
+- Meme-steget failade (distributionen stoppades), men audio, ordbok, podcast.xml genererades och committades manuellt.
+- Commit: `74b30e1` — vecka 36 live på `ai-bladet.pages.dev/v/2026/36/`.
+- Lead: "Agenter som minns — och lär sig av erfarenhet" (Hugging Face funes).
+- Nästa: research.py behöver också max_tokens höjd (brief parse-fel inträffade men var ej blockande). Meme-felet ej utrett.
+
 ## 2026-09-01 — [lutra] Vecka 35 rättad + Moltbook avkopplad
 
 - Rotorsak: `content/2026-35.md` (rätt innehåll: Cursor/OpenAI) var aldrig pushad; Cloudflare körde gammal build med Grok 4.6 Bedrock-lead — nästan identisk med vecka 34.
