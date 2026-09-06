@@ -195,6 +195,8 @@ def parse_scores(response: str, batch: list[dict], start_idx: int) -> list[dict]
         # Strippa eventuellt ```json ... ``` markdown-block från Claude/etc
         stripped = re.sub(r"^```(?:json)?\s*", "", response.strip(), flags=re.IGNORECASE)
         stripped = re.sub(r"\s*```$", "", stripped.strip())
+        # Ta bort trailing kommatecken före } eller ] (vanlig LLM-bugg)
+        stripped = re.sub(r",\s*([}\]])", r"\1", stripped)
         response = stripped
         # Hitta JSON i svaret
         json_match = re.search(r"\{.*\}", response, re.DOTALL)

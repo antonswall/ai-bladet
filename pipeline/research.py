@@ -155,6 +155,7 @@ Om du inte hittar något datum, sätt source_date till "okänt"."""
     try:
         clean = re.sub(r"^```(?:json)?\s*", "", response.strip(), flags=re.IGNORECASE)
         clean = re.sub(r"\s*```$", "", clean.strip())
+        clean = re.sub(r",\s*([}\]])", r"\1", clean)
         json_match = re.search(r"\{.*\}", clean, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(0))
