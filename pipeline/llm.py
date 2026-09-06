@@ -41,7 +41,7 @@ def _get_api_key() -> str:
 def llm_call(
     prompt: str,
     system: Optional[str] = None,
-    max_tokens: int = 2000,
+    max_tokens: int = 4000,
     temperature: float = 0.1,
     model: str = CLAUDE_MODEL,
     timeout: int = DEFAULT_TIMEOUT,
