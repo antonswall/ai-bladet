@@ -7,6 +7,13 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>Agenter som minns — och lär sig av erfarenhet — Vecka 36 2026</title>
+  <description>Veckans nummer: minneslager för kodagenter, självförbättrande agenter och billig fine-tuning på 100 steg.</description>
+  <link>https://aibladet.se/v/2026/36/</link>
+  <guid>https://aibladet.se/v/2026/36/</guid>
+  <pubDate>Sun, 06 Sep 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>OpenAI vill stänga Cursor-kranen efter SpaceX-köpet — Vecka 35 2026</title>
   <description>Cursor riskerar att mista OpenAI-modellerna, medan Kiro och Grok Build får nya verktyg för kod och appar.</description>
   <link>https://aibladet.se/v/2026/35/</link>
