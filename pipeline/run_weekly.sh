@@ -179,6 +179,10 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" || true
         git push origin main || { echo "❌ git push failade"; exit 1; }
 
+        ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
+        python "$PIPELINE_DIR/verify_deploy.py" --issue "$ISSUE_FILE" \
+            || { echo "❌ Content-pushen kunde inte verifieras live — stoppar före SeenDB och distribution"; exit 1; }
+
         # Sajten är nu publicerad. Lås därför veckans kandidater i SeenDB direkt:
         # externa distributionsfel får aldrig göra redan publicerade nyheter "nya"
         # igen nästa vecka (vecka 34→35 återanvände annars samma Grok-lead).
@@ -191,7 +195,6 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         # Distribution — generera audio, X-content, etc.
         echo ""
         echo "📢 Distribuerar veckans nummer..."
-        ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
         if [ -f "$ISSUE_FILE" ]; then
             # `python` = venv-tolken som preflight validerar. `python3` pekar på
             # homebrew 3.14 utan requests/yaml och med trasig pyexpat, och
@@ -205,6 +208,8 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
             git add -A
             git commit -m "distribute: vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d)" || true
             git push origin main || { echo "❌ Distribution push misslyckades"; exit 1; }
+            python "$PIPELINE_DIR/verify_deploy.py" --issue "$ISSUE_FILE" --require-assets \
+                || { echo "❌ Slutpushen kunde inte verifieras live"; exit 1; }
         else
             echo "❌ Ingen issue-fil hittad för distribution: $ISSUE_FILE"
             exit 1

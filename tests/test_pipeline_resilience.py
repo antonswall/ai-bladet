@@ -39,11 +39,11 @@ class CollectionHealthTests(unittest.TestCase):
 
 
 class LlmFailureTests(unittest.TestCase):
-    @mock.patch("llm.subprocess.run")
-    def test_nonzero_codex_exit_never_becomes_model_output(self, run):
-        run.return_value = subprocess.CompletedProcess(
-            args=["codex"], returncode=1, stdout="fatal: auth failed", stderr="auth failed"
-        )
+    @mock.patch("llm._get_api_key", return_value="test-key")
+    @mock.patch("llm.requests.post")
+    def test_openrouter_http_error_never_becomes_model_output(self, post, _key):
+        post.return_value.status_code = 401
+        post.return_value.text = "unauthorized"
         self.assertIsNone(llm.llm_call("test", timeout=1, attempts=1))
 
 
@@ -121,8 +121,8 @@ class RunnerControlFlowTests(unittest.TestCase):
         """En distributionskanal får inte göra publicerade artiklar nya igen."""
         runner = (PIPELINE / "run_weekly.sh").read_text()
         seen_commit = runner.index('collect.py" --commit-seen')
-        moltbook = runner.index('post-to-moltbook.py')
-        self.assertLess(seen_commit, moltbook)
+        distribution = runner.index('python "$PIPELINE_DIR/distribute.py"')
+        self.assertLess(seen_commit, distribution)
 
 
 class CrossIssueDuplicationTests(unittest.TestCase):
@@ -257,15 +257,12 @@ class MoltbookVisibilityTests(unittest.TestCase):
 
 
 class MoltbookIsNotAPublishingGateTests(unittest.TestCase):
-    """Vecka 35 tappade audio/meme/SeenDB för att Moltbook-felet gav exit 1."""
+    """Moltbook är avkopplad och får inte påverka publiceringen."""
 
-    def test_moltbook_failure_does_not_abort_distribution(self):
+    def test_moltbook_is_explicitly_disabled(self):
         runner = (PIPELINE / "run_weekly.sh").read_text()
-        self.assertIn("MOLTBOOK_STATUS=$?", runner)
-        self.assertNotIn(
-            '|| { echo "❌ Moltbook-post eller verifiering misslyckades"; exit 1; }',
-            runner,
-        )
+        self.assertIn("MOLTBOOK_STATUS=0", runner)
+        self.assertNotIn('python "$PIPELINE_DIR/post-to-moltbook.py"', runner)
 
     def test_moltbook_failure_still_fails_the_run(self):
         runner = (PIPELINE / "run_weekly.sh").read_text()
@@ -280,10 +277,9 @@ class InterpreterTests(unittest.TestCase):
         self.assertIn('python "$PIPELINE_DIR/distribute.py"', runner)
         self.assertNotIn('python3 "$PIPELINE_DIR/distribute.py"', runner)
 
-    def test_moltbook_uses_the_preflight_validated_interpreter(self):
+    def test_moltbook_is_not_called_by_runner(self):
         runner = (PIPELINE / "run_weekly.sh").read_text()
-        self.assertIn('python "$PIPELINE_DIR/post-to-moltbook.py"', runner)
-        self.assertNotIn('python3 "$PIPELINE_DIR/post-to-moltbook.py"', runner)
+        self.assertNotIn('post-to-moltbook.py"', runner)
 
     def test_distribution_modules_inherit_the_parent_interpreter(self):
         """distribute.py startar modulerna med sys.executable — därför spelar

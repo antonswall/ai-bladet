@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-12 — [lutra] Live deploy-gate inför vecka 37
+- Rotorsaksmönster: runnern behandlade lyckad `git push` som deploybevis och kunde skriva `DEPLOYAD` utan att kontrollera Cloudflare, rätt veckotitel eller slutassets.
+- Ny `pipeline/verify_deploy.py` med 18×10 s retry. Första gaten kräver rätt titel på startsida + permalink före SeenDB/distribution; slutgaten kräver även RSS, podcast-RSS, aktuell MP3 och meme-PNG.
+- TDD: simulerad gammal startsida och saknad meme blockerar korrekt. Verklig vecka-36-kontroll passerar alla sex live-mål. Full suite 41/41 grön; Bash/Python-syntax och build gröna.
+- Uppdaterat: `pipeline/run_weekly.sh`, `pipeline/verify_deploy.py`, `tests/test_deploy_verification.py`, inaktuella LLM/Moltbook-tester och `RUNBOOK.md`. Backup: `/tmp/ai-bladet-deploy-guard-20260912/`.
+
 ## 2026-09-12 — [lutra] Vecka 36 meme återställd
 - Rotorsak: förra distributionen stoppade i `distribute_meme.py` vid LLM-svarets JSON-identifiering, innan någon PNG skapades.
 - Återkörde endast meme-modulen mot `content/2026-36.md`; skapade `public/memes/2026-36.png` (1080×1080, giltig PNG, all text visuellt verifierad).

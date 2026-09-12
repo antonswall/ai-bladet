@@ -13,10 +13,10 @@ vad du gör när något går fel, och hur du kör manuellt.
   Hermes blockerar symlänkar som pekar utanför scripts-katalogen; använd därför
   **inte** symlänk här.
 - **Timeout:** `cron.script_timeout_seconds: 1800` i `~/.hermes/config.yaml`.
-- **Flöde:** preflight (inkl. Codex-smoke) → checkpoint/collect → dedup → score →
+- **Flöde:** preflight (inkl. LLM-smoke) → checkpoint/collect → dedup → score →
   research → images → write → validering (max 3 fungerande feedback-retries) →
-  build → git push → Moltbook + verifiering → distribution → slut-push → SeenDB-commit
-  → Cloudflare Pages på https://ai-bladet.pages.dev/
+  build → git push → live-verifiering → SeenDB-commit → distribution → slut-push →
+  live-verifiering av sida + feeds + assets → Cloudflare Pages på https://ai-bladet.pages.dev/
 - **Feltolerans:** enstaka källfel tillåts om minst 75 % av källorna och minst 50
   nya kandidater återstår. Kandidater markeras inte som sedda förrän hela
   publiceringen lyckats. En omkörning samma vecka återupptar sparad kandidatfil.
@@ -69,6 +69,15 @@ Vill du behålla en handtrimmad utgåva: ta en kopia först.
 ### 5. Inget hände alls på söndag
 - Datorn (Mac Mini) måste vara på + upplåst kl 07:00. Kolla lutra-jobbets
   `last_run_at`/`last_status` i `~/.hermes/cron/jobs.json` och Telegram-leveransen.
+
+### 6. Push lyckades men rätt upplaga syns inte live
+- `pipeline/verify_deploy.py` väntar automatiskt på Cloudflare och försöker upp till
+  18 gånger med 10 sekunders mellanrum.
+- Första gaten kräver rätt utgåvetitel på både startsidan och veckans permalink innan
+  SeenDB eller distribution får fortsätta.
+- Slutgaten kräver dessutom aktuell RSS, podcast-RSS, MP3 och meme-PNG.
+- Runnern får inte skriva `DEPLOYAD` om någon live-kontroll saknas. Exakt URL/fel syns
+  i runnerloggen och levereras till Telegram.
 
 ## Manuell innehållsgranskning (rekommenderat)
 Sajten deployar utan mänsklig granskning. Kolla `ai-bladet.pages.dev` söndag fm:
