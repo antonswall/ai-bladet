@@ -1,5 +1,16 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-12 — [lutra] Vecka 36 meme återställd
+- Rotorsak: förra distributionen stoppade i `distribute_meme.py` vid LLM-svarets JSON-identifiering, innan någon PNG skapades.
+- Återkörde endast meme-modulen mot `content/2026-36.md`; skapade `public/memes/2026-36.png` (1080×1080, giltig PNG, all text visuellt verifierad).
+- Backup: `/tmp/ai-bladet-meme36-20260912/`. Nästa steg: publicera och verifiera exakt live-URL innan varningsflaggan stängs.
+
+## 2026-09-12 — [lutra] Readiness-check inför vecka 37
+- Cron "AI-Bladet söndag" är enabled, schemalagd 2026-09-13 07:00, med wrapper och timeout 1800 sekunder.
+- `bash -n`, Python `py_compile`, `node build.js`, Codex-version och LLM-smoke (`OK`) passerade. Repo är rent och synkat med `origin/main` efter återställning av sitemap-datum som build-testet ändrade.
+- Live: startsida, vecka 36, RSS, podcast-RSS och audio svarar HTTP 200. Vecka 36:s meme saknas live (HTTP 404), kvarstående fel från föregående körning; meme-modulen har timeout-/filverifiering.
+- Bedömning: **gul men körbar inför vecka 37**. Ingen ny vecka-37-checkpoint finns ännu, vilket är normalt före söndagskörningen.
+
 ## 2026-09-06 — [lutra] Vecka 36 live — LLM-byte GPT-5.6-sol → Claude Haiku
 
 - Rotorsak vecka 36 missad: `gpt-5.6-sol` har tagits bort från ChatGPT Plus OAuth-API. Preflight-check failade → pipeline aborterade utan att skriva ett ord.
