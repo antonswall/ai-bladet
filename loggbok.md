@@ -5,6 +5,7 @@
 - Ny `pipeline/verify_deploy.py` med 18×10 s retry. Första gaten kräver rätt titel på startsida + permalink före SeenDB/distribution; slutgaten kräver även RSS, podcast-RSS, aktuell MP3 och meme-PNG.
 - TDD: simulerad gammal startsida och saknad meme blockerar korrekt. Verklig vecka-36-kontroll passerar alla sex live-mål. Full suite 41/41 grön; Bash/Python-syntax och build gröna.
 - Uppdaterat: `pipeline/run_weekly.sh`, `pipeline/verify_deploy.py`, `tests/test_deploy_verification.py`, inaktuella LLM/Moltbook-tester och `RUNBOOK.md`. Backup: `/tmp/ai-bladet-deploy-guard-20260912/`.
+- Extra engångsskydd: cron `AI-Bladet vecka 37 postcheck` (`6f56c65659d5`) kör 2026-09-13 08:00, verifierar alla live-mål och gör högst en checkpoint-baserad recovery utan blind recollect.
 
 ## 2026-09-12 — [lutra] Vecka 36 meme återställd
 - Rotorsak: förra distributionen stoppade i `distribute_meme.py` vid LLM-svarets JSON-identifiering, innan någon PNG skapades.
