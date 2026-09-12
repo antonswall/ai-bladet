@@ -3,7 +3,7 @@
 ## 2026-09-12 — [lutra] Vecka 36 meme återställd
 - Rotorsak: förra distributionen stoppade i `distribute_meme.py` vid LLM-svarets JSON-identifiering, innan någon PNG skapades.
 - Återkörde endast meme-modulen mot `content/2026-36.md`; skapade `public/memes/2026-36.png` (1080×1080, giltig PNG, all text visuellt verifierad).
-- Backup: `/tmp/ai-bladet-meme36-20260912/`. Nästa steg: publicera och verifiera exakt live-URL innan varningsflaggan stängs.
+- Backup: `/tmp/ai-bladet-meme36-20260912/`. Publicerad i commit `368d8a9`; live-URL verifierad HTTP 200 och SHA-256 matchar lokal fil (`46662f7201485b7a31759899b85276130c8b7a98cfe214939fdeeaa9a788c313`).
 
 ## 2026-09-12 — [lutra] Readiness-check inför vecka 37
 - Cron "AI-Bladet söndag" är enabled, schemalagd 2026-09-13 07:00, med wrapper och timeout 1800 sekunder.
