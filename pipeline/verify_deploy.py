@@ -97,7 +97,7 @@ def verify_live_issue(
             return True, f"rätt upplaga live efter försök {attempt}/{attempts}"
 
         last_reason = "; ".join(failures)
-        print(f"  ⚠️ Live-verifiering {attempt}/{attempts}: {last_reason}", flush=True)
+        print(f"  ⏳ Live-verifiering {attempt}/{attempts}: {last_reason}", flush=True)
         if attempt < attempts:
             sleep_fn(delay_seconds)
 

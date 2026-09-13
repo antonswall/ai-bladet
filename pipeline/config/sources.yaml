@@ -166,6 +166,7 @@ feeds:
 
   # -- YouTube (produktlanseringar via keynote/launch-videor) --
   - id: youtube-openai
+    enabled: false  # 2026-09-13: feeden returnerar verifierad HTTP 404; omprövas i källrevisionen
     tier: 1
     type: rss
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A"
@@ -190,6 +191,7 @@ feeds:
     weight: 16
 
   - id: venturebeat-ai
+    enabled: false  # 2026-09-13: RSS-endpointen returnerar rate-limit-HTML, inte XML
     tier: 2
     type: rss
     url: "https://venturebeat.com/category/ai/feed/"

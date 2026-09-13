@@ -78,13 +78,29 @@ def commit_seen(candidate_path: Path) -> int:
 
 # ─── Collectors ───────────────────────────────────────────────────────────────
 
+def source_enabled(feed_cfg: dict) -> bool:
+    return feed_cfg.get("enabled", True) is not False
+
+
+def rss_parse_problem(feed) -> str | None:
+    if not getattr(feed, "bozo", False):
+        return None
+    error = getattr(feed, "bozo_exception", None)
+    if isinstance(error, feedparser.CharacterEncodingOverride) and feed.entries:
+        return None
+    return str(error or "okänt RSS-parsefel")
+
+
 def collect_rss(feed_cfg: dict) -> list[dict]:
     """Hämta och normalisera RSS/Atom-feed."""
     feed = feedparser.parse(feed_cfg["url"])
     candidates = []
 
-    if feed.bozo:
-        print(f"  ⚠️  RSS parse-varning ({feed_cfg['id']}): {feed.bozo_exception}", file=sys.stderr)
+    problem = rss_parse_problem(feed)
+    if problem and not feed.entries:
+        raise RuntimeError(f"RSS parsefel ({feed_cfg['id']}): {problem}")
+    if problem:
+        print(f"  ℹ️  RSS delvis reparerad ({feed_cfg['id']}): {problem}", file=sys.stderr)
 
     for entry in feed.entries[:30]:  # max 30 per feed
         url = entry.get("link", "")
@@ -280,7 +296,7 @@ def main():
     with open(CONFIG_PATH) as f:
         config = yaml.safe_load(f)
 
-    feeds = config["feeds"]
+    feeds = [feed for feed in config["feeds"] if source_enabled(feed)]
     print(f"📡 {len(feeds)} källor konfigurerade")
 
     # Steg 0: Ladda seen-databas

@@ -1,5 +1,7 @@
 import tempfile
 import unittest
+import io
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from pipeline import verify_deploy
@@ -45,16 +47,20 @@ class DeployVerificationTests(unittest.TestCase):
                 return "<h1>Förra veckan</h1>"
             return "<h1>Rätt upplaga är live</h1>"
 
-        ok, reason = verify_deploy.verify_live_issue(
-            identity,
-            fetch_text=fetch,
-            attempts=2,
-            delay_seconds=0,
-            sleep_fn=lambda _: None,
-        )
+        output = io.StringIO()
+        with redirect_stdout(output):
+            ok, reason = verify_deploy.verify_live_issue(
+                identity,
+                fetch_text=fetch,
+                attempts=2,
+                delay_seconds=0,
+                sleep_fn=lambda _: None,
+            )
 
         self.assertTrue(ok, reason)
         self.assertEqual(len(calls), 4)
+        self.assertNotIn("⚠️", output.getvalue())
+        self.assertIn("⏳", output.getvalue())
 
     def test_required_assets_block_final_success(self):
         identity = verify_deploy.load_issue_identity(self._issue())

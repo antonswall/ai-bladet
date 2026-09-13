@@ -5,7 +5,10 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
+
+import feedparser
 
 
 PIPELINE = Path(__file__).resolve().parents[1] / "pipeline"
@@ -13,6 +16,7 @@ sys.path.insert(0, str(PIPELINE))
 
 import collect
 import distribute_audio
+import distribute_linkedin
 import llm
 import validate as pipeline_validate
 
@@ -36,6 +40,26 @@ class CollectionHealthTests(unittest.TestCase):
 
     def test_too_few_candidates_is_fatal(self):
         self.assertFalse(collect.collection_is_healthy(33, 33, 5))
+
+    def test_disabled_source_is_excluded(self):
+        self.assertFalse(collect.source_enabled({"enabled": False}))
+        self.assertTrue(collect.source_enabled({}))
+
+    def test_encoding_override_with_entries_is_not_a_problem(self):
+        feed = SimpleNamespace(
+            bozo=1,
+            bozo_exception=feedparser.CharacterEncodingOverride("utf-8"),
+            entries=[{"title": "ok"}],
+        )
+        self.assertIsNone(collect.rss_parse_problem(feed))
+
+    def test_malformed_empty_feed_is_a_problem(self):
+        feed = SimpleNamespace(
+            bozo=1,
+            bozo_exception=ValueError("invalid token"),
+            entries=[],
+        )
+        self.assertIn("invalid token", collect.rss_parse_problem(feed))
 
 
 class LlmFailureTests(unittest.TestCase):
@@ -123,6 +147,76 @@ class RunnerControlFlowTests(unittest.TestCase):
         seen_commit = runner.index('collect.py" --commit-seen')
         distribution = runner.index('python "$PIPELINE_DIR/distribute.py"')
         self.assertLess(seen_commit, distribution)
+
+
+class UrlValidationTests(unittest.TestCase):
+    def test_supported_observations_are_not_factual_issues(self):
+        result = {
+            "factual_validation_ok": True,
+            "pass_rate": 0.50,
+            "issues": [{"severity": "low", "supported": True, "problem": "korrekt detalj"}],
+        }
+        normalized = pipeline_validate._normalize_factual_validation(result)
+        self.assertEqual(normalized["issues"], [])
+        self.assertEqual(normalized["pass_rate"], 1.0)
+
+    def test_mixed_observations_recalculate_pass_rate_from_real_issues(self):
+        result = {
+            "factual_validation_ok": True,
+            "pass_rate": 0.20,
+            "issues": [
+                {"severity": "low", "supported": True, "problem": "korrekt detalj"},
+                {"severity": "medium", "supported": False, "problem": "saknar stöd"},
+            ],
+        }
+        normalized = pipeline_validate._normalize_factual_validation(result)
+        self.assertEqual(len(normalized["issues"]), 1)
+        self.assertEqual(normalized["pass_rate"], 0.85)
+
+    def test_private_and_unsupported_urls_are_rejected(self):
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://127.0.0.1/admin"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://169.254.169.254/latest/meta-data"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://2130706433/admin"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://0x7f000001/admin"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://127.1/admin"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("http://0177.0.0.1/admin"))
+        self.assertFalse(pipeline_validate._acceptable_source_url("file:///etc/passwd"))
+
+    def test_hostname_resolving_to_private_network_is_rejected(self):
+        private = [(2, 1, 6, "", ("10.0.0.5", 443))]
+        with mock.patch.object(pipeline_validate.socket, "getaddrinfo", return_value=private):
+            self.assertFalse(pipeline_validate._acceptable_source_url("https://internal.example/article"))
+
+    def test_absent_or_malformed_model_validation_fails_closed(self):
+        for response in (None, "not json"):
+            result = pipeline_validate._normalize_factual_validation(
+                pipeline_validate._parse_validation(response)
+            )
+            self.assertFalse(result["factual_validation_ok"])
+            self.assertEqual(result["pass_rate"], 0.0)
+
+    def test_jina_soft_error_is_not_accepted(self):
+        body = "Title: Access Denied\nURL Source: https://example.com\nMarkdown Content:\nCAPTCHA required"
+        self.assertFalse(pipeline_validate._jina_content_is_valid(body, "https://example.com"))
+
+    def test_jina_mismatched_source_is_not_accepted(self):
+        body = "Title: Real article\nURL Source: https://evil.example/phish\nMarkdown Content:\n" + ("real words " * 30)
+        self.assertFalse(pipeline_validate._jina_content_is_valid(body, "https://example.com/article"))
+
+    def test_bot_blocked_primary_source_can_be_verified_via_jina(self):
+        jina = SimpleNamespace(
+            status_code=200,
+            text="Title: Valid source\nURL Source: https://openai.com/example\nMarkdown Content:\n" + ("substantive article words " * 20),
+        )
+        with mock.patch.object(pipeline_validate.requests, "head") as direct_head, \
+             mock.patch.object(pipeline_validate.requests, "get", return_value=jina):
+            result = pipeline_validate._check_urls([{"url": "https://openai.com/example"}])
+        self.assertEqual(result, {"valid": 1, "invalid": 0, "total": 1})
+        direct_head.assert_not_called()
+
+    def test_any_unverified_source_fails_strict_url_gate(self):
+        self.assertFalse(pipeline_validate._urls_healthy({"valid": 5, "invalid": 1, "total": 6}))
+        self.assertTrue(pipeline_validate._urls_healthy({"valid": 6, "invalid": 0, "total": 6}))
 
 
 class CrossIssueDuplicationTests(unittest.TestCase):
@@ -297,6 +391,14 @@ class PodcastFeedTests(unittest.TestCase):
     def test_published_feed_has_no_dead_host(self):
         feed = (PIPELINE.parent / "public" / "feed" / "podcast.xml").read_text()
         self.assertNotIn("aibladet.se", feed)
+
+
+class LinkedInDraftTests(unittest.TestCase):
+    def test_draft_uses_canonical_issue_url(self):
+        self.assertEqual(
+            distribute_linkedin.issue_url(2026, 37),
+            "https://ai-bladet.pages.dev/v/2026/37/",
+        )
 
 
 if __name__ == "__main__":

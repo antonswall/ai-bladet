@@ -28,9 +28,13 @@ PIPELINE_DIR = Path(__file__).parent
 DIST_OUTPUT_DIR = PIPELINE_DIR / "output" / "distribution" / "linkedin"
 PROJECT_DIR = Path.home() / "ai-bladet"
 CONTENT_DIR = PROJECT_DIR / "content"
-SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
+SITE_URL = os.getenv("SITE_URL", "https://ai-bladet.pages.dev").rstrip("/")
 
 from llm import llm_call
+
+
+def issue_url(year: int, week: int) -> str:
+    return f"{SITE_URL}/v/{int(year)}/{int(week):02d}/"
 
 # ─── API Helper ───────────────────────────────────────────────────────────────
 
@@ -247,7 +251,7 @@ def distribute_linkedin(issue_path: str, dry_run: bool = False) -> bool:
 
 ---
 
-Länk: {SITE_URL}/{year}/{week}
+Länk: {issue_url(year, week)}
 """
     output_path.write_text(output_content, encoding="utf-8")
 

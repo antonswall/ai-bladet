@@ -1,5 +1,12 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-13 — [lutra] Vecka 37 cronvarningar och valideringsfel rättade
+- Rättade alla faktiska fel från 07:00-körningen: två trasiga nollkällor inaktiverade inför källrevisionen, DeepMinds ofarliga encoding-override avklassad, väntande Cloudflare-retries loggas som `⏳` i stället för varning och LinkedIn-utkastet använder canonical `ai-bladet.pages.dev/v/YYYY/WW/`.
+- URL-gaten är nu fail-closed: 6/6 måste verifieras via fasta Jina-proxyn, svar måste matcha exakt käll-URL och innehålla substantiell markdown; lokala/privata/numeriskt maskerade mål och DNS till icke-globala adresser blockeras. Inga direkta anrop görs till research-URL:er.
+- Faktavalidering är fail-closed vid tomt/trasigt modellsvar och räknar bara verkliga `supported: false`-fel. Vecka 37 validerar 100 %, 0 issues, 6/6 URL:er.
+- IBM-briefen rättad från ostött formulering. 54 tester, Python compile, statisk säkerhetsscan och `node build.js` gröna. Backup: `/tmp/ai-bladet-week37-warning-fix-20260913`.
+- LinkedIn: endast utkast skapades; ingen extern post skickades utan Antons uttryckliga publiceringsgodkännande.
+
 ## 2026-09-12 — [lutra] Live deploy-gate inför vecka 37
 - Rotorsaksmönster: runnern behandlade lyckad `git push` som deploybevis och kunde skriva `DEPLOYAD` utan att kontrollera Cloudflare, rätt veckotitel eller slutassets.
 - Ny `pipeline/verify_deploy.py` med 18×10 s retry. Första gaten kräver rätt titel på startsida + permalink före SeenDB/distribution; slutgaten kräver även RSS, podcast-RSS, aktuell MP3 och meme-PNG.

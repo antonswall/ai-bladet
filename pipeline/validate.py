@@ -16,12 +16,15 @@ Output: validated/{YYYY-WW}.json + skriven markdown (om godkänd)
 """
 
 import json
+import ipaddress
 import os
 import re
+import socket
 import sys
 from datetime import datetime, timezone, date
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlparse, urlunparse
 
 import requests
 
@@ -270,6 +273,7 @@ Kontrollera:
 5. DATUMKONTROLL — Är källorna från senaste 7 dagarna? Om äldre: finns ny vinkel?
 6. ATTRIBUERING — Är leverantörspåståenden ("4x snabbare", "6x effektivitet") attribuerade?
 7. ANALYS — Är "AI-Bladets analys" och ingresserna grundade i research? Tolkning är OK, men inga lösryckta fakta eller framtidspåståenden som saknar stöd.
+Lista bara faktiska problem. Om ett påstående stöds och inte har något separat sakfel ska det inte finnas i issues.
 
 Svara endast med JSON:
 {{
@@ -289,7 +293,7 @@ Svara endast med JSON:
 
     response = llm_call(prompt, "Du verifierar faktapåståenden. Var strikt men rimlig. Leta efter hallucinationer, hittade siffror och påståenden som inte stöds.", max_tokens=2000)
 
-    result = _parse_validation(response)
+    result = _normalize_factual_validation(_parse_validation(response))
 
     # Koll av käll-URLs
     result["url_checks"] = _check_urls(research_stories)
@@ -315,7 +319,8 @@ Svara endast med JSON:
     ]
 
     result["pass"] = (result.get("pass_rate", 0) >= VALIDATION_THRESHOLD and
-                      result["url_checks"]["valid"] > 0 and
+                      result.get("factual_validation_ok", False) and
+                      _urls_healthy(result["url_checks"]) and
                       result.get("lead_sources", 1) >= 1 and
                       not result["duplication"]["duplicate"] and
                       result["se_eu_angle"]["found"] and
@@ -424,13 +429,22 @@ def _parse_validation(response: str | None) -> dict:
     """Parsa DeepSeeks validerings-JSON."""
     default = {
         "overall": "UNKNOWN",
-        "pass_rate": 1.0,
+        "pass_rate": 0.0,
         "issues": [],
-        "summary": "Kunde inte validera — okänd modellrespons"
+        "summary": "Kunde inte validera — okänd modellrespons",
+        "factual_validation_ok": False,
     }
 
     parsed = _parse_json_from_text(response)
-    if parsed:
+    schema_ok = (
+        isinstance(parsed, dict)
+        and parsed.get("overall") in {"PASS", "FLAGGED"}
+        and isinstance(parsed.get("pass_rate"), (int, float))
+        and isinstance(parsed.get("issues"), list)
+    )
+    if schema_ok:
+        assert parsed is not None
+        parsed["factual_validation_ok"] = True
         return parsed
 
     if response:
@@ -445,19 +459,113 @@ def _check_urls(research_stories: list[dict]) -> dict:
     invalid = 0
     for s in research_stories[:6]:
         url = s.get("url", "")
-        if not url:
+        if not url or not _acceptable_source_url(url):
             invalid += 1
             continue
+
         try:
-            r = requests.head(url, timeout=8, allow_redirects=True)
-            if r.status_code < 400:
+            proxy = requests.get(
+                f"https://r.jina.ai/{url}",
+                timeout=20,
+                allow_redirects=False,
+                headers={"User-Agent": "Mozilla/5.0 (AI-Bladet validator)"},
+            )
+            if proxy.status_code < 300 and _jina_content_is_valid(proxy.text, url):
                 valid += 1
-            else:
-                invalid += 1
-        except Exception:
-            invalid += 1
+                continue
+        except requests.RequestException:
+            pass
+        invalid += 1
 
     return {"valid": valid, "invalid": invalid, "total": valid + invalid}
+
+
+def _urls_healthy(checks: dict) -> bool:
+    return checks.get("total", 0) > 0 and checks.get("invalid", 0) == 0
+
+
+def _normalize_factual_validation(result: dict) -> dict:
+    normalized = dict(result)
+    if not normalized.get("factual_validation_ok", False):
+        normalized["pass_rate"] = 0.0
+        normalized["issues"] = []
+        return normalized
+    original = list(normalized.get("issues", []))
+    unsupported = [issue for issue in original if issue.get("supported") is not True]
+    normalized["issues"] = unsupported
+    penalties = {"low": 0.05, "medium": 0.15, "high": 0.35}
+    normalized["pass_rate"] = max(
+        0.0,
+        round(1.0 - sum(penalties.get(issue.get("severity"), 0.15) for issue in unsupported), 2),
+    )
+    return normalized
+
+
+def _acceptable_source_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return False
+        if parsed.username or parsed.password:
+            return False
+        if any(ord(char) < 32 for char in url):
+            return False
+        try:
+            address = ipaddress.ip_address(parsed.hostname)
+            return address.is_global
+        except ValueError:
+            hostname = parsed.hostname.lower().rstrip(".")
+            if hostname == "localhost" or hostname.endswith((".localhost", ".local", ".internal")):
+                return False
+            if re.fullmatch(r"(?:0x[0-9a-f]+|[0-9.]+)", hostname, re.IGNORECASE):
+                return False
+            port = parsed.port or (443 if parsed.scheme == "https" else 80)
+            addresses = socket.getaddrinfo(hostname, port, type=socket.SOCK_STREAM)
+            return bool(addresses) and all(
+                ipaddress.ip_address(address[4][0]).is_global for address in addresses
+            )
+    except (OSError, ValueError):
+        return False
+
+
+def _normalized_source_url(url: str) -> str:
+    parsed = urlparse(url.strip())
+    hostname = (parsed.hostname or "").lower()
+    port = parsed.port
+    default_port = (parsed.scheme == "http" and port == 80) or (parsed.scheme == "https" and port == 443)
+    netloc = hostname if port is None or default_port else f"{hostname}:{port}"
+    path = parsed.path.rstrip("/") or "/"
+    return urlunparse((parsed.scheme.lower(), netloc, path, "", parsed.query, ""))
+
+
+def _jina_content_is_valid(text: str, expected_url: str) -> bool:
+    lowered = text.lower()
+    error_markers = (
+        "warning: target url returned error",
+        "failed to fetch",
+        "access denied",
+        "captcha",
+        "status code: 4",
+        "status code: 5",
+    )
+    if any(marker in lowered for marker in error_markers):
+        return False
+    required = ("title:", "url source:", "markdown content:")
+    if not all(marker in lowered for marker in required):
+        return False
+    source_match = re.search(r"^URL Source:\s*(\S+)\s*$", text, re.MULTILINE | re.IGNORECASE)
+    if not source_match:
+        return False
+    try:
+        if _normalized_source_url(source_match.group(1)) != _normalized_source_url(expected_url):
+            return False
+    except ValueError:
+        return False
+    content_parts = re.split(r"markdown content:\s*", text, maxsplit=1, flags=re.IGNORECASE)
+    if len(content_parts) != 2:
+        return False
+    content = content_parts[1].strip()
+    return len(content) >= 100 and len(re.findall(r"\b\w+\b", content)) >= 20
 
 def _check_lead_sources(research_stories: list[dict]) -> int:
     """Räkna antalet oberoende källor för lead-story."""
