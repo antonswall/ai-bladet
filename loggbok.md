@@ -6,6 +6,7 @@
 - Faktavalidering är fail-closed vid tomt/trasigt modellsvar och räknar bara verkliga `supported: false`-fel. Vecka 37 validerar 100 %, 0 issues, 6/6 URL:er.
 - IBM-briefen rättad från ostött formulering. 54 tester, Python compile, statisk säkerhetsscan och `node build.js` gröna. Backup: `/tmp/ai-bladet-week37-warning-fix-20260913`.
 - LinkedIn: endast utkast skapades; ingen extern post skickades utan Antons uttryckliga publiceringsgodkännande.
+- Publicerad i commit `84a6ee5`. Live-readback på `/v/2026/37/?rev=84a6ee5`: HTTP 200, ny IBM-text finns och gamla formuleringen `okända dataset` är borta; sida, RSS, podcast-RSS, MP3 och meme passerar live-gaten.
 
 ## 2026-09-12 — [lutra] Live deploy-gate inför vecka 37
 - Rotorsaksmönster: runnern behandlade lyckad `git push` som deploybevis och kunde skriva `DEPLOYAD` utan att kontrollera Cloudflare, rätt veckotitel eller slutassets.
