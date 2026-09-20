@@ -36,7 +36,7 @@ fi
 
 # ── Preflight: faila TIDIGT och TYDLIGT (till Telegram) om miljön saknar något ──
 preflight_fail=0
-for bin in python node git codex; do
+for bin in python node git claude; do
     command -v "$bin" >/dev/null 2>&1 || { echo "❌ PREFLIGHT: '$bin' saknas i PATH"; preflight_fail=1; }
 done
 # Hela dep-setet som pipelinen importerar (collect→write). Missade feedparser
@@ -44,16 +44,15 @@ done
 python -c "import requests, bs4, lxml, feedparser, trafilatura, yaml" 2>/dev/null \
     || { echo "❌ PREFLIGHT: python-deps saknas (kräver requests/bs4/lxml/feedparser/trafilatura/yaml) i $(command -v python || echo python)"; preflight_fail=1; }
 if [ -z "${OPENROUTER_API_KEY:-}" ]; then
-    echo "❌ PREFLIGHT: OPENROUTER_API_KEY saknas — llm.py och write.py kräver OpenRouter"
-    preflight_fail=1
+    echo "ℹ️  PREFLIGHT: OPENROUTER_API_KEY saknas — använder sessionslös Claude CLI"
 fi
 if [ "$preflight_fail" -ne 0 ]; then
     echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
     exit 1
 fi
-python -c "from llm import llm_call; raise SystemExit(0 if llm_call('Svara exakt OK', attempts=1, timeout=60) else 1)" \
-    || { echo "❌ PREFLIGHT: LLM-anrop (Claude/OpenRouter) svarar inte"; exit 1; }
-echo "✅ Preflight OK — python=$(command -v python), node $(node -v), codex=$(codex --version)"
+# Gör inget betalt/live LLM-smoke här. Första riktiga anropet har egen tydlig
+# felhantering och fallback; ett smoke per veckokörning vore ren usage-overhead.
+echo "✅ Preflight OK — python=$(command -v python), node $(node -v), claude=$(claude --version)"
 
 # Återanvänd checkpoint från samma vecka. Collect kan ha lyckats även om
 # ett senare steg eller cronens timeout stoppade körningen.

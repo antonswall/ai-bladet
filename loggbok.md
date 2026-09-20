@@ -1,5 +1,15 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-20 — [Claude Code] Pipeline-anrop skapar inte längre Codex-tasks
+- Rotorsak: ett separat `codex exec` startades historiskt för varje dedup-, score-, research-, skriv-, validerings- och distributionsanrop. I Codex CLI 0.154 blev dessa synliga desktop-tasks trots `--ephemeral`.
+- `pipeline/llm.py` använder nu explicit `claude -p --no-session-persistence --safe-mode`: Haiku som lågusage-standard, Sonnet endast för skrivfallback, ersatt minimal systemprompt, inga verktyg/slash-kommandon och inga bypass-behörigheter. OpenRouter Luna är fortsatt sista fallback.
+- Runnerns preflight kräver `claude` i stället för `codex`; saknad OpenRouter-nyckel är inte blockerande och det onödiga live-LLM-smoket är borttaget. Regressionstest förbjuder `codex exec` i wrappern. Ingen live-LLM eller full pipeline kördes vid verifieringen.
+
+## 2026-09-13 — [lutra] Vecka 37 liveverifierad efter söndagskörningen
+- Kontrollerade cronjobbet "AI-Bladet söndag" (enabled, `0 7 * * 0`, nästa 2026-09-20 07:00, senaste status `ok`) och runnerloggen `pipeline/output/runner-2026-09-13_0700.log`.
+- `pipeline/verify_deploy.py --issue content/2026-37.md --require-assets --attempts 3 --delay 10` passerade på försök 1/3: rätt titel på startsida och permalink samt aktuell RSS, podcast-RSS, audio och meme live.
+- Ingen recovery behövdes. Repo rent, wrapper körbar och cron-timeout 1800 sekunder.
+
 ## 2026-09-13 — [lutra] Vecka 37 cronvarningar och valideringsfel rättade
 - Rättade alla faktiska fel från 07:00-körningen: två trasiga nollkällor inaktiverade inför källrevisionen, DeepMinds ofarliga encoding-override avklassad, väntande Cloudflare-retries loggas som `⏳` i stället för varning och LinkedIn-utkastet använder canonical `ai-bladet.pages.dev/v/YYYY/WW/`.
 - URL-gaten är nu fail-closed: 6/6 måste verifieras via fasta Jina-proxyn, svar måste matcha exakt käll-URL och innehålla substantiell markdown; lokala/privata/numeriskt maskerade mål och DNS till icke-globala adresser blockeras. Inga direkta anrop görs till research-URL:er.

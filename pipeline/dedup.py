@@ -7,7 +7,7 @@ den bästa versionen per kluster.
 
 Två-stegs process:
 1. Regex-baserad entitetsextraktion (billig, snabb)
-2. GPT-5.6 Sol via Codex CLI för osäkra gränsfall (precisionshöjning)
+2. Claude Haiku via den sessionslösa LLM-wrappern för osäkra gränsfall
 
 Input:  output/candidates/{YYYY-WW}.json (från collect.py)
 Output: output/deduped/{YYYY-WW}.json
@@ -179,7 +179,7 @@ def entities_match(e1: dict, e2: dict, threshold: int = 2) -> bool:
 
 
 def llm_verify_cluster(candidates: list[dict]) -> list[dict]:
-    """Använd GPT-5.6 Sol för att verifiera ett kluster.
+    """Använd den gemensamma LLM-wrappern för att verifiera ett kluster.
     Returnerar kandidaterna med cluster_id satt."""
     if len(candidates) < 2:
         for c in candidates:
@@ -291,11 +291,11 @@ def dedup(input_path: Path, output_path: Path, use_ai: bool = True) -> dict:
     avg_size = sum(len(cl) for cl in clusters) / len(clusters) if clusters else 0
     print(f"  ⌀ Genomsnittlig klusterstorlek: {avg_size:.1f}")
 
-    # Steg 3: GPT-5.6 Sol för stora/komplexa kluster
+    # Steg 3: sessionslös LLM-kontroll för stora/komplexa kluster
     if use_ai:
         large_clusters = [cl for cl in clusters if len(cl) > 3]
         if large_clusters:
-            print(f"  🧠  GPT-5.6 Sol granskar {len(large_clusters)} stora kluster...")
+            print(f"  🧠  Claude Haiku granskar {len(large_clusters)} stora kluster...")
             for cl in large_clusters:
                 cluster_candidates = [candidates[i] for i in cl]
                 llm_verify_cluster(cluster_candidates)

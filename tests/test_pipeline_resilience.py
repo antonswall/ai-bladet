@@ -63,12 +63,33 @@ class CollectionHealthTests(unittest.TestCase):
 
 
 class LlmFailureTests(unittest.TestCase):
-    @mock.patch("llm._get_api_key", return_value="test-key")
+    @mock.patch("llm._llm_call_claude_cli", return_value=None)
+    @mock.patch("llm._get_openrouter_api_key", return_value="test-key")
     @mock.patch("llm.requests.post")
-    def test_openrouter_http_error_never_becomes_model_output(self, post, _key):
+    def test_openrouter_http_error_never_becomes_model_output(self, post, _key, _claude):
         post.return_value.status_code = 401
         post.return_value.text = "unauthorized"
         self.assertIsNone(llm.llm_call("test", timeout=1, attempts=1))
+
+    @mock.patch("llm.subprocess.run")
+    def test_cli_completion_is_non_persistent_and_cannot_use_tools(self, run):
+        run.return_value = SimpleNamespace(returncode=0, stdout="OK\n", stderr="")
+        self.assertEqual(llm._llm_call_claude_cli("test"), "OK")
+        command = run.call_args.args[0]
+        self.assertEqual(command[0:2], ["claude", "-p"])
+        self.assertIn("--no-session-persistence", command)
+        self.assertIn("--safe-mode", command)
+        self.assertIn("--disable-slash-commands", command)
+        self.assertIn("--system-prompt", command)
+        self.assertEqual(command[command.index("--tools") + 1], "")
+        self.assertNotIn("codex", command)
+
+    def test_pipeline_does_not_spawn_codex_tasks(self):
+        wrapper = (PIPELINE / "llm.py").read_text()
+        runner = (PIPELINE / "run_weekly.sh").read_text()
+        self.assertNotIn('["codex", "exec"', wrapper)
+        self.assertNotIn("for bin in python node git codex", runner)
+        self.assertNotIn("llm_call('Svara exakt OK'", runner)
 
 
 class MoltbookChallengeTests(unittest.TestCase):
