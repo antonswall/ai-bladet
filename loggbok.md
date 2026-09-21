@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-21 — [lutra] Vecka 38 publicerad
+- Validerade `content/2026-38.md`, byggde sajten och publicerade commit `ae4d752`; live-gate passerade med rätt titel på startsida och permalink efter 3 försök.
+- Kör distributionen: ljud, X-tråd, LinkedIn-utkast och ordbok skapades. Meme-modulen fick först 500 från Pollinations men lyckades vid omkörning; PNG skapad i 1080×1080.
+- Publicerade distributionsassets i commit `86ff752`; slutgaten passerade efter 3 försök: startsida, permalink, RSS, podcast-RSS, MP3 och meme live.
+- LinkedIn/X skapade endast lokala utkast. Ingen extern social post skickades.
+
 ## 2026-09-20 — [Claude Code] Pipeline-anrop skapar inte längre Codex-tasks
 - Rotorsak: ett separat `codex exec` startades historiskt för varje dedup-, score-, research-, skriv-, validerings- och distributionsanrop. I Codex CLI 0.154 blev dessa synliga desktop-tasks trots `--ephemeral`.
 - `pipeline/llm.py` använder nu explicit `claude -p --no-session-persistence --safe-mode`: Haiku som lågusage-standard, Sonnet endast för skrivfallback, ersatt minimal systemprompt, inga verktyg/slash-kommandon och inga bypass-behörigheter. OpenRouter Luna är fortsatt sista fallback.
