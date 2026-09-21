@@ -104,6 +104,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://aibladet.se/ordbok/ai-agent</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://aibladet.se/ordbok/duplex-rostmodell</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -182,6 +188,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://aibladet.se/audio/2026-38.mp3</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://aibladet.se/audio/test.mp3</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -219,6 +231,12 @@
   </url>
   <url>
     <loc>https://aibladet.se/memes/2026-37.png</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://aibladet.se/memes/2026-38.png</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
