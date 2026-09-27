@@ -1,5 +1,12 @@
 # AI-Bladet — Loggbok
 
+## 2026-09-21 — [lutra] Modellsläpp som första omslagsprioritet
+- Ändrade `pipeline/score.py`: modellrelease-signaler prioriteras före övriga kandidater i scoring-batchen, verifierade släpp får bonus och rykten får inte samma bonus.
+- Ändrade `pipeline/write.py`: verifierade modellsläpp markeras tydligt i skrivprompten och väljs i första hand som omslag när inget större släpp finns.
+- Ersatte den felaktiga namn-watchlisten med fem leverantörsqueries för nya modellsläpp från DeepSeek, Claude/Anthropic, GPT/OpenAI, Gemini/Google DeepMind och Grok/xAI. Inga specifika modellnamn söks längre.
+- Validerade de nio modellreleaseflödena: 30 poster per flöde. Full testsuite: 60/60 grön. Ingen extern publicering utförd.
+- Separat `pipeline/validate.py` på befintlig vecka 38 blev exit 1 på grund av `Claude CLI-fel: Not logged in` och befintlig URL-status 5/6; inget av detta kom från modellreleaseändringen.
+
 ## 2026-09-21 — [lutra] Vecka 38 publicerad
 - Validerade `content/2026-38.md`, byggde sajten och publicerade commit `ae4d752`; live-gate passerade med rätt titel på startsida och permalink efter 3 försök.
 - Kör distributionen: ljud, X-tråd, LinkedIn-utkast och ordbok skapades. Meme-modulen fick först 500 från Pollinations men lyckades vid omkörning; PNG skapad i 1080×1080.

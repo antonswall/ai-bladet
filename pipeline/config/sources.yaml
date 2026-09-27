@@ -243,6 +243,68 @@ feeds:
     label: "HN (≥50 points)"
     weight: 18
 
+  # === TIER 3: Modellrelease-bevakning ===
+  # Separata queries gör att en ny modell inte behöver konkurrera med allmän
+  # AI-trafik i samma Google News-feed innan scoring-steget.
+  - id: model-releases-general
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28%22new+AI+model%22+OR+%22model+release%22+OR+%22model+launch%22%29+when:7d&hl=en-US&gl=US&ceid=US:en"
+    label: "Modellsläpp (allmänt)"
+    weight: 20
+
+  - id: model-releases-frontier
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28GPT+OR+Claude+OR+Gemini+OR+DeepSeek%29+%28release+OR+launch+OR+preview%29+when:7d&hl=en-US&gl=US&ceid=US:en"
+    label: "Modellsläpp (frontier)"
+    weight: 20
+
+  - id: model-releases-open
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28open+weights+OR+open+source%29+%28model+release+OR+model+launch%29+when:7d&hl=en-US&gl=US&ceid=US:en"
+    label: "Modellsläpp (öppna vikter)"
+    weight: 18
+
+  # Leverantörsvisa queries — söker efter nya släpp, inte efter redan namngivna
+  # modeller. En modell tas bara vidare som release när artikeltexten också
+  # innehåller konkret release-/preview-/availability-signal.
+  - id: model-releases-deepseek
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28DeepSeek+OR+%22DeepSeek+AI%22%29+%28%22new+model%22+OR+%22model+release%22+OR+%22model+launch%22+OR+introducing+OR+launches+OR+announces+OR+preview%29+when:30d&hl=en-US&gl=US&ceid=US:en"
+    label: "Nya modellsläpp: DeepSeek"
+    weight: 24
+
+  - id: model-releases-claude
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28Claude+OR+Anthropic%29+%28%22new+model%22+OR+%22model+release%22+OR+%22model+launch%22+OR+introducing+OR+launches+OR+announces+OR+preview%29+when:30d&hl=en-US&gl=US&ceid=US:en"
+    label: "Nya modellsläpp: Claude/Anthropic"
+    weight: 24
+
+  - id: model-releases-gpt
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28OpenAI+OR+GPT%29+%28%22new+model%22+OR+%22model+release%22+OR+%22model+launch%22+OR+introducing+OR+launches+OR+announces+OR+preview%29+when:30d&hl=en-US&gl=US&ceid=US:en"
+    label: "Nya modellsläpp: GPT/OpenAI"
+    weight: 24
+
+  - id: model-releases-gemini
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28Gemini+OR+%22Google+DeepMind%22%29+%28%22new+model%22+OR+%22model+release%22+OR+%22model+launch%22+OR+introducing+OR+launches+OR+announces+OR+preview%29+when:30d&hl=en-US&gl=US&ceid=US:en"
+    label: "Nya modellsläpp: Gemini/Google DeepMind"
+    weight: 24
+
+  - id: model-releases-grok
+    tier: 3
+    type: rss
+    url: "https://news.google.com/rss/search?q=%28Grok+OR+xAI%29+%28%22new+model%22+OR+%22model+release%22+OR+%22model+launch%22+OR+introducing+OR+launches+OR+announces+OR+preview%29+when:30d&hl=en-US&gl=US&ceid=US:en"
+    label: "Nya modellsläpp: Grok/xAI"
+    weight: 24
+
   # === TIER 4: Lucktäckare ===
 
   - id: google-news-ai

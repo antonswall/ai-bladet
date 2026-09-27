@@ -336,13 +336,16 @@ def build_prompt(stories: list[dict], week: str, year: int,
         credit = s.get("image_credit", "")
 
         actionable = s.get("actionable", s.get("ai_score", {}).get("actionable", False))
+        model_release = bool(s.get("model_release", s.get("ai_score", {}).get("model_release", False)))
+        release_status = s.get("release_status", s.get("ai_score", {}).get("release_status", "none"))
         # Markörer byggs utanför f-stringen — non-ASCII i f-string-uttryck
         # kraschar macOS Python 3.11 (se loggbok 2026-07-12)
         lead_mark = "[LEAD CANDIDATE]" if lead >= 4 else ""
         aktion_mark = "[AKTIONABEL — ändrar AI-byggares vardag denna vecka]" if actionable else ""
+        release_mark = f"[MODELLSLÄPP — status: {release_status}]" if model_release else ""
         stories_text += f"""
 ## STORY {i+1} — Score: {score} | Kategori: {category}
-{lead_mark}{aktion_mark}
+{lead_mark}{aktion_mark}{release_mark}
 
 Titel: {title}
 Källa: {source}
@@ -378,8 +381,10 @@ RESEARCHADE ARTIKLAR (scores från DeepSeek V4 Pro):
 INSTRUKTIONER:
 
 1. Välj lead-story: veckans viktigaste VERKTYGSNYHET (kategori Modeller/Verktyg).
-   LEAD- och AKTIONABEL-märkta stories är kandidater. Regel 18 gäller — politik,
-   förvärv och forskning kan ALDRIG vara lead.
+   LEAD-, AKTIONABEL- och MODELLSLÄPP-märkta stories är kandidater. Om det finns
+   ett verifierat modellsläpp (status released, preview eller beta), välj det i
+   första hand till omslaget om det inte finns ett tydligt större släpp. Regel 18
+   gäller — politik, förvärv och forskning kan ALDRIG vara lead.
 
 2. Välj 1-3 ytterligare verktygsstories (segment: "verktyg"). Rangordna efter
    hur mycket de påverkar läsarens AI-vardag.

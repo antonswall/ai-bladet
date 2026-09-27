@@ -35,6 +35,20 @@ BATCH_SIZE = 25  # kandidater per API-anrop
 # inspiration från promptdeep på Moltbook 🦞
 TEMPORAL_DECAY_PER_DAY = 0.85  # ~0.72 efter 2 dagar, ~0.32 efter 7 dagar
 
+# Första omslaget ska i första hand hitta faktiska modellsläpp. Dessa signaler
+# används före LLM-scoring för att modellreleaser inte ska falla bort i topp-100.
+MODEL_RELEASE_TERMS = (
+    "release", "released", "launch", "launched", "introducing", "introduces",
+    "available", "public preview", "public beta", "weights", "model update",
+    "lanserar", "lansering", "släpper", "släpp", "tillgänglig",
+)
+MODEL_FAMILY_TERMS = (
+    "gpt", "chatgpt", "claude", "gemini", "deepseek", "llama", "qwen",
+    "mistral", "grok", "command", "phi", "nemotron", "gemma", "yi",
+    "kimi", "minimax", "hunyuan",
+)
+MODEL_RELEASE_BONUS = 8
+
 # Editorial fatigue — samma leverantör får inte äga leaden vecka efter vecka.
 # Om en entity varit lead minst två av de senaste fyra numren får nya kandidater
 # från samma entity en tydlig score-sänkning. Detta fångar t.ex. Grok/xAI-spåret.
@@ -70,6 +84,21 @@ _VERKTYG_KEYWORDS = [
 def _ar_verktygssignal(text: str) -> bool:
     """Signalerar texten ett konkret verktyg/modellsläpp?"""
     return any(kw in text for kw in _VERKTYG_KEYWORDS)
+
+
+def _ar_modellrelease_signal(candidate: dict) -> bool:
+    """Mekanisk upptäckt av möjliga modellsläpp inför AI-scoring."""
+    text = f"{candidate.get('title', '')} {candidate.get('summary', '')}".lower()
+    has_model = any(term in text for term in MODEL_FAMILY_TERMS)
+    has_release = any(term in text for term in MODEL_RELEASE_TERMS)
+    return has_model and has_release
+
+
+def prioritize_scoring_candidates(candidates: list[dict], limit: int = 100) -> list[dict]:
+    """Välj scoring-batch med modellrelease-signaler först."""
+    release_candidates = [c for c in candidates if _ar_modellrelease_signal(c)]
+    other_candidates = [c for c in candidates if not _ar_modellrelease_signal(c)]
+    return (release_candidates + other_candidates)[:limit]
 
 
 def pre_filter(candidates: list[dict]) -> list[dict]:
@@ -147,6 +176,14 @@ Varje artikel får en score baserat på:
 - Svensk relevans (0-3): Relevant för svenska läsare? (Svenska bolag, EU-policy, svenska forskare)
 - Kategori: Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Övrigt
 
+Extra prioritet för första omslaget:
+- Sätt model_release=true endast när artikeln beskriver ett konkret modellsläpp,
+  preview, beta eller tydligt tillgänglig modelluppdatering.
+- Sätt model_release=false för rykten, benchmarkartiklar, finansiering och allmänna
+  modellnyheter utan ett faktiskt släpp.
+- Sätt release_status till released, preview, beta, announced, rumor eller none.
+- Ett verifierat större modellsläpp ska normalt få lead_potential 4-5 och kategorin Modeller.
+
 Lead-potential ska spegla aktionabiliteten: en nyhet som inte ändrar någons
 AI-vardag denna vecka får aldrig lead_potential 4-5, oavsett hur stor den är.
 
@@ -178,6 +215,8 @@ Svara endast med JSON-format, ingen annan text:
       "actionable": true/false,
       "swedish_relevance": 0-3,
       "category": "Modeller|Politik|Verktyg|Forskning|Företag|Säkerhet|Övrigt",
+      "model_release": true/false,
+      "release_status": "released|preview|beta|announced|rumor|none",
       "reason": "kort motivering (max 15 ord)"
     }}
   ]
@@ -224,6 +263,8 @@ def parse_scores(response: str, batch: list[dict], start_idx: int) -> list[dict]
                 "actionable": bool(s.get("actionable", False)),
                 "swedish_relevance": _clamp(s.get("swedish_relevance", 0), 0, 3),
                 "category": s.get("category", "Övrigt"),
+                "model_release": bool(s.get("model_release", False)),
+                "release_status": s.get("release_status", "none"),
                 "reason": s.get("reason", ""),
             })
         return results
@@ -243,7 +284,7 @@ def _clamp(val, lo, hi):
 def _default_scores(batch: list[dict], start_idx: int) -> list[dict]:
     """Default scores om API-anropet misslyckas."""
     return [
-        {"score": 5, "lead_potential": 3, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "reason": "API-fallback"}
+        {"score": 5, "lead_potential": 3, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "model_release": False, "release_status": "none", "reason": "API-fallback"}
         for _ in batch
     ]
 
@@ -272,6 +313,8 @@ def final_score(c: dict) -> float:
     actionable = ai.get("actionable", False)
     swedish = ai.get("swedish_relevance", 0)
     category = ai.get("category", "Övrigt")
+    model_release = bool(ai.get("model_release", False))
+    release_status = ai.get("release_status", "none")
 
     # Aktionabilitet in i lead-potentialen: en nyhet som ändrar läsarens
     # AI-vardag denna vecka lyfts; en som inte gör det dämpas.
@@ -285,8 +328,13 @@ def final_score(c: dict) -> float:
     # tier-bonus: Tier 1 +2, Tier 2 +1, Tier 3 +0, Tier 4 -1
     tier_bonus = {1: 2, 2: 1, 3: 0}.get(tier, -1)
     kategori_bonus = KATEGORI_BONUS.get(category, 0)
+    release_bonus = (
+        MODEL_RELEASE_BONUS
+        if model_release and release_status in {"released", "preview", "beta", "announced"}
+        else 0
+    )
 
-    raw = (news * 3) + (lead_eff * 2) + (swedish * 4) + tier_bonus + kategori_bonus
+    raw = (news * 3) + (lead_eff * 2) + (swedish * 4) + tier_bonus + kategori_bonus + release_bonus
 
     # Temporal decay: nyare = högre, äldre = lägre
     published = c.get("published")
@@ -332,11 +380,11 @@ def score(input_path: Path, output_path: Path) -> dict:
     for c in candidates:
         c["source_weight"] = feed_map.get(c.get("source_id", ""), 10)
 
-    # Begränsa till topp 100 för AI-scoring (kvalitet framför kvantitet)
-    # Sortera preliminärt efter tier + weight
+    # Begränsa till topp 100 för AI-scoring, men reservera mekaniska
+    # modellrelease-signaler först. Annars kan en viktig release från en
+    # sekundär/signalkälla falla bort innan LLM:n ens får se den.
     candidates.sort(key=lambda c: (c.get("tier", 99), -c["source_weight"]))
-
-    scoring_batch = candidates[:100]  # max 100 till AI
+    scoring_batch = prioritize_scoring_candidates(candidates, limit=100)
     print(f"  🎯 Skickar {len(scoring_batch)} till DeepSeek V4 Pro för scoring\n")
 
     # Batcha och scorea
