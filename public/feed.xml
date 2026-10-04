@@ -7,6 +7,13 @@
 <atom:link href="https://aibladet.se/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>GPT-6.1 Sol, Gemini 4 Argon och en vecka full av xAI — Vecka 40 2026</title>
+  <description>OpenAI pressar priserna, Google siktar på cybersäkerhet och xAI fyller kalendern med releaser.</description>
+  <link>https://aibladet.se/v/2026/40/</link>
+  <guid>https://aibladet.se/v/2026/40/</guid>
+  <pubDate>Sun, 04 Oct 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>GGUF i Transformers, Grok 4.7 och snabbare tokens — Vecka 39 2026</title>
   <description>Hugging Face öppnar för llama.cpp-quants i Transformers — plus Grok 4.7 och tokenizers v1.</description>
   <link>https://aibladet.se/v/2026/39/</link>

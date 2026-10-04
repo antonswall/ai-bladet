@@ -46,6 +46,13 @@ python -c "import requests, bs4, lxml, feedparser, trafilatura, yaml" 2>/dev/nul
 if [ -z "${OPENROUTER_API_KEY:-}" ]; then
     echo "ℹ️  PREFLIGHT: OPENROUTER_API_KEY saknas — använder sessionslös Claude CLI"
 fi
+if [ -z "${SKIP_GIT_PUSH:-}" ]; then
+    git -C "$PROJECT_DIR" var GIT_AUTHOR_IDENT >/dev/null 2>&1 \
+        || { echo "❌ PREFLIGHT: Git-identitet saknas — konfigurera user.name och user.email i repot"; preflight_fail=1; }
+    GIT_TERMINAL_PROMPT=0 git -C "$PROJECT_DIR" -c credential.interactive=false \
+        push --dry-run origin HEAD:refs/heads/main \
+        || { echo "❌ PREFLIGHT: Git-push saknar fungerande autentisering eller skrivåtkomst"; preflight_fail=1; }
+fi
 if [ "$preflight_fail" -ne 0 ]; then
     echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
     exit 1
@@ -53,6 +60,10 @@ fi
 # Gör inget betalt/live LLM-smoke här. Första riktiga anropet har egen tydlig
 # felhantering och fallback; ett smoke per veckokörning vore ren usage-overhead.
 echo "✅ Preflight OK — python=$(command -v python), node $(node -v), claude=$(claude --version)"
+if [ "${1:-}" = "--preflight-only" ]; then
+    echo "PREFLIGHT_ONLY — inget innehåll genererat eller publicerat"
+    exit 0
+fi
 
 # Återanvänd checkpoint från samma vecka. Collect kan ha lyckats även om
 # ett senare steg eller cronens timeout stoppade körningen.
@@ -175,7 +186,10 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
         echo ""
         echo "📤 Pushar till GitHub..."
         git add -A
-        git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" || true
+        if ! git diff --cached --quiet; then
+            git commit -m "Vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d) — auto" \
+                || { echo "❌ git commit failade — ingen push"; exit 1; }
+        fi
         git push origin main || { echo "❌ git push failade"; exit 1; }
 
         ISSUE_FILE="$PROJECT_DIR/content/$WEEK_STEM.md"
@@ -205,7 +219,10 @@ if [ "$VALIDATE_EXIT" -eq 0 ]; then
             cd "$PROJECT_DIR"
             node build.js || { echo "❌ Re-build efter distribution misslyckades"; exit 1; }
             git add -A
-            git commit -m "distribute: vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d)" || true
+            if ! git diff --cached --quiet; then
+                git commit -m "distribute: vecka ${WEEK_NUM:-$(date +%W)} · $(date +%Y-%m-%d)" \
+                    || { echo "❌ Distribution commit misslyckades — ingen push"; exit 1; }
+            fi
             git push origin main || { echo "❌ Distribution push misslyckades"; exit 1; }
             python "$PIPELINE_DIR/verify_deploy.py" --issue "$ISSUE_FILE" --require-assets \
                 || { echo "❌ Slutpushen kunde inte verifieras live"; exit 1; }
