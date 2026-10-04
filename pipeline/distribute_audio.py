@@ -15,7 +15,10 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -69,9 +72,38 @@ def _get_elevenlabs_key() -> str:
         raise ValueError("ELEVENLABS_API_KEY saknas")
     return key
 
+def local_tts(text: str) -> Optional[bytes]:
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        ffmpeg = next((str(p) for p in sorted((Path.home() / ".hermes/tools").glob(
+            "ffmpeg-*-darwin-*/ffmpeg")) if os.access(p, os.X_OK)), None)
+    if sys.platform != "darwin" or not shutil.which("say") or not ffmpeg:
+        print("  ❌ Lokal TTS kräver macOS say, svensk Alva-röst och ffmpeg", file=sys.stderr)
+        return None
+    scratch = Path.home() / ".hermes/cache/scratch"
+    scratch.mkdir(parents=True, exist_ok=True)
+    try:
+        with tempfile.TemporaryDirectory(prefix="ai-bladet-tts-", dir=scratch) as folder:
+            work = Path(folder)
+            (work / "script.txt").write_text(text, encoding="utf-8")
+            subprocess.run(["say", "-v", "Alva", "-r", "150", "-f", str(work / "script.txt"),
+                            "-o", str(work / "audio.aiff")], check=True, capture_output=True, timeout=120)
+            subprocess.run([ffmpeg, "-hide_banner", "-loglevel", "error", "-i", str(work / "audio.aiff"),
+                            "-codec:a", "libmp3lame", "-q:a", "4", str(work / "audio.mp3")],
+                           check=True, capture_output=True, timeout=60)
+            result = (work / "audio.mp3").read_bytes()
+            return result if result else None
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"  ❌ Lokal TTS misslyckades: {exc}", file=sys.stderr)
+        return None
+
+
 def elevenlabs_tts(text: str, voice_id: str = SWEDISH_VOICE_ID) -> Optional[bytes]:
-    """Generera ljud från text med ElevenLabs TTS."""
-    key = _get_elevenlabs_key()
+    """Generera ljud med ElevenLabs, eller lokalt när API-nyckel saknas."""
+    key = _get_env("ELEVENLABS_API_KEY")
+    if not key:
+        print("  ℹ️ ElevenLabs-nyckel saknas — använder lokal svensk TTS utan API-kostnad")
+        return local_tts(text)
     url = f"{ELEVENLABS_URL}/{voice_id}"
 
     try:
@@ -128,7 +160,7 @@ Formatet ska vara:
 [0:05-0:30] Story 1 — rubrik + 1 mening kontext + varför det spelar roll
 [0:30-0:50] Story 2 — rubrik + 1 mening kontext + varför det spelar roll
 [0:50-1:10] Story 3 — rubrik + 1 mening kontext + varför det spelar roll
-[1:10-1:20] "Vill du ha hela bilden? Läs hela tidningen på aibladet.se. Nytt nummer varje söndag."
+[1:10-1:20] "Vill du ha hela bilden? Läs hela tidningen på {SITE_URL}. Nytt nummer varje söndag."
 
 Använd naturlig svenska som låter bra uppläst. Inga parenteser, inga asterisker, inga förkortningar.
 Skriv bara själva texten som ska läsas upp — inga tidsangivelser i output, bara den rena texten.

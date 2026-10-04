@@ -13,7 +13,7 @@ vad du gör när något går fel, och hur du kör manuellt.
   Hermes blockerar symlänkar som pekar utanför scripts-katalogen; använd därför
   **inte** symlänk här.
 - **Timeout:** `cron.script_timeout_seconds: 1800` i `~/.hermes/config.yaml`.
-- **Flöde:** preflight (inkl. LLM-smoke) → checkpoint/collect → dedup → score →
+- **Flöde:** preflight (Python-deps + Git-identitet och push dry-run; inga LLM-smokes) → checkpoint/collect → dedup → score →
   research → images → write → validering (max 3 fungerande feedback-retries) →
   build → git push → live-verifiering → SeenDB-commit → distribution → slut-push →
   live-verifiering av sida + feeds + assets → Cloudflare Pages på https://ai-bladet.pages.dev/
@@ -78,6 +78,12 @@ Vill du behålla en handtrimmad utgåva: ta en kopia först.
 - Slutgaten kräver dessutom aktuell RSS, podcast-RSS, MP3 och meme-PNG.
 - Runnern får inte skriva `DEPLOYAD` om någon live-kontroll saknas. Exakt URL/fel syns
   i runnerloggen och levereras till Telegram.
+
+### 7. ElevenLabs-nyckel saknas vid distribution
+- `distribute_audio.py` använder då automatiskt macOS-rösten Alva via `say`, och ffmpeg för MP3. Ingen extern tjänst eller API-kostnad för denna reservväg.
+- Kräver svensk Alva-röst (`say -v '?'`), samt ffmpeg i PATH eller `~/.hermes/tools/ffmpeg-*-darwin-*/ffmpeg`.
+- Återuppta bara ljudsteget, bevara befintligt manus/MP3 och kontrollera MP3-avkodning före build/push. Podcastfeedens enclosure ska matcha faktisk filstorlek.
+- Om lokal TTS saknar beroenden eller failar: explicit fel, ingen falsk ljudframgång. Lösenord/API-nycklar ska aldrig lämnas i chatten.
 
 ## Manuell innehållsgranskning (rekommenderat)
 Sajten deployar utan mänsklig granskning. Kolla `ai-bladet.pages.dev` söndag fm:
