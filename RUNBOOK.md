@@ -53,8 +53,9 @@ Vill du behålla en handtrimmad utgåva: ta en kopia först.
 - **Du gör:** oftast övergående. Kör om senare samma dag (`bash run_weekly.sh`).
   Kvarstår det: kolla OpenRouter-status + saldo. Inget halvpublicerat — failar före build.
 
-### 3. git push failar (nät/auth)
-- **Vad händer:** build är klar och utgåvan är **committad lokalt** — inget tappat.
+### 3. git commit/push failar (identitet, nät eller auth)
+- **Vad händer:** build och utgåvan är bevarade. Vid commit-fel är innehållet staged men inte committat; runnern stoppar före push. Vid enbart push-fel finns commiten lokalt.
+- Saknas identitet: återställ `user.name` och `user.email` repo-lokalt från verifierad commithistorik. Saknas GitHub-auth: `gh auth login --hostname github.com --git-protocol https --web`, sedan `gh auth setup-git` och icke-interaktiv push dry-run. Lämna inga tokens i chatten.
 - **Du gör:** när nät/auth är tillbaka:
   ```bash
   cd ~/ai-bladet && git push origin main

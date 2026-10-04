@@ -1,5 +1,23 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-04 — [lutra] Vecka 40 fullt återställd och liveverifierad
+- GitHub webbinloggning godkänd av Anton; `gh auth setup-git`, keyring-status och icke-interaktiv push dry-run verifierade. Utgåva + Git-skydd pushade i `37914d7`; live titelgate passerade efter 4 försök.
+- Valideringsrapportens regex-parserformat skiljer sig från PyYAML, men jämförelse med samma parser och SHA-256 mot backup bekräftar att det validerade innehållet är oförändrat.
+- Distribution körd en gång, sekventiellt, med sju sessionslösa Claude-anrop och utan betald OpenRouter-fallback. X/LinkedIn är endast lokala utkast; ordbok och meme skapade. Meme visuellt granskad: läsbar, inte klippt; Pollinations vattenmärke behållet.
+- Ljud saknade ElevenLabs-nyckel. Införde lokal macOS Alva + ffmpeg-reserv utan API-kostnad och rättade gammal aibladet.se-länk i ljudprompt/manus. Riktig MP3 avkodad: 507 022 byte, 69 sekunder; podcast-RSS har samma enclosure-storlek och duration. PNG verifierad 1080×1080.
+- System-Python saknade yaml och gammal Hermes-venv-sökväg fanns inte; pipeline-tolken användes. Whitespace-only patch nekades; RSS normaliserades med verifierad filskrivning efter full läsning och XML-innehållsjämförelse. read_file-dedup returnerade ingen ny content; ingen data gick förlorad.
+- Slutassets publicerade i `56fcdc2`. Slutgaten passerade efter 3 försök: startsida, vecka-40-permalink, RSS, podcast-RSS, MP3 och meme live. Extra GET verifierade att MP3, PNG och ny ordbokssida byte/SHA-256-matchar lokala filer; podcast har exakt en aktuell GUID med rätt storlek.
+- Full suite 69/69 grön. Verklig `run_weekly.sh --preflight-only` passerade med Git-push-test och rätt venv-tolk utan ny innehållsgenerering. SeenDB backup + commit efter liveverifiering: 856/856 checkpoint-hashar återlästa i databasen.
+- Nästa: ordinarie söndagscron 2026-10-11 07:00. Ingen recollect eller omskrivning behövdes.
+
+### Diagnos före GitHub-inloggningen (historik)
+- 07:00-körningen skrev och validerade vecka 40 (100 %, 6/6 URL:er) och byggde sajten. Publicering stoppade: Git saknade `user.name`/`user.email` och GitHub-credentials. Live RSS visar fortfarande vecka 39.
+- Återställde endast repots lokala identitet till samma Anton Swall / anton.swall@gmail.com som de senaste committerna; installerade `gh` för webbinloggning. Push dry-run bekräftar saknad auth. Inga hemligheter visades eller ändrades.
+- `pipeline/run_weekly.sh` kontrollerar nu Git-identitet och icke-interaktiv push dry-run före pipeline; verkliga commit-fel stoppar både innehålls- och distributionspush i stället för att döljas med `|| true`.
+- Bevarade redan staged `--preflight-only`, test och dagens content/build. Lade till fem Git-regressioner; full suite 66/66 grön, `bash -n` och båda diff-checks gröna.
+- Backup: `/Users/anton/.hermes/cache/scratch/ai-bladet-git-recovery-20261004-151540`. Vaultens `search_files` gav `No such process` två gånger; read-only Python-sökning användes som reserv.
+- Nästa: Anton godkänner GitHub webbinloggning; återuppta från färdig utgåva, inte insamling eller skrivning. Inget pushat, ingen extern social kommunikation skickad.
+
 ## 2026-09-21 — [lutra] Modellsläpp som första omslagsprioritet
 - Ändrade `pipeline/score.py`: modellrelease-signaler prioriteras före övriga kandidater i scoring-batchen, verifierade släpp får bonus och rykten får inte samma bonus.
 - Ändrade `pipeline/write.py`: verifierade modellsläpp markeras tydligt i skrivprompten och väljs i första hand som omslag när inget större släpp finns.
