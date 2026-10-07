@@ -28,7 +28,7 @@ function renderArchive(issues) {
       body += `<article class="archive-card">
         <a href="/v/${i.year}/${i.week}/" class="archive-card-link">
           <div class="archive-card-img">
-            ${img ? `<img src="${esc(img)}" alt="${esc(i.title || 'AI-Bladet')}" loading="lazy" decoding="async" onerror="this.parentElement.remove()">` : ''}
+            ${img ? `<img src="${esc(img)}" alt="${esc(i.title || 'AI-Bladet')}" loading="lazy" decoding="async" data-fail="parent">` : ''}
             <span class="archive-card-fallback" aria-hidden="true">AI<span class="archive-card-fallback-b">-Bladet</span></span>
           </div>
           <div class="archive-card-body">

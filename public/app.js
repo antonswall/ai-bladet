@@ -65,3 +65,18 @@
     });
   }
 })();
+
+// Trasiga bilder tas bort (ersätter inline onerror, som CSP blockerar)
+(function () {
+  function drop(img) {
+    var t = img.getAttribute("data-fail") === "parent" ? img.parentElement : img;
+    if (t) t.remove();
+  }
+  document.addEventListener("error", function (e) {
+    var el = e.target;
+    if (el && el.tagName === "IMG" && el.hasAttribute("data-fail")) drop(el);
+  }, true);
+  document.querySelectorAll("img[data-fail]").forEach(function (img) {
+    if (img.complete && img.naturalWidth === 0) drop(img);
+  });
+})();

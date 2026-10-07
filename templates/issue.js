@@ -285,7 +285,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
         const piAlt = pi.title || `AI-Bladet Vecka ${pi.week}`;
         body += `<a href="/v/${pi.year}/${pi.week}/" class="previous-card">
           <div class="previous-card-img">
-            ${piImg ? `<img src="${esc(piImg)}" alt="${esc(piAlt)}" loading="lazy" decoding="async" onerror="this.parentElement.remove()">` : ''}
+            ${piImg ? `<img src="${esc(piImg)}" alt="${esc(piAlt)}" loading="lazy" decoding="async" data-fail="parent">` : ''}
             <span class="previous-card-fallback" aria-hidden="true">AI<span class="previous-card-fallback-b">-Bladet</span></span>
           </div>
           <div class="previous-card-text">
@@ -332,7 +332,7 @@ function esc(str) {
 // the placeholder shows through. `credit` renders a newspaper-style photo byline.
 function figure(url, alt, cls, credit) {
   const img = url
-    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="${cls === 'lead-figure' ? 'eager' : 'lazy'}"${cls === 'lead-figure' ? ' fetchpriority="high"' : ''} decoding="async" onerror="this.remove()">`
+    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="${cls === 'lead-figure' ? 'eager' : 'lazy'}"${cls === 'lead-figure' ? ' fetchpriority="high"' : ''} decoding="async" data-fail="self">`
     : '';
   const cap = credit ? `<figcaption class="figure-credit">${esc(credit)}</figcaption>` : '';
   return `<figure class="figure ${cls}">
