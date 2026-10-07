@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Sanden matchar loggans karaktar
+- Anton: "gar det inte att gora sa det blir likadant som ai bladet loggan?" — kornflykten skulle ha samma karaktar som loggans pulverisering.
+- static/dust.js: vinden lutar nu UPPAT-hoger (dy -130 till -280 enhets-px/s, som loggans vec2(0.45,-0.7)-riktning) i stallet for nastan horisontellt; kornen skimrar (sin-svängning i alpha, som loggans partiklar); tathet upp 3200->4400 (mobil 1700->2200). Virveln fanns redan.
+- Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning: lasyta 3.5 %, kant 39.7 %, fryst 60.4 % och 60.4 % efter 3.2 s; live samma; 0 JS-fel; live-perf 3.4 ms snitt under scroll. Visuellt: sida-vid-sida med hero-pulveriseringen — samma uppat-hoger-svarm med gradvis tunnande kant.
+- Publicerad i `62c88ce`. Stillbild: screenshots/live-scroll-still-5.png.
+
 ## 2026-10-07 — [lutra] Kornen flyger ut hela vagen + snabbare rendering
 - Anton: kornen forsvinner for tidigt (ser inte ut som de flyger ut ur skarmen) och det laggar.
 - static/dust.js: kornflykten ar nu ALDERSBASERAD — varje korn fortsatter at hoger i upp till 2.4 s (230-550 enhets-px/s -> 630-930 CSS-px) tills det lamnar duken, med fade forst sista 0.5 s; vid stillastaende fryser aldern sa kornen hanger kvar. Budgeten sanktes 8000->3200 (mobil 3600->1700) och omslagens dpr-cap 1.5->1.35 (mobil 1.25->1.2) for att ta bort lagget.
