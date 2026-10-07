@@ -36,10 +36,10 @@ test('grains assemble on entry and drift only at the viewport edges while scroll
   assert.equal(dust.edgeZone(500, 1000, 0.22, 0.16), 0);
   assert.ok(dust.edgeZone(990, 1000, 0.22, 0.16) > 0.9);
   assert.ok(dust.edgeZone(5, 1000, 0.22, 0.16) > 0.9);
-  assert.ok(dust.dustAmount(1, 0.2, 0) > 0.9, 'a covered edge stays dissolved at rest');
-  assert.ok(dust.dustAmount(0.6, 0.2, 0) > dust.dustAmount(0.6, 0.9, 0), 'noise keeps it grainy');
-  assert.ok(dust.dustAmount(0.4, 0.1, 1) >= dust.dustAmount(0.4, 0.1, 0), 'scrolling adds a transient burst');
-  assert.equal(dust.dustAmount(0, 0.2, 1), 0, 'clear of the band the image stays crisp while scrolling');
+  assert.ok(dust.dustAmount(1, 0.2) > 0.9, 'a covered edge stays dissolved at rest');
+  assert.ok(dust.dustAmount(0.6, 0.2) > dust.dustAmount(0.6, 0.9), 'noise keeps it grainy');
+  assert.ok(dust.dustAmount(0.5, 0.2) > 0.4, 'sand needs no scrolling to stay dissolved');
+  assert.equal(dust.dustAmount(0, 0.2), 0, 'clear of the band the image stays crisp');
 });
 
 test('hero pulverises with scroll and grain budgets stay bounded', () => {

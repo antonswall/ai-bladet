@@ -12,7 +12,7 @@
   const ZONE_BOTTOM = 0.3;
   const ZONE_TOP = 0.2;
   const INV255 = 1 / 255;
-  const R2K = 0.6 / 255;
+  const R2K = 0.24 / 255;
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function smoothstep(a, b, v) { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -48,7 +48,7 @@
     return Math.max(smoothstep(vh * (1 - bottom), vh, vy), 1 - smoothstep(0, vh * top, vy));
   }
   function introAmount(th, assemble) { return 1 - smoothstep(th, th + BAND, assemble * (1 + BAND)); }
-  function dustAmount(zone, rnd, activity) { return clamp(zone * (1 + activity * 0.35) - rnd * 0.35, 0, 1); }
+  function dustAmount(zone, rnd) { return clamp(zone * 1.4 - rnd * 0.24, 0, 1); }
   function floatOffset(rect, vh) {
     if (rect.top > vh * 0.45) { const t = clamp((rect.top - vh * 0.45) / (vh * 0.55), 0, 1); return 34 * t * t; }
     if (rect.top < vh * 0.15) { const t = clamp((vh * 0.15 - rect.top) / (vh * 0.5), 0, 1); return -34 * t * t; }
@@ -81,6 +81,7 @@
   const ACCENT = styles.getPropertyValue('--accent').trim() || '#C41230';
   const heroEl = document.querySelector('[data-hero]');
   const covers = [];
+  let dustBudget = 0;
   const perf = { n: 0, sum: 0, max: 0 };
   let hero = null, raf = 0, lastNow = 0, lastScroll = window.scrollY, activity = 0, scrollDir = 1, lastHeroVar = '';
 
@@ -106,6 +107,7 @@
     let busy = activity > 0;
     if (hero && hero.built) { if (hero.frame(dt)) busy = true; }
     else if (heroEl) { const r = heroEl.getBoundingClientRect(); setHeroVar(heroProgress(r.top, r.height)); }
+    dustBudget = coarse || lowPower ? 2400 : 5200;
     const t0 = performance.now();
     for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].frame(dt)) busy = true;
     const spent = performance.now() - t0;
@@ -338,8 +340,8 @@ void main() {
     const sctx = src.getContext('2d');
     const maskCanvas = document.createElement('canvas');
     const mctx = maskCanvas.getContext('2d');
-    const c = { el: frameEl, canvas, visible: false, ready: false, started: false, cleared: false, settled: false, assemble: 0, kick: 0, kicks: 0, time: 0, frames: 0 };
-    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null, act16 = 0;
+    const c = { el: frameEl, canvas, visible: false, ready: false, started: false, cleared: false, settled: false, held: false, heldZ: 0, holdAcc: 0, assemble: 0, kick: 0, kicks: 0, time: 0, frames: 0 };
+    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null;
     let em = 0, ex = null, ey = null, eang = null, esp = null;
 
     c.layout = function () {
@@ -347,7 +349,7 @@ void main() {
       const fr = frameEl.getBoundingClientRect();
       const W = fr.width, H = fr.height;
       if (W < 8 || H < 8) return false;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);
       canvas.width = Math.round((W + SAND_X * 2) * dpr);
       canvas.height = Math.round((H + SAND_Y * 2) * dpr);
       src.width = Math.round(W * dpr);
@@ -398,7 +400,7 @@ void main() {
       let d = 0;
       if (introLive) { const th = 0.62 * rowFrac + 0.38 * n; d = 1 - smoothstep(th, th + BAND, A); }
       if (d < 1) {
-        { const dd = dustAmount(zone, r2, activity); if (dd > d) d = dd; }
+        { const dd = dustAmount(zone, r2); if (dd > d) d = dd; }
         if (kickW > 0) { const dk = clamp(kickW * 1.25 - r2 * 0.55, 0, 1); if (dk > d) d = dk; }
       }
       return d;
@@ -406,13 +408,12 @@ void main() {
     function fillAlpha(start, x0, x1, v) { for (let i = (start + x0) * 4 + 3, end = (start + x1) * 4 + 3; i < end; i += 4) data[i] = v; }
     function driftSpan(start, x0, x1, zone) {
       for (let mx = x0, p = start + x0, i = p * 4 + 3; mx < x1; mx++, p++, i += 4) {
-        data[i] = zone * (1 + act16 * 0.35) - noise2[p] * R2K < 0.04 ? 255 : 0;
+        data[i] = zone * 1.4 - noise2[p] * R2K < 0.04 ? 255 : 0;
       }
     }
     function drawGrains(fr, vh) {
       const A = c.assemble * (1 + BAND), introLive = c.assemble < 1, kicking = c.kick > 0;
       let lo = mh, hi = -1;
-      act16 = activity * 1.6;
       for (let my = 0; my < mh; my++) {
         const vy = fr.top + (iy + my * gm + gm / 2) / dpr;
         if (vy < -60 || vy > vh + 60) continue;
@@ -421,25 +422,26 @@ void main() {
         const kickW = kicking ? kickBand(rowFrac, 1 - c.kick) : 0;
         const start = my * mw;
         const still = activity === 0 && kickW < 0.01;
-        if (!rowIntro && still) {
-          if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; if (my < lo) lo = my; if (my > hi) hi = my; }
-          continue;
-        }
-        if (my < lo) lo = my; if (my > hi) hi = my;
-        if (rowIntro && still) {
-          if (A <= 0.62 * rowFrac) { if (rowState[my] !== 2) { fillAlpha(start, 0, mw, 0); rowState[my] = 2; } continue; }
+        const zone = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
+        if (still && rowIntro) {
+          if (A <= 0.62 * rowFrac) { if (rowState[my] !== 2) { fillAlpha(start, 0, mw, 0); rowState[my] = 2; if (my < lo) lo = my; if (my > hi) hi = my; } continue; }
           rowState[my] = 0;
           const base = 0.62 * rowFrac + 0.264;
           for (let p = start, i = p * 4 + 3, end = start + mw; p < end; p++, i += 4) data[i] = A > base + 0.38 * noise[p] * INV255 ? 255 : 0;
+          if (my < lo) lo = my; if (my > hi) hi = my;
           continue;
         }
-        const zone = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
-        if (!rowIntro && kickW < 0.01) {
+        if (still) {
           if (zone === 0) {
-            if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; }
-          } else { rowState[my] = 0; driftSpan(start, 0, mw, zone); }
+            if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; if (my < lo) lo = my; if (my > hi) hi = my; }
+            continue;
+          }
+          rowState[my] = 0;
+          driftSpan(start, 0, mw, zone);
+          if (my < lo) lo = my; if (my > hi) hi = my;
           continue;
         }
+        if (my < lo) lo = my; if (my > hi) hi = my;
         rowState[my] = 0;
         for (let mx = 0, p = start, i = p * 4 + 3; mx < mw; mx++, p++, i += 4) {
           data[i] = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, zone, kickW) < 0.04 ? 255 : 0;
@@ -471,10 +473,14 @@ void main() {
         if (d <= 0.04 || d >= 0.985) continue;
         const e = d * d;
         const spread = (6 + 46 * esp[k]) * dpr * e;
-        let dx = Math.cos(eang[k] + t * 0.8) * spread, dy = Math.sin(eang[k] + t * 0.8) * spread;
+        const wob = 0.2 + 0.8 * activity;
+        let dx = Math.cos(eang[k]) * spread * 0.9 + Math.cos(eang[k] + t * 0.8) * spread * 0.6 * wob;
+        let dy = Math.sin(eang[k]) * spread * 0.9 + Math.sin(eang[k] + t * 0.8) * spread * 0.6 * wob;
         if (rowIntro) dy += 46 * dpr * e;
         else if (kickW >= 0.01) dy -= 34 * dpr * e;
         else { dy += scrollDir * 52 * dpr * e; dx += (esp[k] - 0.5) * 36 * dpr * e; }
+        if (dustBudget <= 0) break;
+        dustBudget -= 1;
         const s = gm * (2 - 1.1 * d);
         ctx.globalAlpha = 1 - Math.pow(d, 1.4);
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
@@ -499,11 +505,22 @@ void main() {
       const off = floatOffset(fr, vh);
       canvas.style.transform = off ? 'translateY(' + off.toFixed(1) + 'px)' : '';
       const zoneEdges = Math.max(edgeZone(fr.top, vh, ZONE_BOTTOM, ZONE_TOP), edgeZone(fr.bottom, vh, ZONE_BOTTOM, ZONE_TOP));
-      if (c.assemble >= 1 && activity === 0 && c.kick === 0 && zoneEdges < 0.035) {
-        if (!c.settled) { drawFull(); c.settled = true; rowState.fill(0); canvas.dataset.state = 'settled'; }
-        return off !== 0 ? true : false;
+      if (c.assemble >= 1 && activity === 0 && c.kick === 0) {
+        if (zoneEdges < 0.035) {
+          if (!c.settled) { drawFull(); c.settled = true; c.held = false; rowState.fill(0); canvas.dataset.state = 'settled'; }
+          return off !== 0;
+        }
+        c.settled = false;
+        c.holdAcc += dt;
+        if (c.held && Math.abs(zoneEdges - c.heldZ) < 0.004 && c.holdAcc < 0.25) return true;
+        c.held = true; c.heldZ = zoneEdges; c.holdAcc = 0;
+        canvas.dataset.state = 'drifting';
+        drawGrains(fr, vh);
+        c.frames += 1;
+        canvas.dataset.frames = String(c.frames);
+        return true;
       }
-      c.settled = false;
+      c.settled = false; c.held = false;
       canvas.dataset.state = c.assemble < 1 ? 'assembling' : c.kick > 0 ? 'rippling' : 'drifting';
       drawGrains(fr, vh);
       c.frames += 1;
@@ -559,7 +576,7 @@ void main() {
       ensureHero();
       if (hero && hero.built) { root.classList.add('dust-live'); hero.canvas.style.visibility = ''; hero.replay(); }
       covers.forEach(c => {
-        c.settled = false; c.started = false; c.cleared = false; c.assemble = 0;
+        c.settled = false; c.started = false; c.cleared = false; c.held = false; c.holdAcc = 0; c.assemble = 0;
         if (c.ready || c.layout()) c.el.classList.add('is-sand');
       });
     }
