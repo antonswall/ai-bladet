@@ -1,5 +1,13 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Sandomslag: frys-bugg rattad, synliga pixlar verifierade, snabbare
+- Anton: "Nastan helt perfekt" men (1) lagg vid scroll, (2) upplosningen byggdes klart anda nar halva bilden lag kvar i kanten.
+- Rotorsak 2: en tidig "still"-gren i radloopen fyllde ALLA rader med fast bild sa fort rorelsen var noll, fore zonberakningen. Maskmatning i webblasaren: synliga rader 0.0 % hal / osynliga 66.7 % vid fryst lage. Grenen borttagen -> synliga rader 87.7 % hal, stabilt efter 3.2 s.
+- Prestanda 1: omslagen ritas nu i max 1.5x (mobil 1.25x) enhetsupplosning, kornbudget per bildruta (5200/2400), och fruset lage ritar ~4 ggr/s i stallet for 60. Live-matning under scroll: 3.3 ms snitt, 12.6 ms max per bildruta (var 8.1/17.5 vid emulerad retina).
+- Verifiering: DOM-tillstand racker inte - lade till pixelbevis via skarmbilder lasta genom webblasarens canvas (samma-origin): lasyta 3.5 % bakgrund (skarp), kant vid scroll 50 %, halvtackt vid stopp 74.4 % sand och 74.3 % efter 3.2 s (frusen). 12/12 + 9/9 tester, 60/60 python, 0 JS-fel.
+- Publicerad i `6690ddd`. Live hash-identisk; nya videor (med avsiktlig paus vid halvtackt bild) i preview-kopian.
+- Nasta: Anton granskar videorna; sandstyrkan i vila (74 %) och zonhojderna (topp 20 %, botten 30 %) ar enkla siffror att justera.
+
 ## 2026-10-07 — [lutra] Upplosningen fryser mitt i luften vid kant
 - Anton: nar han stannar med halva bilden i ovre/nedre kanten fortsatte bilden att byggas klar. Onskat: upplosningen ska hanga pa POSITION, inte pa rorelse — sanden ska stanna "mid air" och bara byggas klar nar bilden lamnar kantzoonen.
 - static/dust.js: kantzoonen ar nu en ren positionsfunktion (edgeZone utan aktivitetsfaktor); rorelsen styr bara virvel/extra korn. Ny dustAmount() ersatter driftAmount() (positionsdel kvarstar, aktivitet ger tillfalligt tillskott). Zon galler ENDAST for den del av bilden som faktiskt ar tackt av en kant (en helt synlig bild ar alltid skarp). "Klar"-villkoret: ingen rorelse OCH ingen tackt del (zoneEdges < 0.035).
