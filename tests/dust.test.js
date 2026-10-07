@@ -36,8 +36,10 @@ test('grains assemble on entry and drift only at the viewport edges while scroll
   assert.equal(dust.edgeZone(500, 1000, 0.22, 0.16), 0);
   assert.ok(dust.edgeZone(990, 1000, 0.22, 0.16) > 0.9);
   assert.ok(dust.edgeZone(5, 1000, 0.22, 0.16) > 0.9);
-  assert.equal(dust.driftAmount(1, 0.2, 0), 0, 'no scrolling, no drift');
-  assert.ok(dust.driftAmount(1, 0.2, 1) > 0.5);
+  assert.ok(dust.dustAmount(1, 0.2, 0) > 0.9, 'a covered edge stays dissolved at rest');
+  assert.ok(dust.dustAmount(0.6, 0.2, 0) > dust.dustAmount(0.6, 0.9, 0), 'noise keeps it grainy');
+  assert.ok(dust.dustAmount(0.4, 0.1, 1) >= dust.dustAmount(0.4, 0.1, 0), 'scrolling adds a transient burst');
+  assert.equal(dust.dustAmount(0, 0.2, 1), 0, 'clear of the band the image stays crisp while scrolling');
 });
 
 test('hero pulverises with scroll and grain budgets stay bounded', () => {
@@ -54,4 +56,14 @@ test('cover grains are device-pixel fine and the read-more ripple sweeps upward'
   assert.equal(dust.grainSize(700 * 394, true), 2);
   assert.ok(dust.kickBand(1, 0.1) > 0.5 && dust.kickBand(0, 0.1) < 0.01);
   assert.ok(dust.kickBand(0, 0.9) > 0.5 && dust.kickBand(1, 0.9) < 0.01);
+});
+
+test('float drift is zero mid-view and follows the crossing edge', () => {
+  assert.equal(dust.floatOffset({ top: 400, height: 200 }, 1000), 0);
+  assert.equal(dust.floatOffset({ top: 240, height: 920 }, 900), 0);
+  const entering = dust.floatOffset({ top: 880, height: 300 }, 1000);
+  const leaving = dust.floatOffset({ top: -260, height: 300 }, 1000);
+  assert.ok(entering > 8, 'entering floats up from below: ' + entering);
+  assert.ok(leaving <= -12, 'leaving drifts away upward: ' + leaving);
+  assert.ok(entering <= 34 && leaving >= -34);
 });
