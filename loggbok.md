@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Omslagen: vind mer at hoger + alltid partiklar
+- Anton: pixlarna ska inte fardas lika mycket uppat utan mer at hoger; omslagen ska inte bli vanliga bilder nar man star still.
+- static/dust.js: vindvektorn i omslagsshadern (1.25+0.8sy, (-0.35-0.35sz)*flip) i stallet for loggans (0.45+0.8sy, -0.7-0.9sz) -> ca 18 grader over horisontalen i stallet for ca 54. Omslagen ritas nu som partiklar hela tiden (skimmer + vag aven mitt i fonstret och i vila); <img> visas bara nar rorelse ar pausad/reduced motion. Helt upplosta omslag (p >= 0.915, alla alpha 0) ritas inte.
+- Verifierat lokalt + live: mitt-i-fonstret-omslag state live, ritas 75 bildrutor/s (skarmens takt), upplosta 0; bildintervall 13.3 ms median / 14.4 ms max vid dpr 2; las mer-burst, pausknapp, hero oforandrade; 0 JS-fel; 8/8 Node, 60/60 Python. Visuellt: dammet driver at hoger (nedat-hoger vid nederkanten), bilden hel och lasbar mitt i fonstret.
+- Publicerad i `8effd61`. Kand kostnad: kontinuerlig GPU-rendering medan omslag syns (som loggan) — batteri pa mobil ej matt pa riktig telefon.
+
 ## 2026-10-07 — [lutra] Omslagen renderas nu med loggans EGEN partikelshader (WebGL)
 - Anton: omslagen hade fortfarande inte exakt samma animation som loggan. Rotorsak: loggan ar GPU-partiklar (varje pixel en partikel med skimmer, vag, diagonal upplosningsfront, vind, virvel, fade, krympning), omslagen var en CPU-mask + glesa korn som bara harmade formlerna.
 - static/dust.js: CPU-sandmotorn borttagen. Omslagen ritas i en delad fast WebGL-duk med samma vertexshader som loggan (rad for rad: skimmer 0.45 px, vag, burst, th = n.x*0.55 + (1-n.y)*0.12 + seed*0.33, vind, virvel, alpha- och storlekskurva); fargen tas fran pressbilden som textur. uDissolve = coverProgress(): ren positionsfunktion vid kantzonerna (topp 18 %, botten 26 %), easad som loggans p. Mitt i fonstret visas riktiga <img> (knivskarp). Avvikelser fran loggan: vindens y speglas vid nederkanten sa dammet hamnar utanfor skarmen i stallet for over texten; ingen pekar-interaktion; tatare punkter (150k/60k per omslag, punktstorlek (steg*1.7+0.6)*dpr) for att bilden inte ska bli prickig. Las mer = loggans klick-burst fran klickpunkten.
