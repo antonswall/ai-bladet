@@ -23,7 +23,7 @@ export async function onRequestGet(context) {
 
   let upstream;
   try {
-    upstream = await fetch(target.href, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; AI-Bladet cover relay)', accept: 'image/avif,image/webp,image/png,image/jpeg,image/*' }, redirect: 'follow' });
+    upstream = await fetch(target.href, { headers: { 'user-agent': 'AI-Bladet/1.0 (+https://ai-bladet.pages.dev; cover relay)', accept: 'image/avif,image/webp,image/png,image/jpeg,image/*' }, redirect: 'follow' });
   } catch (e) { return fail(502, 'upstream unreachable'); }
   if (!upstream.ok) return fail(502, 'upstream ' + upstream.status);
   const type = upstream.headers.get('content-type') || '';
