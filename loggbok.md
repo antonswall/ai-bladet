@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Omslagen fick EXAKT loggans partikelstruktur
+- Anton: "kan vi bara testa att ha exakt samma struktur pa bilderna som vi redan har pa loggan". (Och: sluta skicka foton/videos.)
+- static/dust.js: kornen foljer nu loggans exakta formler — vindvektor (0.45+0.8sy, -0.7-0.9sz)*k*uWind, virvel dir*k*(24+72s), alpha 1-smoothstep(0.55,1,k), storlek mix(1,0.42,k) dar k=d*d. uWind ar en REN funktion av skrollpositionen (overskott over kantzonen / 0.75*vh, cappad 1.6) — skrollar man forsar dammet ivag, stannar man fryser det exakt, skrollar man tillbaka atervander det. Aldersmekaniken (eage) togs bort helt. Budget 9500/4200 (oreducerad tathet i zonen).
+- Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning: lasyta 3.5 %, kant 39.7 %, fryst 59.4 % och 59.4 % efter 3.2 s; live samma; 0 JS-fel; live-perf 3.7 ms snitt. Visuellt: sida-vid-sida med hero-pulveriseringen — samma svarm, nu aven inne i bilden (svepande korn falt over bilderna, inte bara vid kanten).
+- Publicerad i `39e9701`.
+
 ## 2026-10-07 — [lutra] Sanden matchar loggans karaktar
 - Anton: "gar det inte att gora sa det blir likadant som ai bladet loggan?" — kornflykten skulle ha samma karaktar som loggans pulverisering.
 - static/dust.js: vinden lutar nu UPPAT-hoger (dy -130 till -280 enhets-px/s, som loggans vec2(0.45,-0.7)-riktning) i stallet for nastan horisontellt; kornen skimrar (sin-svängning i alpha, som loggans partiklar); tathet upp 3200->4400 (mobil 1700->2200). Virveln fanns redan.
