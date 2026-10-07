@@ -108,7 +108,7 @@
     let busy = activity > 0;
     if (hero && hero.built) { if (hero.frame(dt)) busy = true; }
     else if (heroEl) { const r = heroEl.getBoundingClientRect(); setHeroVar(heroProgress(r.top, r.height)); }
-    dustBudget = coarse || lowPower ? 2400 : 5200;
+    dustBudget = coarse || lowPower ? 2900 : 6300;
     const t0 = performance.now();
     for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].frame(dt)) busy = true;
     const spent = performance.now() - t0;
@@ -377,7 +377,7 @@ void main() {
       const random = rng(97 + index * 7919);
       for (let i = 0; i < noise.length; i++) { noise[i] = (random() * 256) | 0; noise2[i] = (random() * 256) | 0; }
 
-      em = Math.round(clamp(W * H * (coarse ? 0.06 : 0.05), 2500, coarse || lowPower ? 5000 : 16000));
+      em = Math.round(clamp(W * H * (coarse ? 0.075 : 0.062), 3200, coarse || lowPower ? 6500 : 19000));
       ex = new Float32Array(em); ey = new Float32Array(em); eang = new Float32Array(em); esp = new Float32Array(em);
       for (let k = 0; k < em; k++) { ex[k] = Math.floor(random() * mw); ey[k] = Math.floor(random() * mh); eang[k] = random() * TAU; esp[k] = random(); }
       radius = (parseFloat(getComputedStyle(frameEl).borderTopLeftRadius) || 0) * dpr;
@@ -490,7 +490,7 @@ void main() {
         else { dx += (90 + 210 * esp[k]) * dpr * e; dy += (-26 + 52 * esp[k]) * dpr * e; }
         if (dustBudget <= 0) break;
         dustBudget -= 1;
-        const s = gm * (2.2 - 1.2 * d);
+        const s = gm * (1.1 - 0.6 * d);
         ctx.globalAlpha = Math.max(0.14, 1 - Math.pow(d, 2.4));
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
       }
