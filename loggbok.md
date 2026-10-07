@@ -1,5 +1,14 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Säkerhetshärdning inför trafik
+- Anton: säkerställ att sajten är säker att driva trafik till.
+- build.js genererar nu public/_headers (CSP med sha256 för inline-skriptet, HSTS, X-Frame-Options DENY, nosniff, Referrer-, Permissions-, COOP) + public/cover-allow.json.
+- functions/cover.js: reläet var en öppen bildproxy (alla https-bilder, utan Origin). Nu endast URL:er från publicerade nummer (cover-allow.json via env.ASSETS) -> annat 403.
+- aibladet.se ägs INTE av oss (nginx/Ubuntu, annan IP) men användes som SITE_URL, i og/JSON-LD, feed, ordbok och pipeline-distribution (X/LinkedIn-länkar). Allt bytt till ai-bladet.pages.dev. Gamla utkast i pipeline/output/ (gitignorerade) har kvar aibladet.se — generera om före publicering.
+- Inline onerror-attribut (blockeras av CSP) ersatta med data-fail + lyssnare i static/app.js.
+- Verifierat: 8/8 Node, 69/69 Python; preview + live: 0 CSP-överträdelser på start, arkiv, ordbok, om, v25, v40; omslag/dust live; relä 200 för vitlistad bild, 403 för främmande. Repo publikt, ingen hemlighet i git-historiken (mönsterskanning).
+- Publicerad i `cfe93ff`. Kvar för Anton: 2FA på GitHub och Cloudflare (kunde inte verifieras härifrån).
+
 ## 2026-10-07 — [lutra] Omslagen: vind mer at hoger + alltid partiklar
 - Anton: pixlarna ska inte fardas lika mycket uppat utan mer at hoger; omslagen ska inte bli vanliga bilder nar man star still.
 - static/dust.js: vindvektorn i omslagsshadern (1.25+0.8sy, (-0.35-0.35sz)*flip) i stallet for loggans (0.45+0.8sy, -0.7-0.9sz) -> ca 18 grader over horisontalen i stallet for ca 54. Omslagen ritas nu som partiklar hela tiden (skimmer + vag aven mitt i fonstret och i vila); <img> visas bara nar rorelse ar pausad/reduced motion. Helt upplosta omslag (p >= 0.915, alla alpha 0) ritas inte.
