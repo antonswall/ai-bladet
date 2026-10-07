@@ -1,5 +1,13 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Sandomslag: bara vid fonstrets kanter + svavande rorelse
+- Antons bestallning: bilderna ska vara skarpa mitt i fonstret och bara pixla sig nara botten/toppen, och svalva in/ivag som loggan gor.
+- static/dust.js: kant-erosionen (colBd/rowBd/bandPx) borttagen helt — pulverisering sker nu enbart i fonstrets topp-/bottenzon (ZONE_TOP 0.2 / ZONE_BOTTOM 0.3). Ny floatOffset(): 0 i laszonen, +34 px nedifran vid intrade, -34 px uppat vid uttrade; appliceras som translateY pa cover-canvasen och galler aven i stilla lage.
+- Verifierat lokalt: 12/12 Node-tester (nytt test for float-riktning), synlig Chrome: mitt-i-fonstret "settled" utan transform, vid toppen "drifting" med translateY(-9.3px), skarmbilder scroll-mid.png/scroll-edge.png visuellt granskade. 60/60 Python-tester ororda (ingen pipeline-andring).
+- Publicerad i `d725c5d`. Live: dust.js hash-identisk med public/; riktig Chrome mot ai-bladet.pages.dev visar tva knivskarpa mitt-i-fonstret-omslag (settled, ingen transform), alla partiellt synliga stilla, kantdrift vid toppen, inga JS-fel.
+- Nya videor i preview-kopian: dust-mobile.mp4, dust-desktop-telegram.mp4.
+- Nasta: Anton granskar videorna. Retina-toppar (max ca 32 ms/bildruta vid emulerad dpr 2) kvarstar som kand begransning.
+
 ## 2026-10-07 — [lutra] Dust-designen publicerad på officiella sajten
 - Flyttade den godkända ramen till produktion: templates/base.js, templates/issue.js, static/dust.js, static/dust.css, static/app.js samt tests/design.test.js och tests/dust.test.js. Originalen backade till scratch/ai-bladet-dust-promote-20261007-121433. content/, pipeline/ och style.css orörda.
 - Alla 16 nummer (och startsidan) använder nu landningssidan med pulveriserad logga och sandomslag; arkiv, om och 404 sidan har kvar masthead utan effektlager.
