@@ -1,5 +1,12 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Upplosningsanimationen finjusterad (spridning, lutning, kornflykt)
+- Antons tre onskemal: (1) mindre koncentrerad/skarp front — mer utdragen och spridd, (2) fronten vinklad mot hoger (~80-85 grader i stallet for 90), (3) kornen ska flyga ivag at hoger ut ur skarmen som loggans damm, inte bara forsvinna.
+- static/dust.js: zonerna bredare (topp 0.26, botten 0.36 av fonstret) och brusandelen i erosionen okad (0.6) -> langre, grynigare overgang. Ny lutning TILT=0.12 av bildbredden: zon per pixel via radzon + linjariserad lutning (3 extra edgeZone-anrop per rad). Flygande korn far stark hogervind (90+210*rand enhets-px), langre livstid (ritas till d=0.995, alpha-golv 0.14) och något storre minimistorlek. Sandduken utokad till fonstrets hogerkant (JS-satt storlek) sa kornen kan lamna bilden ut ur skarmen; omlayout vid fonsterbreddsandring.
+- Verifierat: 12/12 + 9/9 tester, 60/60 python. Pixelmatning (skarmbilder via webblasarens canvas): lasyta 3.5 %, kant vid scroll 55 %, halvtackt vid stopp 79.6 % och 79.6 % efter 3.2 s (fruset), live mot ai-bladet.pages.dev samma siffror; 0 JS-fel. Live-prestanda under scroll: 3.7 ms snitt, 13 ms max per bildruta.
+- Publicerad i `74b6324`. Inga videos skickade (Anton vill inte ha dem); en stillbild visar lutning och kornflykt.
+- Justerbara siffror om det onskas: lutningens riktning/storlek, zonhojder, vindstyrka.
+
 ## 2026-10-07 — [lutra] Sandomslag: frys-bugg rattad, synliga pixlar verifierade, snabbare
 - Anton: "Nastan helt perfekt" men (1) lagg vid scroll, (2) upplosningen byggdes klart anda nar halva bilden lag kvar i kanten.
 - Rotorsak 2: en tidig "still"-gren i radloopen fyllde ALLA rader med fast bild sa fort rorelsen var noll, fore zonberakningen. Maskmatning i webblasaren: synliga rader 0.0 % hal / osynliga 66.7 % vid fryst lage. Grenen borttagen -> synliga rader 87.7 % hal, stabilt efter 3.2 s.
