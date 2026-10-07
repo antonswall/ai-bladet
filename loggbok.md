@@ -4,7 +4,7 @@
 - Anton: nar han stannar med halva bilden i ovre/nedre kanten fortsatte bilden att byggas klar. Onskat: upplosningen ska hanga pa POSITION, inte pa rorelse — sanden ska stanna "mid air" och bara byggas klar nar bilden lamnar kantzoonen.
 - static/dust.js: kantzoonen ar nu en ren positionsfunktion (edgeZone utan aktivitetsfaktor); rorelsen styr bara virvel/extra korn. Ny dustAmount() ersatter driftAmount() (positionsdel kvarstar, aktivitet ger tillfalligt tillskott). Zon galler ENDAST for den del av bilden som faktiskt ar tackt av en kant (en helt synlig bild ar alltid skarp). "Klar"-villkoret: ingen rorelse OCH ingen tackt del (zoneEdges < 0.035).
 - Verifierat lokalt: 12/12 Node-tester (inkl. nya frys-asserts), synlig Chrome/CDP: halvtackt stillastaende -> "drifting" i 3.2 s utan att byggas klart -> "settled" forst efter att ha lamnat zonen; mid-view fortsatt knivskarp; skarmbilder scroll-frozen.png m.fl.
-- Publicerad i `f9a6b2b` + testfil i `c5e0e8d`. Live mot ai-bladet.pages.dev i riktig Chrome: halvtackt omslag vid -0.2 vf "drifting" vid tva matningar 3 s isar, "settled" vid 0.6 vf efter att ha kommit in i lasytan; 0 JS-fel. dust.js hash-identisk med public/.
+- Publicerad i `f9a6b2b` + testfilen i `486a3ca`. Live mot ai-bladet.pages.dev i riktig Chrome: halvtackt omslag vid -0.2 vf "drifting" vid tva matningar 3 s isar, "settled" vid 0.6 vf efter att ha kommit in i lasytan; 0 JS-fel. dust.js hash-identisk med public/.
 - Nya videor: dust-mobile.mp4, dust-desktop-telegram.mp4 i preview-kopian.
 
 ## 2026-10-07 — [lutra] Sandomslag: bara vid fonstrets kanter + svavande rorelse
