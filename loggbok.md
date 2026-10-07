@@ -1,5 +1,13 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Omslagen renderas nu med loggans EGEN partikelshader (WebGL)
+- Anton: omslagen hade fortfarande inte exakt samma animation som loggan. Rotorsak: loggan ar GPU-partiklar (varje pixel en partikel med skimmer, vag, diagonal upplosningsfront, vind, virvel, fade, krympning), omslagen var en CPU-mask + glesa korn som bara harmade formlerna.
+- static/dust.js: CPU-sandmotorn borttagen. Omslagen ritas i en delad fast WebGL-duk med samma vertexshader som loggan (rad for rad: skimmer 0.45 px, vag, burst, th = n.x*0.55 + (1-n.y)*0.12 + seed*0.33, vind, virvel, alpha- och storlekskurva); fargen tas fran pressbilden som textur. uDissolve = coverProgress(): ren positionsfunktion vid kantzonerna (topp 18 %, botten 26 %), easad som loggans p. Mitt i fonstret visas riktiga <img> (knivskarp). Avvikelser fran loggan: vindens y speglas vid nederkanten sa dammet hamnar utanfor skarmen i stallet for over texten; ingen pekar-interaktion; tatare punkter (150k/60k per omslag, punktstorlek (steg*1.7+0.6)*dpr) for att bilden inte ska bli prickig. Las mer = loggans klick-burst fran klickpunkten.
+- functions/cover.js (ny Pages Function): /cover?u= relay med CORS for bildvardar utan CORS (x.ai, googleapis, github m.fl.) — https-only, bara image/*, max 12 MB, origin-check, edge-cache 7 d. Gratis inom Pages Functions free tier.
+- Verifierat: 8/8 Node, 60/60 Python, git diff --check rent. Preview-deploy (dust-gpu) + live: 65/65 omslag med fungerande bild over alla 17 sidor far partiklar (en dod wikimedia-lank i v25 404:ar redan uppstroms, fallback som forut); halvtackt omslag stabilt (p 0.627 -> 0.627 efter 3 s); mitt-i-fonstret settled; Las mer-burst, pausknapp och hero oforandrade; 0 JS-fel; JS 0.15 ms/bildruta, 13.3 ms bildintervall vid dpr 2 (ingen tapp).
+- Publicerad i `b6ea2ee` + `da7b99f`. Backup av forra versionen: Hermes scratch ai-bladet-gpu-backup (rensas efter 24 h) + git `76ac863`.
+- Nasta: Anton testar. Justerbart: kantzonernas hojd, om pekar-interaktion ska med, om vinden ska speglas vid nederkanten.
+
 ## 2026-10-07 — [lutra] Omslagen fick EXAKT loggans partikelstruktur
 - Anton: "kan vi bara testa att ha exakt samma struktur pa bilderna som vi redan har pa loggan". (Och: sluta skicka foton/videos.)
 - static/dust.js: kornen foljer nu loggans exakta formler — vindvektor (0.45+0.8sy, -0.7-0.9sz)*k*uWind, virvel dir*k*(24+72s), alpha 1-smoothstep(0.55,1,k), storlek mix(1,0.42,k) dar k=d*d. uWind ar en REN funktion av skrollpositionen (overskott over kantzonen / 0.75*vh, cappad 1.6) — skrollar man forsar dammet ivag, stannar man fryser det exakt, skrollar man tillbaka atervander det. Aldersmekaniken (eage) togs bort helt. Budget 9500/4200 (oreducerad tathet i zonen).
