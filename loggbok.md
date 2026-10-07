@@ -4,7 +4,8 @@
 - Flyttade den godkända ramen till produktion: templates/base.js, templates/issue.js, static/dust.js, static/dust.css, static/app.js samt tests/design.test.js och tests/dust.test.js. Originalen backade till scratch/ai-bladet-dust-promote-20261007-121433. content/, pipeline/ och style.css orörda.
 - Alla 16 nummer (och startsidan) använder nu landningssidan med pulveriserad logga och sandomslag; arkiv, om och 404 sidan har kvar masthead utan effektlager.
 - Fixat under flytten: gamla nummer saknade hero (hero: !isPermalink → hero: true), designtestet krävde fel mall för permalänkar, ett tomrum i lead-cta-raden gav trailing whitespace i permalänkar.
-- Verifierat: 60/60 Python-tester (pipeline/.venv), 8/8 Node-tester, build utan fel, alla 17 issuesidor + startsida innehåller hero och /dust.js, git diff --check rent. Livekontroll: [LIVE] — se nästa post vid avvikelse.
+- Verifierat: 60/60 Python-tester (pipeline/.venv), 8/8 Node-tester, build utan fel, alla 17 issuesidor + startsida innehåller hero och /dust.js, git diff --check rent.
+- Publicerad i `c9a4ad5`. Live: dust.js och dust.css är SHA-256-identiska med public/ på ai-bladet.pages.dev; startsida, v40 och v25 (äldre nummer) har hero och resurserna. Riktig Chrome mot skarpa domänen: loggan live (partiklar + bildrutor), sandomslagen materialiseras och settles, inga JS-fel. Skärmbild i preview-kopians screenshots/live-desktop.jpg.
 - Nästa: söndagscron 2026-10-11 07:00 bygger nya nummer i samma ram; inget mer behöver göras per vecka.
 
 ## 2026-10-07 — [lutra] Omslagen smidigare (prestanda)
