@@ -9,10 +9,11 @@
   const BAND = 0.3;
   const SAND_X = 24;
   const SAND_Y = 40;
-  const ZONE_BOTTOM = 0.3;
-  const ZONE_TOP = 0.2;
+  const ZONE_BOTTOM = 0.36;
+  const ZONE_TOP = 0.26;
+  const TILT = 0.12;
   const INV255 = 1 / 255;
-  const R2K = 0.24 / 255;
+  const R2K = 0.6 / 255;
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function smoothstep(a, b, v) { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -48,7 +49,7 @@
     return Math.max(smoothstep(vh * (1 - bottom), vh, vy), 1 - smoothstep(0, vh * top, vy));
   }
   function introAmount(th, assemble) { return 1 - smoothstep(th, th + BAND, assemble * (1 + BAND)); }
-  function dustAmount(zone, rnd) { return clamp(zone * 1.4 - rnd * 0.24, 0, 1); }
+  function dustAmount(zone, rnd) { return clamp(zone * 1.5 - rnd * 0.6, 0, 1); }
   function floatOffset(rect, vh) {
     if (rect.top > vh * 0.45) { const t = clamp((rect.top - vh * 0.45) / (vh * 0.55), 0, 1); return 34 * t * t; }
     if (rect.top < vh * 0.15) { const t = clamp((vh * 0.15 - rect.top) / (vh * 0.5), 0, 1); return -34 * t * t; }
@@ -350,7 +351,12 @@ void main() {
       const W = fr.width, H = fr.height;
       if (W < 8 || H < 8) return false;
       dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5);
-      canvas.width = Math.round((W + SAND_X * 2) * dpr);
+      const rightPad = Math.max(SAND_X, Math.ceil(window.innerWidth - (fr.left + W) + SAND_X));
+      canvas.style.left = -SAND_X + 'px';
+      canvas.style.top = -SAND_Y + 'px';
+      canvas.style.width = (W + SAND_X + rightPad) + 'px';
+      canvas.style.height = (H + SAND_Y * 2) + 'px';
+      canvas.width = Math.round((W + SAND_X + rightPad) * dpr);
       canvas.height = Math.round((H + SAND_Y * 2) * dpr);
       src.width = Math.round(W * dpr);
       src.height = Math.round(H * dpr);
@@ -406,9 +412,10 @@ void main() {
       return d;
     }
     function fillAlpha(start, x0, x1, v) { for (let i = (start + x0) * 4 + 3, end = (start + x1) * 4 + 3; i < end; i += 4) data[i] = v; }
-    function driftSpan(start, x0, x1, zone) {
+    function driftSpan(start, x0, x1, zone, tz) {
       for (let mx = x0, p = start + x0, i = p * 4 + 3; mx < x1; mx++, p++, i += 4) {
-        data[i] = zone * 1.4 - noise2[p] * R2K < 0.04 ? 255 : 0;
+        let z = zone + (mx - mw * 0.5) * tz; if (z < 0) z = 0; else if (z > 1) z = 1;
+        data[i] = z * 1.5 - noise2[p] * R2K < 0.04 ? 255 : 0;
       }
     }
     function drawGrains(fr, vh) {
@@ -423,6 +430,7 @@ void main() {
         const start = my * mw;
         const still = activity === 0 && kickW < 0.01;
         const zone = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
+        const tz = -TILT * iw * ((edgeZone(vy + 8, vh, ZONE_BOTTOM, ZONE_TOP) - edgeZone(vy - 8, vh, ZONE_BOTTOM, ZONE_TOP)) / 16) / mw;
         if (still && rowIntro) {
           if (A <= 0.62 * rowFrac) { if (rowState[my] !== 2) { fillAlpha(start, 0, mw, 0); rowState[my] = 2; if (my < lo) lo = my; if (my > hi) hi = my; } continue; }
           rowState[my] = 0;
@@ -432,19 +440,20 @@ void main() {
           continue;
         }
         if (still) {
-          if (zone === 0) {
+          if (zone === 0 && tz === 0) {
             if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; if (my < lo) lo = my; if (my > hi) hi = my; }
             continue;
           }
           rowState[my] = 0;
-          driftSpan(start, 0, mw, zone);
+          driftSpan(start, 0, mw, zone, tz);
           if (my < lo) lo = my; if (my > hi) hi = my;
           continue;
         }
         if (my < lo) lo = my; if (my > hi) hi = my;
         rowState[my] = 0;
         for (let mx = 0, p = start, i = p * 4 + 3; mx < mw; mx++, p++, i += 4) {
-          data[i] = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, zone, kickW) < 0.04 ? 255 : 0;
+          let z = zone + (mx - mw * 0.5) * tz; if (z < 0) z = 0; else if (z > 1) z = 1;
+          data[i] = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, z, kickW) < 0.04 ? 255 : 0;
         }
       }
       if (hi >= lo) mctx.putImageData(mask, 0, 0, 0, lo, mw, hi - lo + 1);
@@ -470,7 +479,7 @@ void main() {
         if (!rowIntro && activity === 0 && kickW < 0.01 && ez === 0) continue;
         const p = my * mw + mx;
         const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, ez, kickW);
-        if (d <= 0.04 || d >= 0.985) continue;
+        if (d <= 0.04 || d >= 0.995) continue;
         const e = d * d;
         const spread = (6 + 46 * esp[k]) * dpr * e;
         const wob = 0.2 + 0.8 * activity;
@@ -478,11 +487,11 @@ void main() {
         let dy = Math.sin(eang[k]) * spread * 0.9 + Math.sin(eang[k] + t * 0.8) * spread * 0.6 * wob;
         if (rowIntro) dy += 46 * dpr * e;
         else if (kickW >= 0.01) dy -= 34 * dpr * e;
-        else { dy += scrollDir * 52 * dpr * e; dx += (esp[k] - 0.5) * 36 * dpr * e; }
+        else { dx += (90 + 210 * esp[k]) * dpr * e; dy += (-26 + 52 * esp[k]) * dpr * e; }
         if (dustBudget <= 0) break;
         dustBudget -= 1;
-        const s = gm * (2 - 1.1 * d);
-        ctx.globalAlpha = 1 - Math.pow(d, 1.4);
+        const s = gm * (2.2 - 1.2 * d);
+        ctx.globalAlpha = Math.max(0.14, 1 - Math.pow(d, 2.4));
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
       }
       ctx.globalAlpha = 1;
@@ -625,7 +634,8 @@ void main() {
     }).observe(sentinel);
   }
   addEventListener('scroll', schedule, { passive: true });
-  addEventListener('resize', () => { lastNow = 0; schedule(); }, { passive: true });
+  let lastInnerW = window.innerWidth;
+  addEventListener('resize', () => { lastNow = 0; if (window.innerWidth !== lastInnerW) { lastInnerW = window.innerWidth; covers.forEach(cv2 => { if (cv2.ready) cv2.layout(); }); } schedule(); }, { passive: true });
   document.addEventListener('visibilitychange', () => { lastNow = 0; schedule(); });
   window.AIBladetDust = Object.freeze({ get activity() { return activity; }, get motionOff() { return motionOff(); }, get coverFrame() { return { avg: perf.n ? +(perf.sum / perf.n).toFixed(2) : 0, max: +perf.max.toFixed(2), n: perf.n }; }, resetPerf() { perf.n = 0; perf.sum = 0; perf.max = 0; } });
 })();

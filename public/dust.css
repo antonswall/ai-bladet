@@ -89,7 +89,7 @@ html:not(.dust-live) .hero-logo { opacity: clamp(0, calc(1 - var(--hero-p) * 1.5
 .figure-frame:has(.figure-img) .figure-fallback { visibility: hidden; }
 .figure-frame.is-sand { overflow: visible; background: transparent; box-shadow: none !important; }
 .figure-frame.is-sand .figure-img { opacity: 0; }
-.cover-sand { position: absolute; left: -24px; top: -40px; width: calc(100% + 48px); height: calc(100% + 80px); z-index: 2; pointer-events: none; display: none; }
+.cover-sand { position: absolute; z-index: 2; pointer-events: none; display: none; }
 .figure-frame.is-sand .cover-sand { display: block; }
 .figure-credit { margin-top: .8rem; font-size: .55rem; letter-spacing: .08em; }
 .lead-analysis { position: relative; margin: 1.6rem 0 0; max-width: none; border: 1px solid var(--rule); border-left: 0; padding: 1.2rem 1.4rem; border-radius: 18px; background: color-mix(in srgb, var(--paper-2) 80%, transparent); }
