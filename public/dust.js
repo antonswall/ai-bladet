@@ -108,7 +108,7 @@
     let busy = activity > 0;
     if (hero && hero.built) { if (hero.frame(dt)) busy = true; }
     else if (heroEl) { const r = heroEl.getBoundingClientRect(); setHeroVar(heroProgress(r.top, r.height)); }
-    dustBudget = coarse || lowPower ? 2200 : 4400;
+    dustBudget = coarse || lowPower ? 4200 : 9500;
     const t0 = performance.now();
     for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].frame(dt)) busy = true;
     const spent = performance.now() - t0;
@@ -342,7 +342,7 @@ void main() {
     const maskCanvas = document.createElement('canvas');
     const mctx = maskCanvas.getContext('2d');
     const c = { el: frameEl, canvas, visible: false, ready: false, started: false, cleared: false, settled: false, held: false, heldZ: 0, holdAcc: 0, assemble: 0, kick: 0, kicks: 0, time: 0, frames: 0 };
-    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null, eage = null;
+    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null;
     let em = 0, ex = null, ey = null, eang = null, esp = null;
 
     c.layout = function () {
@@ -378,7 +378,6 @@ void main() {
       for (let i = 0; i < noise.length; i++) { noise[i] = (random() * 256) | 0; noise2[i] = (random() * 256) | 0; }
 
       em = Math.round(clamp(W * H * (coarse ? 0.075 : 0.062), 3200, coarse || lowPower ? 6500 : 19000));
-      eage = new Float32Array(em);
       ex = new Float32Array(em); ey = new Float32Array(em); eang = new Float32Array(em); esp = new Float32Array(em);
       for (let k = 0; k < em; k++) { ex[k] = Math.floor(random() * mw); ey[k] = Math.floor(random() * mh); eang[k] = random() * TAU; esp[k] = random(); }
       radius = (parseFloat(getComputedStyle(frameEl).borderTopLeftRadius) || 0) * dpr;
@@ -419,7 +418,7 @@ void main() {
         data[i] = z * 1.5 - noise2[p] * R2K < 0.04 ? 255 : 0;
       }
     }
-    function drawGrains(fr, vh, dt) {
+    function drawGrains(fr, vh) {
       const A = c.assemble * (1 + BAND), introLive = c.assemble < 1, kicking = c.kick > 0;
       let lo = mh, hi = -1;
       for (let my = 0; my < mh; my++) {
@@ -467,38 +466,36 @@ void main() {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(maskCanvas, 0, 0, mw, mh, ox, oy, mw * gm, mh * gm);
       ctx.restore();
-      const t = c.time;
-      const flying = activity > 0.02 || kicking;
+      const w = c.wind;
       for (let k = 0; k < em; k++) {
         const mx = ex[k], my = ey[k], st = rowState[my];
-        if (st === 1 || st === 2) { eage[k] = 0; continue; }
+        if (st === 1 || st === 2) continue;
         const vy = fr.top + (iy + my * gm) / dpr;
         if (vy < -60 || vy > vh + 60) continue;
         const rowFrac = my / mh;
         const rowIntro = introLive && A < 0.62 * rowFrac + 0.38 + BAND;
         const kickW = kicking ? kickBand(rowFrac, 1 - c.kick) : 0;
         const ez = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
-        if (!rowIntro && kickW < 0.01 && ez === 0) { eage[k] = 0; continue; }
+        if (!rowIntro && kickW < 0.01 && ez === 0) continue;
         const p = my * mw + mx;
         const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, ez, kickW);
-        if (d <= 0.06) { eage[k] = 0; continue; }
-        if (flying) { const na = eage[k] + dt; eage[k] = na > 2.4 ? 2.4 : na; }
-        const age = eage[k];
-        const fade = age > 1.9 ? (2.4 - age) / 0.5 : 1;
-        if (fade <= 0.02) continue;
-        const e = d * d;
-        const spread = (6 + 46 * esp[k]) * dpr * e;
-        const wob = 0.2 + 0.8 * activity;
-        const swirl = eang[k] + t * 0.8 + age * 3.2;
-        let dx = Math.cos(eang[k]) * spread * 0.9 + Math.cos(swirl) * spread * 0.6 * wob;
-        let dy = Math.sin(eang[k]) * spread * 0.9 + Math.sin(swirl) * spread * 0.6 * wob;
-        if (rowIntro) dy += 46 * dpr * e;
-        else if (kickW >= 0.01) dy -= 34 * dpr * e;
-        else { dx += (230 + 320 * esp[k]) * age * dpr; dy += (-130 - 150 * esp[k]) * age * dpr; }
+        if (d <= 0.06) continue;
+        const q = (d - 0.55) / 0.45;
+        const fA = q <= 0 ? 1 : q >= 1 ? 0 : 1 - q * q * (3 - 2 * q);
+        if (fA <= 0.02) continue;
+        const kk = d * d;
+        const sd = esp[k];
+        const sy = (sd * 7.13) % 1, sz = (sd * 13.7) % 1, sb = (sd * 3.77) % 1;
+        const swR = kk * (24 + 72 * sb) * dpr;
+        const sc = (6 + 46 * sd) * dpr * kk;
+        let dx = (0.45 + 0.8 * sy) * kk * w * 1100 * dpr + Math.cos(eang[k]) * (swR + sc);
+        let dy = -(0.7 + 0.9 * sz) * kk * w * 1100 * dpr + Math.sin(eang[k]) * (swR + sc);
+        if (rowIntro) { dx *= 0.5; dy += 46 * dpr * kk; }
+        else if (kickW >= 0.01) dy -= 34 * dpr * kk;
         if (dustBudget <= 0) break;
         dustBudget -= 1;
-        const s = gm * (1.1 - 0.6 * d) * (0.8 + 0.2 * Math.min(1, age * 4));
-        ctx.globalAlpha = Math.max(0.18, 1 - Math.pow(d, 1.8)) * Math.min(1, 0.4 + age * 4) * fade * (0.86 + 0.14 * Math.sin(t * 5 + k * 1.7));
+        const s = gm * 1.1 * (1 - 0.58 * d);
+        ctx.globalAlpha = fA;
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
       }
       ctx.globalAlpha = 1;
@@ -508,6 +505,9 @@ void main() {
       if (!c.ready || motionOff()) return false;
       const fr = frameEl.getBoundingClientRect();
       const vh = window.innerHeight;
+      const wTop = (ZONE_TOP * vh - fr.top) / (0.75 * vh);
+      const wBot = (fr.bottom - (1 - ZONE_BOTTOM) * vh) / (0.75 * vh);
+      c.wind = Math.max(0, Math.min(1.6, Math.max(wTop, wBot)));
       if (!c.started) {
         if (fr.top < vh * 0.88 && fr.bottom > vh * 0.03) { c.started = true; rowState.fill(0); canvas.dataset.state = 'assembling'; }
         else {
@@ -531,14 +531,14 @@ void main() {
         if (c.held && Math.abs(zoneEdges - c.heldZ) < 0.004 && c.holdAcc < 0.25) return true;
         c.held = true; c.heldZ = zoneEdges; c.holdAcc = 0;
         canvas.dataset.state = 'drifting';
-        drawGrains(fr, vh, dt);
+        drawGrains(fr, vh);
         c.frames += 1;
         canvas.dataset.frames = String(c.frames);
         return true;
       }
       c.settled = false; c.held = false;
       canvas.dataset.state = c.assemble < 1 ? 'assembling' : c.kick > 0 ? 'rippling' : 'drifting';
-      drawGrains(fr, vh, dt);
+      drawGrains(fr, vh);
       c.frames += 1;
       canvas.dataset.frames = String(c.frames);
       return true;
