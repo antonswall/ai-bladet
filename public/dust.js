@@ -108,7 +108,7 @@
     let busy = activity > 0;
     if (hero && hero.built) { if (hero.frame(dt)) busy = true; }
     else if (heroEl) { const r = heroEl.getBoundingClientRect(); setHeroVar(heroProgress(r.top, r.height)); }
-    dustBudget = coarse || lowPower ? 1700 : 3200;
+    dustBudget = coarse || lowPower ? 2200 : 4400;
     const t0 = performance.now();
     for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].frame(dt)) busy = true;
     const spent = performance.now() - t0;
@@ -494,11 +494,11 @@ void main() {
         let dy = Math.sin(eang[k]) * spread * 0.9 + Math.sin(swirl) * spread * 0.6 * wob;
         if (rowIntro) dy += 46 * dpr * e;
         else if (kickW >= 0.01) dy -= 34 * dpr * e;
-        else { dx += (230 + 320 * esp[k]) * age * dpr; dy += (-34 + 68 * esp[k]) * age * dpr; }
+        else { dx += (230 + 320 * esp[k]) * age * dpr; dy += (-130 - 150 * esp[k]) * age * dpr; }
         if (dustBudget <= 0) break;
         dustBudget -= 1;
         const s = gm * (1.1 - 0.6 * d) * (0.8 + 0.2 * Math.min(1, age * 4));
-        ctx.globalAlpha = Math.max(0.18, 1 - Math.pow(d, 1.8)) * Math.min(1, 0.4 + age * 4) * fade;
+        ctx.globalAlpha = Math.max(0.18, 1 - Math.pow(d, 1.8)) * Math.min(1, 0.4 + age * 4) * fade * (0.86 + 0.14 * Math.sin(t * 5 + k * 1.7));
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
       }
       ctx.globalAlpha = 1;
