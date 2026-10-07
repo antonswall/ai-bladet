@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Kornen flyger ut hela vagen + snabbare rendering
+- Anton: kornen forsvinner for tidigt (ser inte ut som de flyger ut ur skarmen) och det laggar.
+- static/dust.js: kornflykten ar nu ALDERSBASERAD — varje korn fortsatter at hoger i upp till 2.4 s (230-550 enhets-px/s -> 630-930 CSS-px) tills det lamnar duken, med fade forst sista 0.5 s; vid stillastaende fryser aldern sa kornen hanger kvar. Budgeten sanktes 8000->3200 (mobil 3600->1700) och omslagens dpr-cap 1.5->1.35 (mobil 1.25->1.2) for att ta bort lagget.
+- Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning: lasyta 3.5 %, kant 39 %, fryst 60.2 % och 60.1 % efter 3.2 s; live samma; 0 JS-fel. Prestanda: lokalt 3.0 ms snitt/8 ms max, live 3.4 ms snitt/11.5 ms max (var 9.1/19.9 i retina-emulering fore sänkningen). Visuellt granskat: langa kornstrak hela vagen ut mot fonsterkanten.
+- Publicerad i `32bda22`. Stillbild: screenshots/live-scroll-still-4.png.
+
 ## 2026-10-07 — [lutra] Smalare kantzoner + tydligare kornflykt
 - Anton: upplosningen ska borja narmare fonstrets kant (inte nara mitten) och kornen ska tydligare flyga ut at hoger.
 - static/dust.js: ZONE_TOP 0.26->0.18, ZONE_BOTTOM 0.36->0.26 (lasytan = mitten 56 % av fonstret, alltid skarp). Hogervind okad (135+245*rand enhets-px), alpha-golv 0.14->0.24, kornbudget 6300->8000 (mobil 2900->3600).
