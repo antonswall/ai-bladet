@@ -48,7 +48,7 @@
     return Math.max(smoothstep(vh * (1 - bottom), vh, vy), 1 - smoothstep(0, vh * top, vy));
   }
   function introAmount(th, assemble) { return 1 - smoothstep(th, th + BAND, assemble * (1 + BAND)); }
-  function driftAmount(zone, rnd, activity) { return clamp(zone * activity * 1.6 - rnd * 0.6, 0, 1); }
+  function dustAmount(zone, rnd, activity) { return clamp(zone * (1 + activity * 0.35) - rnd * 0.35, 0, 1); }
   function floatOffset(rect, vh) {
     if (rect.top > vh * 0.45) { const t = clamp((rect.top - vh * 0.45) / (vh * 0.55), 0, 1); return 34 * t * t; }
     if (rect.top < vh * 0.15) { const t = clamp((vh * 0.15 - rect.top) / (vh * 0.5), 0, 1); return -34 * t * t; }
@@ -63,7 +63,7 @@
   function kickBand(ny, progress) { const q = (ny - (1.15 - 1.3 * progress)) / 0.09; return Math.exp(-q * q); }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { sampleWordmark, fitRect, heroProgress, edgeZone, introAmount, driftAmount, cellSize, grainSize, kickBand, floatOffset };
+    module.exports = { sampleWordmark, fitRect, heroProgress, edgeZone, introAmount, dustAmount, cellSize, grainSize, kickBand, floatOffset };
     return;
   }
 
@@ -398,7 +398,7 @@ void main() {
       let d = 0;
       if (introLive) { const th = 0.62 * rowFrac + 0.38 * n; d = 1 - smoothstep(th, th + BAND, A); }
       if (d < 1) {
-        if (activity > 0) { const dd = driftAmount(zone, r2, activity); if (dd > d) d = dd; }
+        { const dd = dustAmount(zone, r2, activity); if (dd > d) d = dd; }
         if (kickW > 0) { const dk = clamp(kickW * 1.25 - r2 * 0.55, 0, 1); if (dk > d) d = dk; }
       }
       return d;
@@ -406,7 +406,7 @@ void main() {
     function fillAlpha(start, x0, x1, v) { for (let i = (start + x0) * 4 + 3, end = (start + x1) * 4 + 3; i < end; i += 4) data[i] = v; }
     function driftSpan(start, x0, x1, zone) {
       for (let mx = x0, p = start + x0, i = p * 4 + 3; mx < x1; mx++, p++, i += 4) {
-        data[i] = zone * act16 - noise2[p] * R2K < 0.04 ? 255 : 0;
+        data[i] = zone * (1 + act16 * 0.35) - noise2[p] * R2K < 0.04 ? 255 : 0;
       }
     }
     function drawGrains(fr, vh) {
@@ -433,7 +433,7 @@ void main() {
           for (let p = start, i = p * 4 + 3, end = start + mw; p < end; p++, i += 4) data[i] = A > base + 0.38 * noise[p] * INV255 ? 255 : 0;
           continue;
         }
-        const zone = activity > 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
+        const zone = vy < 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : vy > vh ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
         if (!rowIntro && kickW < 0.01) {
           if (zone === 0) {
             if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; }
@@ -464,9 +464,10 @@ void main() {
         const rowFrac = my / mh;
         const rowIntro = introLive && A < 0.62 * rowFrac + 0.38 + BAND;
         const kickW = kicking ? kickBand(rowFrac, 1 - c.kick) : 0;
-        if (!rowIntro && activity === 0 && kickW < 0.01) continue;
+        const ez = vy < 0 || vy > vh ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
+        if (!rowIntro && activity === 0 && kickW < 0.01 && ez === 0) continue;
         const p = my * mw + mx;
-        const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, activity > 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0, kickW);
+        const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, ez, kickW);
         if (d <= 0.04 || d >= 0.985) continue;
         const e = d * d;
         const spread = (6 + 46 * esp[k]) * dpr * e;
@@ -497,7 +498,8 @@ void main() {
       if (c.kick > 0) c.kick = Math.max(0, c.kick - dt / 1.25);
       const off = floatOffset(fr, vh);
       canvas.style.transform = off ? 'translateY(' + off.toFixed(1) + 'px)' : '';
-      if (c.assemble >= 1 && activity === 0 && c.kick === 0) {
+      const zoneEdges = fr.top >= 0 && fr.bottom <= vh ? 0 : Math.max(fr.top < 0 ? edgeZone(fr.top, vh, ZONE_BOTTOM, ZONE_TOP) : 0, fr.bottom > vh ? edgeZone(fr.bottom, vh, ZONE_BOTTOM, ZONE_TOP) : 0);
+      if (c.assemble >= 1 && activity === 0 && c.kick === 0 && zoneEdges < 0.035) {
         if (!c.settled) { drawFull(); c.settled = true; rowState.fill(0); canvas.dataset.state = 'settled'; }
         return off !== 0 ? true : false;
       }
