@@ -34,7 +34,7 @@ PROJECT_DIR = Path.home() / "ai-bladet"
 PUBLIC_DIR = PROJECT_DIR / "public"
 GLOSSARY_DIR = PUBLIC_DIR / "ordbok"
 
-SITE_URL = os.getenv("SITE_URL", "https://aibladet.se")
+SITE_URL = os.getenv("SITE_URL", "https://ai-bladet.pages.dev")
 
 # ─── API Helper ───────────────────────────────────────────────────────────────
 

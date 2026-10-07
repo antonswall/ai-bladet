@@ -42,7 +42,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
 
   const isPermalink = mode === 'permalink';
   const canonical = `/v/${year}/${week}/`;
-  const pageUrl = `https://aibladet.se${canonical}`;
+  const pageUrl = `https://ai-bladet.pages.dev${canonical}`;
   const leadImage = lead?.image || (stories && stories[0]?.image) || '';
 
   // SEO: Fullständig JSON-LD för Google News + Search
@@ -64,7 +64,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
       'name': 'AI-Bladet',
       'logo': {
         '@type': 'ImageObject',
-        'url': 'https://aibladet.se/favicon.svg'
+        'url': 'https://ai-bladet.pages.dev/favicon.svg'
       }
     }
   };

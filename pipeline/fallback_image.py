@@ -20,7 +20,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-SITE_URL = "https://aibladet.se"
+SITE_URL = "https://ai-bladet.pages.dev"
 STATIC_IMG_DIR = Path(__file__).parent.parent / "static" / "img" / "fallback"
 
 # Mörk redaktionell bas + en accentfärg per kategori (tidningens röda som bas).

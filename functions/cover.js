@@ -16,6 +16,11 @@ export async function onRequestGet(context) {
   try { target = new URL(raw); } catch (e) { return fail(400, 'bad url'); }
   if (target.protocol !== 'https:' || /^(localhost|\d+\.\d+\.\d+\.\d+|\[.*\])$/i.test(target.hostname)) return fail(400, 'https hosts only');
 
+  // Endast bilder som faktiskt finns i publicerade nummer får reläas (annars öppen proxy).
+  let allowed = [];
+  try { allowed = await (await context.env.ASSETS.fetch(new URL('/cover-allow.json', request.url))).json(); } catch (e) { return fail(503, 'allowlist unavailable'); }
+  if (!allowed.includes(target.href)) return fail(403, 'url not allowed');
+
   const cache = caches.default;
   const key = new Request('https://cover-cache.ai-bladet/' + encodeURIComponent(target.href));
   const hit = await cache.match(key);

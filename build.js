@@ -8,7 +8,7 @@ const { renderArchive } = require('./templates/archive');
 const { renderAbout } = require('./templates/about');
 const { render404 } = require('./templates/404');
 
-const SITE_URL = process.env.SITE_URL || 'https://aibladet.se';
+const SITE_URL = process.env.SITE_URL || 'https://ai-bladet.pages.dev';
 const CONTENT_DIR = path.join(__dirname, 'content');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const STATIC_DIR = path.join(__dirname, 'static');
@@ -209,6 +209,55 @@ function copyDir(src, dest) {
   }
 }
 if (fs.existsSync(STATIC_DIR)) copyDir(STATIC_DIR, PUBLIC_DIR);
+
+// 4b. SECURITY: säkerhetsheaders (CSP med hash för inline-skript) + vitlista för /cover-reläet
+(function writeSecurityFiles() {
+  const crypto = require('crypto');
+  const hashes = new Set();
+  const covers = new Set();
+  const walk = dir => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.html')) {
+        const html = fs.readFileSync(p, 'utf8');
+        for (const m of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+          hashes.add("'sha256-" + crypto.createHash('sha256').update(m[1]).digest('base64') + "'");
+        }
+        for (const m of html.matchAll(/<img[^>]+src="(https:\/\/[^"]+)"/g)) { try { covers.add(new URL(m[1].replace(/&amp;/g, '&')).href); } catch (e) {} }
+      }
+    }
+  };
+  walk(PUBLIC_DIR);
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' " + [...hashes].sort().join(' '),
+    "style-src 'self'",
+    "img-src 'self' https: data: blob:",
+    "media-src 'self'",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    'upgrade-insecure-requests',
+  ].join('; ');
+  const headers = [
+    '/*',
+    '  Content-Security-Policy: ' + csp,
+    '  Strict-Transport-Security: max-age=31536000; includeSubDomains',
+    '  X-Frame-Options: DENY',
+    '  X-Content-Type-Options: nosniff',
+    '  Referrer-Policy: strict-origin-when-cross-origin',
+    '  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    '  Cross-Origin-Opener-Policy: same-origin',
+    '',
+  ].join('\n');
+  fs.writeFileSync(path.join(PUBLIC_DIR, '_headers'), headers);
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'cover-allow.json'), JSON.stringify([...covers].sort()));
+  console.log(`Säkerhet: _headers (${hashes.size} inline-hash), cover-vitlista ${covers.size} URL:er`);
+})();
 
 // 5. DONE
 const w = latest ? latest.week : '?';

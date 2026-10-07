@@ -226,7 +226,7 @@ def distribute_linkedin(issue_path: str, dry_run: bool = False) -> bool:
             "Den här veckan hände något som faktiskt påverkar din vardag mer än "
             "du tror. [Story-förklaring här...]\n\n"
             "Vad betyder detta för Sverige? Kanske mer än vi tror.\n\n"
-            "Läs hela veckans AI-Bladet på aibladet.se (dry-run)"
+            "Läs hela veckans AI-Bladet på ai-bladet.pages.dev (dry-run)"
         )
         print("(dry-run)")
     else:

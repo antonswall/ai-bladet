@@ -4,7 +4,7 @@ function base({ title, description, canonical, ogType, ogImage, jsonLd, content,
   const y = year || '';
   const editionLabel = w ? `Vecka ${w} · ${y}` : 'Veckotidning om AI';
   const descr = description || 'Sveriges veckotidning om artificiell intelligens. En utgåva i veckan, rankat efter vad som faktiskt betyder något.';
-  const ogImg = ogImage || 'https://aibladet.se/favicon.svg';
+  const ogImg = ogImage || 'https://ai-bladet.pages.dev/favicon.svg';
   const tagline = 'Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.';
   const top = `<div class="masthead-top">
       <span>${editionLabel}</span>

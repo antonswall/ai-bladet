@@ -78,7 +78,7 @@ def sonnet_call(prompt: str, system: str = None,
             headers={
                 "Authorization": f"Bearer {key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://aibladet.se",
+                "HTTP-Referer": "https://ai-bladet.pages.dev",
                 "X-Title": "AI-Bladet",
             },
             json={

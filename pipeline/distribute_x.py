@@ -56,7 +56,7 @@ def generate_thread(issue: dict, week: int, year: int) -> Optional[str]:
 Tweet 1: Hook — "Här är veckans viktigaste AI-nyheter från AI-Bladet."
 Tweet 2: Story 1 — rubrik + kort förklaring varför det spelar roll
 Tweet 3: Story 2 — rubrik + kort förklaring varför det spelar roll
-Tweet 4: Story 3 + länk: "Läs hela veckans AI-Bladet på aibladet.se [länk]"
+Tweet 4: Story 3 + länk: "Läs hela veckans AI-Bladet på ai-bladet.pages.dev [länk]"
 
 Varje tweet MAX 280 tecken. Använd naturlig svenska. 
 Inga hashtags. Var konkret.
@@ -177,7 +177,7 @@ Publicera måndag 09:00.
 ```
 
 ---
-Länk: https://aibladet.se/{year}/{week}
+Länk: https://ai-bladet.pages.dev/{year}/{week}
 """
         thread_path.write_text(thread_content, encoding="utf-8")
         print(f"    ➡ Sparad: {thread_path.name}")
@@ -206,7 +206,7 @@ Publicera måndag 09:00 (EFTER thread).
 ```
 
 ---
-Länk: https://aibladet.se/{year}/{week}
+Länk: https://ai-bladet.pages.dev/{year}/{week}
 """
         lie_path.write_text(lie_content, encoding="utf-8")
         print(f"    ➡ Sparad: {lie_path.name}")

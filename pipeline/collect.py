@@ -25,7 +25,7 @@ from bs4 import BeautifulSoup
 CONFIG_PATH = Path(__file__).parent / "config" / "sources.yaml"
 OUTPUT_DIR = Path(__file__).parent / "output" / "candidates"
 REQUEST_TIMEOUT = 20  # sekunder per feed
-USER_AGENT = "AI-Bladet/1.0 (+https://aibladet.se; news-collector)"
+USER_AGENT = "AI-Bladet/1.0 (+https://ai-bladet.pages.dev; news-collector)"
 MIN_SOURCE_SUCCESS_RATIO = 0.75
 MIN_CANDIDATES = 50
 

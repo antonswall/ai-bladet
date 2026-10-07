@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://aibladet.se/sitemap.xml
+Sitemap: https://ai-bladet.pages.dev/sitemap.xml
 
 # AI-Bladet — full indexing allowed
