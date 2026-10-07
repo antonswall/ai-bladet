@@ -48,7 +48,12 @@
     return Math.max(smoothstep(vh * (1 - bottom), vh, vy), 1 - smoothstep(0, vh * top, vy));
   }
   function introAmount(th, assemble) { return 1 - smoothstep(th, th + BAND, assemble * (1 + BAND)); }
-  function driftAmount(zone, rnd, activity, border) { return clamp((zone + (border || 0) * 0.9) * activity * 1.6 - rnd * 0.6, 0, 1); }
+  function driftAmount(zone, rnd, activity) { return clamp(zone * activity * 1.6 - rnd * 0.6, 0, 1); }
+  function floatOffset(rect, vh) {
+    if (rect.top > vh * 0.45) { const t = clamp((rect.top - vh * 0.45) / (vh * 0.55), 0, 1); return 34 * t * t; }
+    if (rect.top < vh * 0.15) { const t = clamp((vh * 0.15 - rect.top) / (vh * 0.5), 0, 1); return -34 * t * t; }
+    return 0;
+  }
   function cellSize(cssWidth, dpr, area, maxCells) {
     let g = Math.round(clamp(cssWidth / 160, 3, 5) * dpr);
     if (area / (g * g) > maxCells) g = Math.ceil(Math.sqrt(area / maxCells));
@@ -58,7 +63,7 @@
   function kickBand(ny, progress) { const q = (ny - (1.15 - 1.3 * progress)) / 0.09; return Math.exp(-q * q); }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { sampleWordmark, fitRect, heroProgress, edgeZone, introAmount, driftAmount, cellSize, grainSize, kickBand };
+    module.exports = { sampleWordmark, fitRect, heroProgress, edgeZone, introAmount, driftAmount, cellSize, grainSize, kickBand, floatOffset };
     return;
   }
 
@@ -334,7 +339,7 @@ void main() {
     const maskCanvas = document.createElement('canvas');
     const mctx = maskCanvas.getContext('2d');
     const c = { el: frameEl, canvas, visible: false, ready: false, started: false, cleared: false, settled: false, assemble: 0, kick: 0, kicks: 0, time: 0, frames: 0 };
-    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null, colBd = null, rowBd = null, act16 = 0, bandPx = 0;
+    let dpr = 1, gm = 1, mw = 0, mh = 0, ix = 0, iy = 0, iw = 0, ih = 0, radius = 0, mask = null, data = null, noise = null, noise2 = null, rowState = null, act16 = 0;
     let em = 0, ex = null, ey = null, eang = null, esp = null;
 
     c.layout = function () {
@@ -363,10 +368,7 @@ void main() {
       rowState = new Uint8Array(mh);
       const random = rng(97 + index * 7919);
       for (let i = 0; i < noise.length; i++) { noise[i] = (random() * 256) | 0; noise2[i] = (random() * 256) | 0; }
-      colBd = new Float32Array(mw); rowBd = new Float32Array(mh);
-      for (let x = 0; x < mw; x++) colBd[x] = 1 - smoothstep(0, 34, Math.min(x, mw - 1 - x) * gm / dpr);
-      for (let y = 0; y < mh; y++) rowBd[y] = 1 - smoothstep(0, 34, Math.min(y, mh - 1 - y) * gm / dpr);
-      bandPx = Math.min(mw >> 1, Math.ceil(34 * dpr / gm) + 1);
+
       em = Math.round(clamp(W * H * (coarse ? 0.06 : 0.05), 2500, coarse || lowPower ? 5000 : 16000));
       ex = new Float32Array(em); ey = new Float32Array(em); eang = new Float32Array(em); esp = new Float32Array(em);
       for (let k = 0; k < em; k++) { ex[k] = Math.floor(random() * mw); ey[k] = Math.floor(random() * mh); eang[k] = random() * TAU; esp[k] = random(); }
@@ -392,20 +394,19 @@ void main() {
       ctx.drawImage(src, ix, iy, iw, ih, SAND_X * dpr + ix, SAND_Y * dpr + iy, iw, ih);
       ctx.restore();
     }
-    function amount(n, r2, rowFrac, A, introLive, zone, bd, kickW) {
+    function amount(n, r2, rowFrac, A, introLive, zone, kickW) {
       let d = 0;
       if (introLive) { const th = 0.62 * rowFrac + 0.38 * n; d = 1 - smoothstep(th, th + BAND, A); }
       if (d < 1) {
-        if (activity > 0) { const dd = driftAmount(zone, r2, activity, bd); if (dd > d) d = dd; }
+        if (activity > 0) { const dd = driftAmount(zone, r2, activity); if (dd > d) d = dd; }
         if (kickW > 0) { const dk = clamp(kickW * 1.25 - r2 * 0.55, 0, 1); if (dk > d) d = dk; }
       }
       return d;
     }
     function fillAlpha(start, x0, x1, v) { for (let i = (start + x0) * 4 + 3, end = (start + x1) * 4 + 3; i < end; i += 4) data[i] = v; }
-    function driftSpan(start, x0, x1, zone, rb) {
+    function driftSpan(start, x0, x1, zone) {
       for (let mx = x0, p = start + x0, i = p * 4 + 3; mx < x1; mx++, p++, i += 4) {
-        const bd = colBd[mx] > rb ? colBd[mx] : rb;
-        data[i] = (zone + bd * 0.9) * act16 - noise2[p] * R2K < 0.04 ? 255 : 0;
+        data[i] = zone * act16 - noise2[p] * R2K < 0.04 ? 255 : 0;
       }
     }
     function drawGrains(fr, vh) {
@@ -433,20 +434,15 @@ void main() {
           continue;
         }
         const zone = activity > 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
-        const rb = rowBd[my];
         if (!rowIntro && kickW < 0.01) {
-          if (zone === 0 && rb === 0) {
-            if (rowState[my] !== 3 && rowState[my] !== 1) fillAlpha(start, bandPx, mw - bandPx, 255);
-            rowState[my] = 3;
-            driftSpan(start, 0, bandPx, 0, 0);
-            driftSpan(start, mw - bandPx, mw, 0, 0);
-          } else { rowState[my] = 0; driftSpan(start, 0, mw, zone, rb); }
+          if (zone === 0) {
+            if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; }
+          } else { rowState[my] = 0; driftSpan(start, 0, mw, zone); }
           continue;
         }
         rowState[my] = 0;
         for (let mx = 0, p = start, i = p * 4 + 3; mx < mw; mx++, p++, i += 4) {
-          const bd = colBd[mx] > rb ? colBd[mx] : rb;
-          data[i] = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, zone, bd, kickW) < 0.04 ? 255 : 0;
+          data[i] = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, zone, kickW) < 0.04 ? 255 : 0;
         }
       }
       if (hi >= lo) mctx.putImageData(mask, 0, 0, 0, lo, mw, hi - lo + 1);
@@ -462,15 +458,15 @@ void main() {
       const t = c.time;
       for (let k = 0; k < em; k++) {
         const mx = ex[k], my = ey[k], st = rowState[my];
-        if (st === 1 || st === 2 || (st === 3 && colBd[mx] === 0)) continue;
+        if (st === 1 || st === 2) continue;
         const vy = fr.top + (iy + my * gm) / dpr;
         if (vy < -60 || vy > vh + 60) continue;
         const rowFrac = my / mh;
         const rowIntro = introLive && A < 0.62 * rowFrac + 0.38 + BAND;
         const kickW = kicking ? kickBand(rowFrac, 1 - c.kick) : 0;
         if (!rowIntro && activity === 0 && kickW < 0.01) continue;
-        const p = my * mw + mx, bd = colBd[mx] > rowBd[my] ? colBd[mx] : rowBd[my];
-        const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, activity > 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0, bd, kickW);
+        const p = my * mw + mx;
+        const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, activity > 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0, kickW);
         if (d <= 0.04 || d >= 0.985) continue;
         const e = d * d;
         const spread = (6 + 46 * esp[k]) * dpr * e;
@@ -490,7 +486,7 @@ void main() {
       const fr = frameEl.getBoundingClientRect();
       const vh = window.innerHeight;
       if (!c.started) {
-        if (fr.top < vh * 0.94 && fr.bottom > vh * 0.04) { c.started = true; rowState.fill(0); canvas.dataset.state = 'assembling'; }
+        if (fr.top < vh * 0.88 && fr.bottom > vh * 0.03) { c.started = true; rowState.fill(0); canvas.dataset.state = 'assembling'; }
         else {
           if (!c.cleared) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); c.cleared = true; }
           return false;
@@ -499,9 +495,11 @@ void main() {
       c.time += dt;
       if (c.assemble < 1) c.assemble = Math.min(1, c.assemble + dt / 1.6);
       if (c.kick > 0) c.kick = Math.max(0, c.kick - dt / 1.25);
+      const off = floatOffset(fr, vh);
+      canvas.style.transform = off ? 'translateY(' + off.toFixed(1) + 'px)' : '';
       if (c.assemble >= 1 && activity === 0 && c.kick === 0) {
         if (!c.settled) { drawFull(); c.settled = true; rowState.fill(0); canvas.dataset.state = 'settled'; }
-        return false;
+        return off !== 0 ? true : false;
       }
       c.settled = false;
       canvas.dataset.state = c.assemble < 1 ? 'assembling' : c.kick > 0 ? 'rippling' : 'drifting';
