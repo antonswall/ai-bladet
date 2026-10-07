@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Smalare kantzoner + tydligare kornflykt
+- Anton: upplosningen ska borja narmare fonstrets kant (inte nara mitten) och kornen ska tydligare flyga ut at hoger.
+- static/dust.js: ZONE_TOP 0.26->0.18, ZONE_BOTTOM 0.36->0.26 (lasytan = mitten 56 % av fonstret, alltid skarp). Hogervind okad (135+245*rand enhets-px), alpha-golv 0.14->0.24, kornbudget 6300->8000 (mobil 2900->3600).
+- Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning lokalt och live: lasyta 3.5 %, kant vid scroll 38 %, halvtackt vid stopp 56.4 % och 56.5 % efter 3.2 s (fruset); 0 JS-fel; live-perf 3.8 ms snitt under scroll. Visuellt granskat: sanden nu enbart nara kanterna, dammet forsar tydligt at hoger om omslagen.
+- Publicerad i `65bc001`. Stillbild: screenshots/live-scroll-still-3.png.
+
 ## 2026-10-07 — [lutra] Kornen halverade
 - Anton: kornen ska vara halften sa stora. static/dust.js: emitterdiametern gm*(1.1-0.6d) (var 2.2-1.2d) = exakt halva; tathet kompenserad (area-faktor 0.062/0.075, tak 19k/6.5k, budget 6300/2900). Masken oforandrad (1 enhets-pixel).
 - Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning: lasyta 3.5 %, fryst vid stopp 77.7 % och 77.8 % efter 3.2 s; live samma; 0 JS-fel; live-perf 3.4 ms snitt under scroll. Kontrollerade ocksa att ingen fallback-text lacker genom sanden (alla bilder laddade, fallback hidden).
