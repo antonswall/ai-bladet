@@ -433,7 +433,7 @@ void main() {
           for (let p = start, i = p * 4 + 3, end = start + mw; p < end; p++, i += 4) data[i] = A > base + 0.38 * noise[p] * INV255 ? 255 : 0;
           continue;
         }
-        const zone = vy < 0 ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : vy > vh ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
+        const zone = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
         if (!rowIntro && kickW < 0.01) {
           if (zone === 0) {
             if (rowState[my] !== 1) { fillAlpha(start, 0, mw, 255); rowState[my] = 1; }
@@ -464,7 +464,7 @@ void main() {
         const rowFrac = my / mh;
         const rowIntro = introLive && A < 0.62 * rowFrac + 0.38 + BAND;
         const kickW = kicking ? kickBand(rowFrac, 1 - c.kick) : 0;
-        const ez = vy < 0 || vy > vh ? edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP) : 0;
+        const ez = edgeZone(vy, vh, ZONE_BOTTOM, ZONE_TOP);
         if (!rowIntro && activity === 0 && kickW < 0.01 && ez === 0) continue;
         const p = my * mw + mx;
         const d = amount(noise[p] * INV255, noise2[p] * INV255, rowFrac, A, rowIntro, ez, kickW);
@@ -498,7 +498,7 @@ void main() {
       if (c.kick > 0) c.kick = Math.max(0, c.kick - dt / 1.25);
       const off = floatOffset(fr, vh);
       canvas.style.transform = off ? 'translateY(' + off.toFixed(1) + 'px)' : '';
-      const zoneEdges = fr.top >= 0 && fr.bottom <= vh ? 0 : Math.max(fr.top < 0 ? edgeZone(fr.top, vh, ZONE_BOTTOM, ZONE_TOP) : 0, fr.bottom > vh ? edgeZone(fr.bottom, vh, ZONE_BOTTOM, ZONE_TOP) : 0);
+      const zoneEdges = Math.max(edgeZone(fr.top, vh, ZONE_BOTTOM, ZONE_TOP), edgeZone(fr.bottom, vh, ZONE_BOTTOM, ZONE_TOP));
       if (c.assemble >= 1 && activity === 0 && c.kick === 0 && zoneEdges < 0.035) {
         if (!c.settled) { drawFull(); c.settled = true; rowState.fill(0); canvas.dataset.state = 'settled'; }
         return off !== 0 ? true : false;
