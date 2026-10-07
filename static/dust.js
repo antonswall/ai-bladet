@@ -9,8 +9,8 @@
   const BAND = 0.3;
   const SAND_X = 24;
   const SAND_Y = 40;
-  const ZONE_BOTTOM = 0.36;
-  const ZONE_TOP = 0.26;
+  const ZONE_BOTTOM = 0.26;
+  const ZONE_TOP = 0.18;
   const TILT = 0.12;
   const INV255 = 1 / 255;
   const R2K = 0.6 / 255;
@@ -108,7 +108,7 @@
     let busy = activity > 0;
     if (hero && hero.built) { if (hero.frame(dt)) busy = true; }
     else if (heroEl) { const r = heroEl.getBoundingClientRect(); setHeroVar(heroProgress(r.top, r.height)); }
-    dustBudget = coarse || lowPower ? 2900 : 6300;
+    dustBudget = coarse || lowPower ? 3600 : 8000;
     const t0 = performance.now();
     for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].frame(dt)) busy = true;
     const spent = performance.now() - t0;
@@ -487,11 +487,11 @@ void main() {
         let dy = Math.sin(eang[k]) * spread * 0.9 + Math.sin(eang[k] + t * 0.8) * spread * 0.6 * wob;
         if (rowIntro) dy += 46 * dpr * e;
         else if (kickW >= 0.01) dy -= 34 * dpr * e;
-        else { dx += (90 + 210 * esp[k]) * dpr * e; dy += (-26 + 52 * esp[k]) * dpr * e; }
+        else { dx += (135 + 245 * esp[k]) * dpr * e; dy += (-24 + 48 * esp[k]) * dpr * e; }
         if (dustBudget <= 0) break;
         dustBudget -= 1;
         const s = gm * (1.1 - 0.6 * d);
-        ctx.globalAlpha = Math.max(0.14, 1 - Math.pow(d, 2.4));
+        ctx.globalAlpha = Math.max(0.24, 1 - Math.pow(d, 2.4));
         ctx.drawImage(src, ix + mx * gm, iy + my * gm, 1, 1, ox + mx * gm + dx, oy + my * gm + dy, s, s);
       }
       ctx.globalAlpha = 1;
