@@ -82,7 +82,7 @@ html:not(.dust-live) .hero-logo { opacity: clamp(0, calc(1 - var(--hero-p) * 1.5
 .lead-cta span { color: var(--accent); font-size: 1rem; }
 .lead-figure { margin: 0; }
 
-/* Covers: dust.js redraws the image as the wordmark's particles near the viewport edges; the <img> is shown everywhere else and keeps alt text, layout and the no-JS fallback */
+/* Covers: dust.js draws the image as the wordmark's particles whenever motion is on; the <img> keeps alt text, layout and the no-JS / paused fallback */
 .figure-frame { isolation: isolate; border-radius: 18px; max-height: none; }
 .lead-figure .figure-frame { aspect-ratio: 16/9; border-radius: 26px; }
 .lead-figure .figure-img { object-fit: contain; }

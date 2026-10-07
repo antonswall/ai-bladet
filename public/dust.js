@@ -1,8 +1,9 @@
 /* AI-Bladet — dust engine.
  * Hero: the wordmark as GPU particles that condense from stardust, react to pointer/touch and pulverise on scroll.
  * Covers: every press image is rendered with the wordmark's exact particle shader (same wind, swirl, fade and shrink),
- * coloured by the image as a WebGL texture. Its dissolve is driven by the cover's position at the viewport edges, the
- * way the wordmark's is driven by the hero's scroll; at the bottom edge the wind is mirrored so the dust stays off-screen. Images without CORS are fetched through the same-origin /cover proxy. */
+ * coloured by the image as a WebGL texture, and stays particles (shimmer + wave) even mid-view and at rest. Its dissolve is
+ * driven by the cover's position at the viewport edges, the way the wordmark's is driven by the hero's scroll. The wind
+ * blows mostly rightwards (shallower than the wordmark's) and is mirrored at the bottom edge so the dust stays off-screen. Images without CORS are fetched through the same-origin /cover proxy. */
 (function () {
   'use strict';
 
@@ -356,7 +357,7 @@ void main() {
   float local = smoothstep(th, th + 0.26, uDissolve * 1.38);
   float k = local * local;
   float ang = aSeed.y * 6.2831853 + uTime * (0.4 + aSeed.z) + local * 6.0;
-  pos += vec2(0.45 + aSeed.y * 0.8, (-0.7 - aSeed.z * 0.9) * uFlip) * k * uWind + vec2(cos(ang), sin(ang)) * k * (24.0 + 72.0 * aSeed.z);
+  pos += vec2(1.25 + aSeed.y * 0.8, (-0.35 - aSeed.z * 0.35) * uFlip) * k * uWind + vec2(cos(ang), sin(ang)) * k * (24.0 + 72.0 * aSeed.z);
   vAlpha = (1.0 - smoothstep(0.55, 1.0, local)) * (1.0 - w * 0.12);
   vUv = n;
   gl_PointSize = max(1.0, uPoint * mix(1.0, 0.42, local));
@@ -477,11 +478,10 @@ void main() {
       if (Math.abs(target - c.p) < 0.0008) c.p = target;
       burst.age += dt;
       const bursting = burst.age < 1.3;
-      const dust = c.p > 0.002 || bursting;
-      if (dust !== c.dust) { c.dust = dust; frameEl.classList.toggle('is-dust', dust); }
+      if (!c.dust) { c.dust = true; frameEl.classList.add('is-dust'); }
       frameEl.dataset.p = c.p.toFixed(3);
-      frameEl.dataset.state = dust ? (bursting && c.p <= 0.002 ? 'burst' : 'dust') : 'settled';
-      if (!dust) return Math.abs(target - c.p) > 0;
+      frameEl.dataset.state = bursting ? 'burst' : c.p > 0.002 ? 'dust' : 'live';
+      if (c.p >= 0.915 && !bursting) return Math.abs(target - c.p) > 0;
       const { gl: ctx, loc } = g;
       ctx.bindBuffer(ctx.ARRAY_BUFFER, c.buffer);
       ctx.enableVertexAttribArray(g.aHome); ctx.vertexAttribPointer(g.aHome, 2, ctx.FLOAT, false, COVER_STRIDE * 4, 0);
