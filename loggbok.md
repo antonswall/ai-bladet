@@ -1,5 +1,10 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Kornen halverade
+- Anton: kornen ska vara halften sa stora. static/dust.js: emitterdiametern gm*(1.1-0.6d) (var 2.2-1.2d) = exakt halva; tathet kompenserad (area-faktor 0.062/0.075, tak 19k/6.5k, budget 6300/2900). Masken oforandrad (1 enhets-pixel).
+- Verifierat: 12/12 + 9/9 tester, 60/60 python; pixelmatning: lasyta 3.5 %, fryst vid stopp 77.7 % och 77.8 % efter 3.2 s; live samma; 0 JS-fel; live-perf 3.4 ms snitt under scroll. Kontrollerade ocksa att ingen fallback-text lacker genom sanden (alla bilder laddade, fallback hidden).
+- Publicerad i `0ba2b35`.
+
 ## 2026-10-07 — [lutra] Upplosningsanimationen finjusterad (spridning, lutning, kornflykt)
 - Antons tre onskemal: (1) mindre koncentrerad/skarp front — mer utdragen och spridd, (2) fronten vinklad mot hoger (~80-85 grader i stallet for 90), (3) kornen ska flyga ivag at hoger ut ur skarmen som loggans damm, inte bara forsvinna.
 - static/dust.js: zonerna bredare (topp 0.26, botten 0.36 av fonstret) och brusandelen i erosionen okad (0.6) -> langre, grynigare overgang. Ny lutning TILT=0.12 av bildbredden: zon per pixel via radzon + linjariserad lutning (3 extra edgeZone-anrop per rad). Flygande korn far stark hogervind (90+210*rand enhets-px), langre livstid (ritas till d=0.995, alpha-golv 0.14) och något storre minimistorlek. Sandduken utokad till fonstrets hogerkant (JS-satt storlek) sa kornen kan lamna bilden ut ur skarmen; omlayout vid fonsterbreddsandring.
