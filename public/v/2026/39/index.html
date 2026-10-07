@@ -6,7 +6,7 @@
   <title>GGUF i Transformers, Grok 4.7 och snabbare tokens — Vecka 39 2026 — AI-Bladet</title>
   <meta name="description" content="Hugging Face öppnar för llama.cpp-quants i Transformers — plus Grok 4.7 och tokenizers v1. — AI-Bladet vecka 39 2026.">
   <link rel="canonical" href="/v/2026/39/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="GGUF i Transformers, Grok 4.7 och snabbare tokens — Vecka 39 2026">
   <meta property="og:description" content="Hugging Face öppnar för llama.cpp-quants i Transformers — plus Grok 4.7 och tokenizers v1. — AI-Bladet vecka 39 2026.">
   <meta property="og:type" content="article">
@@ -21,52 +21,60 @@
   <meta name="twitter:image" content="https://huggingface.co/blog/assets/transformers_llama_cpp_quants/thumbnail.png">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Kör llama.cpp-modeller direkt i Transformers — utan extra kod","description":"Hugging Face öppnar för llama.cpp-quants i Transformers — plus Grok 4.7 och tokenizers v1.","datePublished":"2026-09-27","dateModified":"2026-09-27","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/39/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/39/"},"image":["https://huggingface.co/blog/assets/transformers_llama_cpp_quants/thumbnail.png"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Modeller"},{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Säkerhet"}],"keywords":"Modeller, Verktyg, Säkerhet"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 39 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">6 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://huggingface.co/blog/assets/transformers_llama_cpp_quants/thumbnail.png" alt="Kör llama.cpp-modeller direkt i Transformers — utan extra kod" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://huggingface.co/blog/assets/transformers_llama_cpp_quants/thumbnail.png" alt="Kör llama.cpp-modeller direkt i Transformers — utan extra kod" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · Hugging Face Blog (pressbild)</figcaption>
   </figure>
-      <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
-      <h1 class="lead-headline">Kör llama.cpp-modeller direkt i Transformers — utan extra kod</h1>
-      <p class="lead-ingress">Hugging Face har byggt in stöd för GGUF-modeller i Transformers-biblioteket. Det innebär att kvantiserade modeller som tidigare krävde ett separat llama.cpp-flöde nu kan köras med vanliga Transformers-API:er — lokalt, på Mac eller Linux, utan molnkostnader.</p>
       <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>GGUF-formatet har laddats ned miljontals gånger från Hugging Face Hub, men har
 levt i ett parallellt ekosystem vid sidan av Transformers. Integrationen minskar
 friktionen för utvecklare som vill kombinera kvantiserade modeller med befintliga
 Transformers-pipelines. Med initial fokus på Apple Silicon och Qwen3.5-arkitekturen
 är signalen tydlig: lokal inferens är inte längre ett sidospår utan en förstaklassens
 use case i Hugging Face-ekosystemet.
-</p></aside>
+</p></aside></div>
+      <div class="lead-copy">
+      <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
+      <h1 class="lead-headline">Kör llama.cpp-modeller direkt i Transformers — utan extra kod</h1>
+      <p class="lead-ingress">Hugging Face har byggt in stöd för GGUF-modeller i Transformers-biblioteket. Det innebär att kvantiserade modeller som tidigare krävde ett separat llama.cpp-flöde nu kan köras med vanliga Transformers-API:er — lokalt, på Mac eller Linux, utan molnkostnader.</p>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-39-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/grok-4-7-og.webp" alt="xAI uppger: Grok 4.7 hårdare att jailbreaka och bättre på kod" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -94,7 +102,7 @@ use case i Hugging Face-ekosystemet.
         <div class="story-kicker">Verktyg</div>
         <h2 class="story-headline">Liquid AI: vision-language-modell tre gånger snabbare med speculative decoding</h2>
         <p class="story-ingress">Liquid AI lanserar DSpark, en draft-modell för vision-language-modellen LFM2.5-VL-3B. Med speculative decoding uppger Liquid AI upp till 3,13 gånger snabbare dekodning på Apple M5 Max och 2,66 gånger på H100 — utan försämrad utdatakvalitet.</p>
-        <p class="story-body">Liquid AI lanserar DSpark som en experimentell release för LFM2.5-VL-3B, en vision-language-modell på tre miljarder parametrar. DSpark är en draft-modell på 280 miljoner parametrar — en ökning på 8,9 procent ovanpå basmodellen — med en förenklad attention-only arkitektur i fyra lager. Tekniken bygger på speculative decoding, där draft-modellen genererar förslag som den större modellen sedan verifierar, vilket minskar antalet dyra forward passes.</p><p class="story-body">Prestandasiffrorna är enligt Liquid AI: 3,13 gånger snabbare dekodning på Apple M5 Max, 2,66 gånger på H100 GPU och 2,62 gånger förbättrad end-to-end-latens. Stöd finns från dag ett för llama.cpp, MLX-VLM och SGLang — de tre ramverk som dominerar lokal och serverbaserad deployment av kompakta modeller.</p><p class="story-body">Speculative decoding för vision-language-modeller är fortfarande ett relativt ungt område, och DSpark är märkt som experimentell. Men för svenska AI-utvecklare och ML-ingenjörer som optimerar VLM-deployment — oavsett om det gäller on-device-applikationer på Apple Silicon eller serverbaserade tjänster på H100 — är hastighetsvinsterna tillräckligt stora för att motivera ett test. Kompatibiliteten med etablerade ramverk sänker tröskeln ytterligare.</p></div></article></section><header class="segment-header">
+        <p class="story-body">Liquid AI lanserar DSpark som en experimentell release för LFM2.5-VL-3B, en vision-language-modell på tre miljarder parametrar. DSpark är en draft-modell på 280 miljoner parametrar — en ökning på 8,9 procent ovanpå basmodellen — med en förenklad attention-only arkitektur i fyra lager. Tekniken bygger på speculative decoding, där draft-modellen genererar förslag som den större modellen sedan verifierar, vilket minskar antalet dyra forward passes.</p><p class="story-body">Prestandasiffrorna är enligt Liquid AI: 3,13 gånger snabbare dekodning på Apple M5 Max, 2,66 gånger på H100 GPU och 2,62 gånger förbättrad end-to-end-latens. Stöd finns från dag ett för llama.cpp, MLX-VLM och SGLang — de tre ramverk som dominerar lokal och serverbaserad deployment av kompakta modeller.</p><p class="story-body">Speculative decoding för vision-language-modeller är fortfarande ett relativt ungt område, och DSpark är märkt som experimentell. Men för svenska AI-utvecklare och ML-ingenjörer som optimerar VLM-deployment — oavsett om det gäller on-device-applikationer på Apple Silicon eller serverbaserade tjänster på H100 — är hastighetsvinsterna tillräckligt stora för att motivera ett test. Kompatibiliteten med etablerade ramverk sänker tröskeln ytterligare.</p></div></article></section><header id="segment-bransch" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">02</span>
         <h2 class="segment-label">Bransch i korthet</h2>
@@ -113,7 +121,7 @@ use case i Hugging Face-ekosystemet.
           <ul class="briefs-list briefs-list--bransch"><li><p class="brief-text">OpenAI förbättrar prompt caching för GPT-6 med upp till 90 procents rabatt på cachade input-tokens och en ny Prompt Caching Dashboard som spårar cache hit rates och identifierar orsaker till cache misses. Cachen håller i 30 minuter.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> om du kör agentiska pipelines med GPT-6 och delar kontext mellan requests kan du sänka API-kostnaderna markant — börja med att mäta din nuvarande cache hit rate i dashboarden.</p></li><li><p class="brief-text">Tencent Hunyuan Team har publicerat en teknisk rapport om Hunyuan-A13B på arXiv. Rapporten är tillgänglig men det offentliga materialet är begränsat till titel och författarlista — inga prestandasiffror eller arkitekturdetaljer har ännu bekräftats utanför Tencent.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> håll ögonen på uppföljande releases, men vänta med att planera in modellen i er stack tills mer verifierad information finns tillgänglig.</p></li></ul>
-        </section><header class="segment-header">
+        </section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -132,5 +140,6 @@ use case i Hugging Face-ekosystemet.
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

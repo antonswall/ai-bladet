@@ -6,7 +6,7 @@
   <title>GPT-Live-1 i API:et — röstens arkitektur förenklas — Vecka 37 2026 — AI-Bladet</title>
   <meta name="description" content="OpenAI öppnar sin duplex-röstmodell för utvecklare, IBM:s tidsseriemodell når toppen och Devin testar sin egen kod med GPT-6 Astra. — AI-Bladet vecka 37 2026.">
   <link rel="canonical" href="/v/2026/37/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="GPT-Live-1 i API:et — röstens arkitektur förenklas — Vecka 37 2026">
   <meta property="og:description" content="OpenAI öppnar sin duplex-röstmodell för utvecklare, IBM:s tidsseriemodell når toppen och Devin testar sin egen kod med GPT-6 Astra. — AI-Bladet vecka 37 2026.">
   <meta property="og:type" content="article">
@@ -21,47 +21,55 @@
   <meta name="twitter:image" content="https://images.ctfassets.net/kftzwdyauwt9/7Mz7MwoSyFLdOMk26N1hCA/b66e84b656c1d666fc2adc1c56ff67f1/introducing-gpt-live-1-green-seo.png?w=1600&h=900&fit=fill">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"OpenAI öppnar duplex-röstmodellen — 80 procent färre avbrytningar enligt tidig testare","description":"OpenAI öppnar sin duplex-röstmodell för utvecklare, IBM:s tidsseriemodell når toppen och Devin testar sin egen kod med GPT-6 Astra.","datePublished":"2026-09-13","dateModified":"2026-09-13","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/37/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/37/"},"image":["https://images.ctfassets.net/kftzwdyauwt9/7Mz7MwoSyFLdOMk26N1hCA/b66e84b656c1d666fc2adc1c56ff67f1/introducing-gpt-live-1-green-seo.png?w=1600&h=900&fit=fill"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Modeller"},{"@type":"Thing","name":"Agenter"}],"keywords":"Verktyg, Modeller, Agenter"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 37 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Modeller</span><span class="cat">Agenter</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">5 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Modeller</span><span class="cat">Agenter</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://images.ctfassets.net/kftzwdyauwt9/7Mz7MwoSyFLdOMk26N1hCA/b66e84b656c1d666fc2adc1c56ff67f1/introducing-gpt-live-1-green-seo.png?w=1600&amp;h=900&amp;fit=fill" alt="OpenAI öppnar duplex-röstmodellen — 80 procent färre avbrytningar enligt tidig testare" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://images.ctfassets.net/kftzwdyauwt9/7Mz7MwoSyFLdOMk26N1hCA/b66e84b656c1d666fc2adc1c56ff67f1/introducing-gpt-live-1-green-seo.png?w=1600&amp;h=900&amp;fit=fill" alt="OpenAI öppnar duplex-röstmodellen — 80 procent färre avbrytningar enligt tidig testare" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · OpenAI (pressbild)</figcaption>
   </figure>
+      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>Tidigare röst-API:er tvingade utvecklare att koppla ihop tre separata modeller och hantera turtagningslogik manuellt — ett arkitekturproblem som gav hackiga upplevelser. GPT-Live-1 löser det i ett lager. Speak uppger 80 procents minskning av oönskade avbrytningar i sin språktutor, vilket antyder att skillnaden är mätbar i verkliga produkter. Frågan är vad full-duplex-stödet för telefoni kostar i praktiken — det avgör om modellen når bredare adoption utanför välfinansierade startups.
+</p></aside></div>
+      <div class="lead-copy">
       <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
       <h1 class="lead-headline">OpenAI öppnar duplex-röstmodellen — 80 procent färre avbrytningar enligt tidig testare</h1>
       <p class="lead-ingress">GPT-Live-1, röstmodellen som kan lyssna och tala samtidigt, är nu tillgänglig i OpenAI:s API. Modellen slår ihop tal-till-text, resonemang och text-till-tal i ett enda anrop och hanterar avbrytningar, skratt och bakgrundsbrus utan att tappa tråden.</p>
-      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>Tidigare röst-API:er tvingade utvecklare att koppla ihop tre separata modeller och hantera turtagningslogik manuellt — ett arkitekturproblem som gav hackiga upplevelser. GPT-Live-1 löser det i ett lager. Speak uppger 80 procents minskning av oönskade avbrytningar i sin språktutor, vilket antyder att skillnaden är mätbar i verkliga produkter. Frågan är vad full-duplex-stödet för telefoni kostar i praktiken — det avgör om modellen når bredare adoption utanför välfinansierade startups.
-</p></aside>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-37-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://images.ctfassets.net/kftzwdyauwt9/3lud5ZFEQSmggpw69KBl6l/07c5d333914a26516ca5470c72a214e9/cognition-seo-image-option-b.png?w=1600&amp;h=900&amp;fit=fill" alt="Devin testar sin egen kod — GPT-6 Astra tar över kodgranskningen" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -89,7 +97,7 @@
         <div class="story-kicker">Verktyg</div>
         <h2 class="story-headline">Perplexity litar på GPT-6 Astra med hela produktionssystemet</h2>
         <p class="story-ingress">Perplexity använder OpenAI:s GPT-6 Astra för att skriva kommunikation, redigera verkliga system och övervaka produktionsprogramvara. Enligt grundaren Johnny Ho kräver modellen betydligt mindre mänsklig tillsyn än tidigare generationer.</p>
-        <blockquote class="story-quote"><p>Vi kan faktiskt lita på den med hela end-to-end-system och checka in på den mycket mer sällan än med tidigare modellgenerationer.</p><cite>Johnny Ho, medgrundare och Chief Strategy Officer, Perplexity</cite></blockquote><p class="story-body">Perplexity, den AI-drivna sökmotorn, har integrerat GPT-6 Astra i sin kärninfrastruktur. Modellen används för att skriva kommunikation, redigera verkliga system och övervaka produktionsprogramvara. En konkret funktion är att Astra kan generera realistiska testresponser och ersätta externa tjänster under testning — vilket minskar beroendet av externa API-anrop i utvecklingsfasen.</p><p class="story-body">Det som skiljer Perplexitys användning från tidigare AI-integrationer är graden av autonomi. Johnny Ho beskriver det som att teamet &quot;checkar in&quot; på modellen snarare än att övervaka varje steg. Det är en formulering som signalerar ett skifte i hur AI-drivna bolag tänker kring tillsyn: från kontinuerlig granskning till undantagsbaserad intervention. För ett bolag vars kärnprodukt är informationsnoggrannhet är det ett anmärkningsvärt förtroende att ge en modell.</p><p class="story-body">Mönstret är detsamma som hos Cognition och Devin: GPT-6 Astra positioneras som en modell som inte bara genererar output utan hanterar hela arbetsflöden. För utvecklare som bygger agentiska system är det relevant att notera att Perplexity — ett bolag med höga krav på tillförlitlighet — valt att minska manuell tillsyn. Det antyder att modellens felfrekvens i produktionsmiljö är tillräckligt låg för att motivera det.</p></div></article></section><header class="segment-header">
+        <blockquote class="story-quote"><p>Vi kan faktiskt lita på den med hela end-to-end-system och checka in på den mycket mer sällan än med tidigare modellgenerationer.</p><cite>Johnny Ho, medgrundare och Chief Strategy Officer, Perplexity</cite></blockquote><p class="story-body">Perplexity, den AI-drivna sökmotorn, har integrerat GPT-6 Astra i sin kärninfrastruktur. Modellen används för att skriva kommunikation, redigera verkliga system och övervaka produktionsprogramvara. En konkret funktion är att Astra kan generera realistiska testresponser och ersätta externa tjänster under testning — vilket minskar beroendet av externa API-anrop i utvecklingsfasen.</p><p class="story-body">Det som skiljer Perplexitys användning från tidigare AI-integrationer är graden av autonomi. Johnny Ho beskriver det som att teamet &quot;checkar in&quot; på modellen snarare än att övervaka varje steg. Det är en formulering som signalerar ett skifte i hur AI-drivna bolag tänker kring tillsyn: från kontinuerlig granskning till undantagsbaserad intervention. För ett bolag vars kärnprodukt är informationsnoggrannhet är det ett anmärkningsvärt förtroende att ge en modell.</p><p class="story-body">Mönstret är detsamma som hos Cognition och Devin: GPT-6 Astra positioneras som en modell som inte bara genererar output utan hanterar hela arbetsflöden. För utvecklare som bygger agentiska system är det relevant att notera att Perplexity — ett bolag med höga krav på tillförlitlighet — valt att minska manuell tillsyn. Det antyder att modellens felfrekvens i produktionsmiljö är tillräckligt låg för att motivera det.</p></div></article></section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -108,5 +116,6 @@
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

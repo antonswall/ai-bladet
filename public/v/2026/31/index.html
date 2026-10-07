@@ -6,7 +6,7 @@
   <title>xAI fyller på Copilot — och bygger webbappar i chatten — Vecka 31 2026 — AI-Bladet</title>
   <meta name="description" content="Grok 4.5 i GitHub Copilot, Build Mode för webbprojekt och en ny röstmodell — xAI dominerar veckans verktygsflöde. — AI-Bladet vecka 31 2026.">
   <link rel="canonical" href="/v/2026/31/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="xAI fyller på Copilot — och bygger webbappar i chatten — Vecka 31 2026">
   <meta property="og:description" content="Grok 4.5 i GitHub Copilot, Build Mode för webbprojekt och en ny röstmodell — xAI dominerar veckans verktygsflöde. — AI-Bladet vecka 31 2026.">
   <meta property="og:type" content="article">
@@ -21,47 +21,55 @@
   <meta name="twitter:image" content="https://x.ai/images/news/og-github-copilot.webp">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Grok 4.5 finns nu i GitHub Copilot — välj den i modellväljaren","description":"Grok 4.5 i GitHub Copilot, Build Mode för webbprojekt och en ny röstmodell — xAI dominerar veckans verktygsflöde.","datePublished":"2026-07-26","dateModified":"2026-07-26","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/31/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/31/"},"image":["https://x.ai/images/news/og-github-copilot.webp"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Modeller"},{"@type":"Thing","name":"Forskning"}],"keywords":"Verktyg, Modeller, Forskning"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 31 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Modeller</span><span class="cat">Forskning</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">5 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Modeller</span><span class="cat">Forskning</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/og-github-copilot.webp" alt="Grok 4.5 finns nu i GitHub Copilot — välj den i modellväljaren" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/og-github-copilot.webp" alt="Grok 4.5 finns nu i GitHub Copilot — välj den i modellväljaren" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · xAI (pressbild)</figcaption>
   </figure>
+      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>GitHub Copilot har länge fungerat som en neutral plattform för modellval, och tillägget av Grok 4.5 befäster den trenden. xAI prissätter modellen till 2 USD per miljon input-tokens och 6 USD per miljon output-tokens via SpaceXAI-konsolen — konkurrenskraftigt mot jämförbara kodmodeller. Att Copilot nu samlar modeller från flera leverantörer förskjuter makten mot den som äger distributionsytan, inte nödvändigtvis den som tränar modellen.
+</p></aside></div>
+      <div class="lead-copy">
       <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
       <h1 class="lead-headline">Grok 4.5 finns nu i GitHub Copilot — välj den i modellväljaren</h1>
       <p class="lead-ingress">xAI:s kodmodell Grok 4.5 har lagts till som valbar modell i GitHub Copilot och når därmed miljontals VS Code-användare. Modellen fungerar i molnagenter, Copilot CLI och direkt via SpaceXAI-konsolen — men vissa företagskonton kan behöva aktivera den manuellt i Copilots inställningar.</p>
-      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>GitHub Copilot har länge fungerat som en neutral plattform för modellval, och tillägget av Grok 4.5 befäster den trenden. xAI prissätter modellen till 2 USD per miljon input-tokens och 6 USD per miljon output-tokens via SpaceXAI-konsolen — konkurrenskraftigt mot jämförbara kodmodeller. Att Copilot nu samlar modeller från flera leverantörer förskjuter makten mot den som äger distributionsytan, inte nödvändigtvis den som tränar modellen.
-</p></aside>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-31-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/grok-build-mode-og.png" alt="Build Mode: berätta en idé, få en fungerande webbapp" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -89,7 +97,7 @@
         <div class="story-kicker">Verktyg</div>
         <h2 class="story-headline">NVIDIA visar hur man självhostar en kodassistent som håller koden hemma</h2>
         <p class="story-ingress">Med StarCoder2-7B NIM, NeMo Guardrails och en CI-pipeline kan organisationer köra en AI-kodassistent helt på egna GPU:er. NVIDIA:s guide adresserar tre vanliga invändningar mot molnbaserade alternativ: datakontroll, hallucinerade paketnamn och spårbarhet.</p>
-        <blockquote class="story-quote"><p>Modellen föreslår kod, men policystyrning, beroendeverifiering, spårbarhet och resultatmätning lever utanför modellen — i system som ingenjörsteam redan litar på.</p><cite>NVIDIA</cite></blockquote><p class="story-body">NVIDIA beskriver i en detaljerad guide hur en självhostad AI-kodassistent kan sättas upp med StarCoder2-7B NIM som kör kodkompletteringar på organisationens egna GPU:er. NeMo Guardrails lägger till policystyrning — bland annat kan förfrågningar om filer markerade som &quot;endast för mänsklig hantering&quot; nekas automatiskt. CI-steget täcker tester, SAST, hemlighetsskanning, kontroll av hallucinerade beroenden och licensskanning.</p><p class="story-body">Kärnprincipen i arkitekturen är att modellen inte är kontrollplanet. Spårbarhet och mätning av om AI-assisterade ändringar förbättrar eller försämrar defektnivån hanteras av externa system via Prometheus och Grafana. Det är ett mognare angreppssätt än att lita på att modellen själv håller sig inom rätt gränser — och det adresserar direkt de compliance-krav som många organisationer möter när de vill ta AI-kodning till produktion.</p><p class="story-body">Förutsättningarna är minst 24 GB GPU-minne och Python 3.10 eller senare. För svenska organisationer med krav på att källkod inte lämnar det egna nätverket — exempelvis inom offentlig sektor eller försvar — erbjuder upplägget en konkret väg framåt utan att ge upp kodassistentens produktivitetsvinster.</p></div></article></section><header class="segment-header">
+        <blockquote class="story-quote"><p>Modellen föreslår kod, men policystyrning, beroendeverifiering, spårbarhet och resultatmätning lever utanför modellen — i system som ingenjörsteam redan litar på.</p><cite>NVIDIA</cite></blockquote><p class="story-body">NVIDIA beskriver i en detaljerad guide hur en självhostad AI-kodassistent kan sättas upp med StarCoder2-7B NIM som kör kodkompletteringar på organisationens egna GPU:er. NeMo Guardrails lägger till policystyrning — bland annat kan förfrågningar om filer markerade som &quot;endast för mänsklig hantering&quot; nekas automatiskt. CI-steget täcker tester, SAST, hemlighetsskanning, kontroll av hallucinerade beroenden och licensskanning.</p><p class="story-body">Kärnprincipen i arkitekturen är att modellen inte är kontrollplanet. Spårbarhet och mätning av om AI-assisterade ändringar förbättrar eller försämrar defektnivån hanteras av externa system via Prometheus och Grafana. Det är ett mognare angreppssätt än att lita på att modellen själv håller sig inom rätt gränser — och det adresserar direkt de compliance-krav som många organisationer möter när de vill ta AI-kodning till produktion.</p><p class="story-body">Förutsättningarna är minst 24 GB GPU-minne och Python 3.10 eller senare. För svenska organisationer med krav på att källkod inte lämnar det egna nätverket — exempelvis inom offentlig sektor eller försvar — erbjuder upplägget en konkret väg framåt utan att ge upp kodassistentens produktivitetsvinster.</p></div></article></section><header id="segment-bransch" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">02</span>
         <h2 class="segment-label">Bransch i korthet</h2>
@@ -99,7 +107,7 @@
           <ul class="briefs-list briefs-list--bransch"><li><p class="brief-text">OpenAI uppger att en intern version av kommande modellen Astra har löst tio matematiska och datavetenskapliga problem där huvudresultaten inte hade utvecklats på minst ett decennium. Bland resultaten nämns konstruktion av en icke-sofisk grupp, motbevisning av Connes rigiditetsförmodan och lösningar på tre Erdős-problem. Människor förberedde argumenten som manuskript, varefter modellen formaliserade dem som Lean-certifikat. Den beräknade kostnaden för tokenmängden uppges till cirka 2 000 dollar enligt Sol API-priser.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> om Astra-resultaten håller vid extern granskning kan liknande modeller bli ett reellt verktyg för formell verifiering av komplex kod och algoritmer.</p></li><li><p class="brief-text">xAI lanserar Imagine Video 1.5 med text-till-video, inbyggd 1080p och referensfunktioner. En karaktärsbild och en röstreferens kan användas för att bevara samma ansikte och röst mellan scener, och Multi-Reference låter upp till sju referenser låsa specifika element som ansikte, produkt eller plats. Text-till-video och 1080p är tillgängliga på grok.com/imagine samt i iOS- och Android-apparna. Bild- och röstreferenser lanseras initialt i USA för SuperGrok Heavy och Plus och ska nå fler abonnemangsnivåer inom kort.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> referensfunktionerna förenklar produktionsvideor med återkommande karaktärer eller varumärkeselement, men geografisk tillgänglighet för referensläget är ännu begränsad till USA.</p></li></ul>
-        </section><header class="segment-header">
+        </section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -118,5 +126,6 @@
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

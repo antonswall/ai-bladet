@@ -1,10 +1,31 @@
-// base.js — HTML shell, masthead, edition strip, nav, footer, SEO
-function base({ title, description, canonical, ogType, ogImage, jsonLd, content, week, year, bodyClass }) {
+// base.js — HTML shell: landing hero (front page) or masthead, sticky bar, footer, SEO
+function base({ title, description, canonical, ogType, ogImage, jsonLd, content, week, year, bodyClass, hero, heroTeaser }) {
   const w = week || '';
   const y = year || '';
   const editionLabel = w ? `Vecka ${w} · ${y}` : 'Veckotidning om AI';
   const descr = description || 'Sveriges veckotidning om artificiell intelligens. En utgåva i veckan, rankat efter vad som faktiskt betyder något.';
   const ogImg = ogImage || 'https://aibladet.se/favicon.svg';
+  const tagline = 'Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.';
+  const top = `<div class="masthead-top">
+      <span>${editionLabel}</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
+    </div>`;
+  const header = hero
+    ? `<header class="hero" data-hero>
+    ${top}
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">${tagline}</p>
+      <a class="hero-cue" href="#main"><span>${heroTeaser ? `Vecka ${w}: ${heroTeaser}` : 'Till veckans nummer'}</span><span class="hero-cue-line" aria-hidden="true"></span></a>
+    </div>
+  </header>`
+    : `<header class="masthead">
+    ${top}
+    <div class="masthead-brand">
+      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
+      <p class="masthead-tag">${tagline}</p>
+    </div>
+  </header>`;
 
   return `<!DOCTYPE html>
 <html lang="sv">
@@ -14,7 +35,7 @@ function base({ title, description, canonical, ogType, ogImage, jsonLd, content,
   <title>${title}${title.includes('AI-Bladet') ? '' : ' — AI-Bladet'}</title>
   <meta name="description" content="${descr}">
   <link rel="canonical" href="${canonical || '/'}">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${descr}">
   <meta property="og:type" content="${ogType || 'website'}">
@@ -29,31 +50,27 @@ function base({ title, description, canonical, ogType, ogImage, jsonLd, content,
   <meta name="twitter:image" content="${ogImg}">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
 </head>
 <body${bodyClass ? ` class="${bodyClass}"` : ''}>
-  <header class="masthead">
-    <div class="masthead-top">
-      <span>${editionLabel}</span>
-    </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
-    </div>
-  </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  ${header}
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
+  <main class="sheet" id="main">
   ${content}
   </main>
   <footer class="footer">
@@ -65,6 +82,7 @@ function base({ title, description, canonical, ogType, ogImage, jsonLd, content,
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>`;
 }

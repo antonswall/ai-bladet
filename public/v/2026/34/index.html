@@ -6,7 +6,7 @@
   <title>Grok flyttar in i Bedrock – och inferensen växlar upp — Vecka 34 2026 — AI-Bladet</title>
   <meta name="description" content="Grok 4.6 når AWS-byggare, Liquid AI snabbar upp lokal inferens och Replit öppnar ett kostnadsfritt byggläge. — AI-Bladet vecka 34 2026.">
   <link rel="canonical" href="/v/2026/34/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="Grok flyttar in i Bedrock – och inferensen växlar upp — Vecka 34 2026">
   <meta property="og:description" content="Grok 4.6 når AWS-byggare, Liquid AI snabbar upp lokal inferens och Replit öppnar ett kostnadsfritt byggläge. — AI-Bladet vecka 34 2026.">
   <meta property="og:type" content="article">
@@ -21,47 +21,55 @@
   <meta name="twitter:image" content="https://x.ai/images/news/og-grok-4-6-on-bedrock.webp">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Grok 4.6 flyttar in i Amazon Bedrock","description":"Grok 4.6 når AWS-byggare, Liquid AI snabbar upp lokal inferens och Replit öppnar ett kostnadsfritt byggläge.","datePublished":"2026-08-23","dateModified":"2026-08-23","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/34/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/34/"},"image":["https://x.ai/images/news/og-grok-4-6-on-bedrock.webp"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Modeller"},{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Företag"},{"@type":"Thing","name":"Datacenter"},{"@type":"Thing","name":"Forskning"}],"keywords":"Modeller, Verktyg, Företag, Datacenter, Forskning"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 34 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Företag</span><span class="cat">Datacenter</span><span class="cat">Forskning</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">4 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Företag</span><span class="cat">Datacenter</span><span class="cat">Forskning</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/og-grok-4-6-on-bedrock.webp" alt="Grok 4.6 flyttar in i Amazon Bedrock" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/og-grok-4-6-on-bedrock.webp" alt="Grok 4.6 flyttar in i Amazon Bedrock" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · xAI (pressbild)</figcaption>
   </figure>
+      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>AI-Bladets analys: Bedrock-lanseringen gör Grok 4.6 till ett mer konkret alternativ i befintliga AWS-miljöer. Det stora kontextfönstret och den justerbara resoneringsnivån ger utvecklare två tydliga reglage för agentbyggen: hur mycket information modellen kan bära med sig och hur mycket beräkning uppgiften får kräva. Prissättningen gör samtidigt kostnaden för stora kontexter möjlig att räkna på.
+</p></aside></div>
+      <div class="lead-copy">
       <div class="lead-kicker">Modeller<span class="lead-sources">· 10 källor</span></div>
       <h1 class="lead-headline">Grok 4.6 flyttar in i Amazon Bedrock</h1>
       <p class="lead-ingress">xAI:s flaggskeppsmodell Grok 4.6 är nu allmänt tillgänglig via Amazon Bedrock. Ett kontextfönster på 500 000 token och fyra valbara resoneringsnivåer gör lanseringen särskilt relevant för långvariga agentflöden.</p>
-      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>AI-Bladets analys: Bedrock-lanseringen gör Grok 4.6 till ett mer konkret alternativ i befintliga AWS-miljöer. Det stora kontextfönstret och den justerbara resoneringsnivån ger utvecklare två tydliga reglage för agentbyggen: hur mycket information modellen kan bära med sig och hur mycket beräkning uppgiften får kräva. Prissättningen gör samtidigt kostnaden för stora kontexter möjlig att räkna på.
-</p></aside>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-34-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://cdn-uploads.huggingface.co/production/uploads/644249b08443bce4c9890a0f/ZMoThfdqzAz8cbxweVQfO.gif" alt="Liquid AI: upp till 3,18 gånger högre GPU-genomströmning" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -80,7 +88,7 @@
         <div class="story-kicker">Verktyg</div>
         <h2 class="story-headline">Replit öppnar kostnadsfritt byggläge med GPT-5.6 Luna</h2>
         <p class="story-ingress">GPT-5.6 Luna driver nu Replits Free Mode, där projekt kan planeras, utvecklas och analyseras utan att användning förbrukas. Mer avancerade uppgifter kan skickas vidare till GPT-5.6 Sol och sedan återvända till det kostnadsfria läget med projektkontexten bevarad.</p>
-        <blockquote class="story-quote"><p>Tack vare OpenAI och de prissänkningar ni nyligen gjorde kan vi erbjuda detta till miljontals användare i Free Mode.</p><cite>Amjad Masad, medgrundare och vd för Replit</cite></blockquote><p class="story-body">Replit använder GPT-5.6 Luna som motor i Free Mode, ett läge där användare kan planera, utveckla och utforska programvaruidéer utan att förbruka användning. Modellen ger svar, förslag, återkoppling och analyser med tillgång till hela projektkontexten. När en uppgift kräver mer avancerad bearbetning kan den dirigeras till GPT-5.6 Sol. Därefter går det att återvända till det Luna-baserade läget utan att projektets sammanhang försvinner. Replit uppger att OpenAI:s prissänkningar och modellens förhållande mellan pris och prestanda gör det möjligt att erbjuda funktionen till miljontals användare.</p><p class="story-body">För den som bygger med AI blir modellväxlingen en central del av produkten. Luna hanterar det löpande arbetet i det kostnadsfria läget, medan Sol reserveras för mer avancerade uppgifter. Det ger Replit ett sätt att hålla kvar samma projektkontext trots att olika modeller används under arbetets gång. Bolaget placerar därmed kostnadsstyrning och modellrouting bakom gränssnittet i stället för att låta användaren hantera varje modellbyte separat. Replit var tidigt ute med GPT-3, men den konkreta förändringen nu är att AI-stött programvarubyggande erbjuds utan löpande användningsförbrukning i Free Mode.</p><p class="story-body">För svenska privatpersoner, entreprenörer och småföretag kan det kostnadsfria läget sänka både kostnads- och kunskapströskeln för att testa programvaruidéer. Researchunderlaget anger däremot ingen särskild svensk lanseringsplan eller tillgänglighet.</p></div></article></section><header class="segment-header">
+        <blockquote class="story-quote"><p>Tack vare OpenAI och de prissänkningar ni nyligen gjorde kan vi erbjuda detta till miljontals användare i Free Mode.</p><cite>Amjad Masad, medgrundare och vd för Replit</cite></blockquote><p class="story-body">Replit använder GPT-5.6 Luna som motor i Free Mode, ett läge där användare kan planera, utveckla och utforska programvaruidéer utan att förbruka användning. Modellen ger svar, förslag, återkoppling och analyser med tillgång till hela projektkontexten. När en uppgift kräver mer avancerad bearbetning kan den dirigeras till GPT-5.6 Sol. Därefter går det att återvända till det Luna-baserade läget utan att projektets sammanhang försvinner. Replit uppger att OpenAI:s prissänkningar och modellens förhållande mellan pris och prestanda gör det möjligt att erbjuda funktionen till miljontals användare.</p><p class="story-body">För den som bygger med AI blir modellväxlingen en central del av produkten. Luna hanterar det löpande arbetet i det kostnadsfria läget, medan Sol reserveras för mer avancerade uppgifter. Det ger Replit ett sätt att hålla kvar samma projektkontext trots att olika modeller används under arbetets gång. Bolaget placerar därmed kostnadsstyrning och modellrouting bakom gränssnittet i stället för att låta användaren hantera varje modellbyte separat. Replit var tidigt ute med GPT-3, men den konkreta förändringen nu är att AI-stött programvarubyggande erbjuds utan löpande användningsförbrukning i Free Mode.</p><p class="story-body">För svenska privatpersoner, entreprenörer och småföretag kan det kostnadsfria läget sänka både kostnads- och kunskapströskeln för att testa programvaruidéer. Researchunderlaget anger däremot ingen särskild svensk lanseringsplan eller tillgänglighet.</p></div></article></section><header id="segment-bransch" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">02</span>
         <h2 class="segment-label">Bransch i korthet</h2>
@@ -90,7 +98,7 @@
           <ul class="briefs-list briefs-list--bransch"><li><p class="brief-text">OpenAI uppger att ChatGPT Ads nästa vecka expanderar till 31 europeiska länder, däribland Sverige. Annonserna ska visas för användare av Free- och Go-planerna, medan Plus, Pro och Enterprise förblir annonsfria; initial åtkomst för annonsörer går genom OpenAI Ads Solutions samt byrå- och teknikpartner.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> svenska team som bygger annonsflöden får inledningsvis gå via dessa partnerkanaler, eftersom självbetjäning i Ads Manager ska lanseras först senare under sommaren.</p></li><li><p class="brief-text">NVIDIA beskriver DSX MaxLPS, en tekniksvit för att öka AI-genomströmningen inom en fast effektbudget genom dynamisk effektfördelning, mjukvaruoptimering och vätskekylning med 45-gradigt vatten. I bolagets exempel används en AI-fabrik på 100 MW, där omkring 60 procent av den levererade effekten avsätts till beräkningar för AI-resultat och 20 MW går till anläggningens overhead.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> den som bygger AI-infrastruktur under ett fast effekttak kan behöva optimera för AI-resultat per megawatt, inte enbart för antalet installerade GPU:er.</p></li></ul>
-        </section><header class="segment-header">
+        </section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -109,5 +117,6 @@
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

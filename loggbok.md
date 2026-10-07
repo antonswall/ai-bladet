@@ -1,5 +1,59 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-07 — [lutra] Dust-designen publicerad på officiella sajten
+- Flyttade den godkända ramen till produktion: templates/base.js, templates/issue.js, static/dust.js, static/dust.css, static/app.js samt tests/design.test.js och tests/dust.test.js. Originalen backade till scratch/ai-bladet-dust-promote-20261007-121433. content/, pipeline/ och style.css orörda.
+- Alla 16 nummer (och startsidan) använder nu landningssidan med pulveriserad logga och sandomslag; arkiv, om och 404 sidan har kvar masthead utan effektlager.
+- Fixat under flytten: gamla nummer saknade hero (hero: !isPermalink → hero: true), designtestet krävde fel mall för permalänkar, ett tomrum i lead-cta-raden gav trailing whitespace i permalänkar.
+- Verifierat: 60/60 Python-tester (pipeline/.venv), 8/8 Node-tester, build utan fel, alla 17 issuesidor + startsida innehåller hero och /dust.js, git diff --check rent. Livekontroll: [LIVE] — se nästa post vid avvikelse.
+- Nästa: söndagscron 2026-10-11 07:00 bygger nya nummer i samma ram; inget mer behöver göras per vecka.
+
+## 2026-10-07 — [lutra] Omslagen smidigare (prestanda)
+- Anton: omslagen ”laggar” jämfört med loggan. Rotorsak: loggan går på GPU, omslagen räknade varje pixel på huvudtråden varje bildruta → canvas uppdaterades glesare än scrollen.
+- `static/dust.js` (preview-dust): bara kantband + scrollzoner räknas om, radtillstånd cachas, inlinade loopar, förberäknade kantvärden, mjukare scroll-respons, färre dammkorn (16k max). Bild/korn oförändrade (1 px).
+- Mätt i synlig Chrome under scroll: 2,6 ms snitt / 5 ms max per bildruta (vanlig skärm), 8,9 ms snitt / 35 ms max (Retina-emulering) → Retina kan fortfarande hacka enstaka bildrutor. Före-värden mättes inte; backup av förra versionen i Hermes scratch (rensas efter 24 h).
+- 11/11 tester, verify grön, 0 sidfel; nya videor inspelade. Usage 85 % session → stoppat nära taket 90 %. Nästa efter usage-reset 13:39: sänka Retina-toppar (t.ex. cover-DPR 1,5 eller 2 px-korn under snabb scroll).
+
+## 2026-10-07 — [lutra] Sandomslag 10× finare + animerad Läs mer
+- Anton: ”JÄTTESNYGGT” — men 10× finare korn på bilderna och snygg öppna-animation för Läs mer.
+- `static/dust.js`: omslagen eroderar nu med en pixelmask (1 enhetspixel per korn, tidigare 9) via canvas-kompositering + upp till 20k ultrafina dammkorn med bildens färger (drawImage 1×1, fortfarande CORS-fritt). Läs mer: höjd + text glider fram ur oskärpa (WAAPI), stängning animeras, omslaget får en sandvåg nedifrån och upp. Fallback utan animation vid paus/reduced motion (app.js-toggeln orörd).
+- Verifierat: 11/11 Node-tester; synlig Chrome/CDP allt grönt inkl. grain=1, 12 557 dammkorn på huvudomslaget, öppna/stäng-animation, sandvåg, 320–2560 px utan overflow, 0 sidfel. Nya videor: `screenshots/dust-mobile.mp4` (25,1 s), `dust-desktop-telegram.mp4` (28,0 s). Usage (Claude) 81 % session vid avslut.
+- Inget i produktionsrepo ändrat utom loggboken. Nästa: Antons godkännande → flytta filer enligt README.
+
+## 2026-10-07 — [lutra] Landningssida + pulveriserad logga + sandomslag (tredje förslaget)
+- Anton: nano-förslaget var rätt riktning men för lite skillnad (”damm i två kluster”). Ny beställning: landningssida med stor logga som pulveriseras vid scroll, sand/nanotech på omslagen styrt av scroll, allt sammanvävt, en återanvändbar ”ram” för varje vecka. Higgsfield avfärdat: videor kan inte vara interaktiva, vore betalt per vecka och ger rättighetsfråga för pressbilder.
+- Isolerad kopia `/Users/anton/ai-bladet-preview-dust-20261007` (tidigare förslag kvar). Nytt: `static/dust.js` (WebGL-logga ur riktiga typsnittet, ~90k/23k partiklar; CORS-fria sandkorn via drawImage för omslag), `static/dust.css`, mallar med hero på framsidan + sticky bar. Samma palett/typsnitt/innehåll. Ramen = mallar + motor; söndagspipelinen behöver inte ändras.
+- CORS-mätning: x.ai, storage.googleapis.com, NVIDIA, GitHub-bilder saknar ACAO → pixelavläsning/WebGL-texturer omöjligt för omslag; därav drawImage-korn.
+- Verifierat: 10/10 Node-tester; synlig Chrome/CDP: hero, magnet, puls, 50 % upplösning vid halv scroll, sticky bar, 4 sandomslag, scroll→drift→återformning, paus, reduced motion, mobil touch, 320–2560 px utan overflow, 0 sidfel. Fysisk telefon/Safari ej testat.
+- Felsökning: namnkrock `frame` (element vs metod) kraschade init → `el`; -0 i heroProgress; serif i menyrad; ljus remsa av skugga runt letterbox → ingen skugga i sandläge + 16:9; för diskret sand → kanterosion vid scroll.
+- Media: `screenshots/dust-mobile.mp4` (24,4 s), `dust-desktop-telegram.mp4` (26,8 s, 12,7 MB) från riktiga screencast-frames. Usage (Claude) 69 % session / 27 % vecka vid avslut, under taket 90 %.
+- Inget i produktionsrepo ändrat utom denna loggbok; ingen commit/push/deploy. Nästa: Anton granskar videorna; vid godkännande flyttas filerna enligt README och app.js-restkod städas.
+
+## 2026-10-07 — [lutra] Nanotech-förslag verifierat och inspelat
+- 10:07 — Anton avvisade första designriktningen och bad om nanotech, naturliga färger, magnetiskt grain/dust och levande omslag. Ny isolerad arbetskopia: `/Users/anton/ai-bladet-preview-nano-20261007`. Första kandidaten bevarad separat; inget godkännande/publiceringsbeslut ännu.
+- Ändrade preview-mallar, static/nano.css och static/nano.js: organiska partikelfält med pekarattraktion, omslag med subtil andning/tilt/ljus och klick-/touchpuls. Samma cream/ink/red-palett, sex typsnitt och 16 innehållsfiler bytejämförda oförändrade. Bred datorlayout, staplad mobilvy. Ingen pipeline-/modellgenerering eller betald tjänst körd.
+- Verklig build: 16 utgåvor + arkiv/om/404. Åtta Node-tester gröna. Synlig Chrome/CDP vid 320/375/390/768/1024/1440/1920/2560 px: ingen horisontell overflow. Pekartilt, puls, native-emulerad touch, artikelknapp/Enter, paus och reduced motion verifierade; paus fryser partikelräknare och omslagsanimation. Noll observerade JS-exceptions. Fysisk telefon/Safari ej testade.
+- Felsökning: partikelfältens negativa höger-insets orsakade mobil-/tablet-overflow; fixade verklig geometri (mobil inset 0, lead-overscan begränsad till gutter). Väntan på ResizeObserver ensam löste inte felet. Debug-assertions behållna.
+- Riktig rörelsefilm `screenshots/nano-demo.mp4`: 72 synliga Chrome-captures med uppmätt timing; H.264 1440×1100, 24 fps, 9,17 s, 2 145 255 byte, alla 220 kodade frames avkodade. Röd pekarring endast inspelningshjälp. Dator-/mobilbilder visuellt granskade; rapport i verification.json och README.md i arbetskopian.
+- Slutlig usage-kontroll: 60 % sessionsfönster och 9 % vecka förbrukat, under Antons uttryckligen höjda tak 90 %. Bara loggbok.md ändrad i produktionsrepo; mallar/static/content/build.js oförändrade, ingen commit/push/deploy. git diff --check och diff --exit-code för sajtfilernas original gröna.
+- Egen Chrome-flik (CDP 9338) stängd och frånvaro återläst; direkt första readback gav falskt för tidig stängningsassertion, andra kontrollen bekräftade frånvaro. Endast identifierad loopback-server PID 1790 stoppad, ingen lyssnare på 8089 kvar. Antons flikar orörda. ai-news-site-skill uppdaterad med partikel-/inspelningsverifiering.
+- Nästa: video och mobil-/datorbild levereras i Telegram. Invänta Antons designgodkännande före promotion; följ samarbetskontrakt och verifiera exakta live-markörer efter eventuell deploy.
+
+## 2026-10-07 — [lutra] Makeover-förslag byggt och verifierat separat
+- Anton ändrade usage-taket till 90 %. Avslutningskontroll: 41 % förbrukat sessionsfönster, 6 % veckovis. Ingen extra AI-agent eller pipeline-generering körd.
+- Arbetsversion: `/Users/anton/ai-bladet-preview-20261007`, helt utanför produktionsrepo/cron. Fem sajtfiländringar: templates/base.js, templates/issue.js, static/app.js, static/editorial.css, static/constellation.svg. Oförändrade färgtokens/typsnitt/innehåll; bred layout upp till 1920 px, tvåspalt på dator, enspalt på mobil, organiskt bildformat, finkornigt stjärnfält, pekarrespons, läsprogress och sektionslänkar.
+- Bygg: 16 utgåvor + arkiv/om/404. Sex Node-tester gröna; alla utgåvor renderade i båda lägena med unika ID:n/giltiga ankare. Riktig synlig Chrome/CDP verifierad vid 320/375/390/768/1024/1440/1920/2560 px utan overflow. Artikelknapp med klick/Enter, reduced motion och gamla/nya utgåvor gröna; inga observerade JS-exceptions. Tio lokala resurser HTTP 200. Originalets 16 contentfiler, sex typsnitt och palett-CSS bytejämförda oförändrade.
+- Verifierad mobilvy är browseremulering, inte fysisk telefon eller Safari. Bilder sparade i preview-kopians screenshots/ (desktop.png, desktop-stories.png, mobile.png); data i verification.json och handover i README.md. Bilder levereras i Telegram eftersom Anton inte är hemma.
+- Hanterade fel: Python saknade websocket-modul (Node native WebSocket användes); bildbeskärning fick failing regression och contain-fix; tvetydig CSS-patch nekades och ersattes med exakt match; Enter-test saknade CR-text och rättades utan UI-kodändring.
+- Backup flyttad från produktionsrepots backups/ till preview-kopians reference-original/ så veckorunnerns git add inte tar med förslaget. Endast loggbok.md ändrad i produktionsrepo; ingen build/commit/push där. Egen preview-flik stängd, Antons flikar orörda.
+- Nästa: Anton granskar bilderna; invänta godkännande före merge/publicering. Följ repo-kontraktet för commit/push och verifiera exakta live-markörer efter deploy.
+
+## 2026-10-07 — [lutra] Makeover pausad vid usage-gräns
+- Anton beställde bibehållen palett, mer levande minimalistisk form, mobilanpassning och bredare datorlayout. Förhandsvisning ska skickas som mobil-/datorskärmbilder i Telegram: Anton är inte hemma. Ingen publicering godkänd i denna omgång.
+- OpenAI-kvot verifierad 14 → 19 → 25 % för sessionsfönstret, 4 % veckovis vid stopp. Paus före 30 %-gränsen; design ej färdig, ej visuellt verifierad.
+- Failing-first Node-test kördes (förväntat saknad skip-link); partiella malländringar sparade i `backups/makeover-20261007/partial/`, originalmallar återställda med exakta inversa patchar. Testet arkiverat, ej aktivt i tests/. Ingen CSS/app.js ändrad; ingen build, commit eller push.
+- Usage-kontrollen misslyckades först på två saknade Python-sökvägar. Fungerande: installerad `python -I`, lägg till Hermes-repot i sys.path, importera hermes_bootstrap, använd agent.account_usage.fetch_account_usage. Inga nya modell-/pipelineanrop.
+- Nästa: kontrollera kvoten före återupptagning; färdigställ CSS och verifiera riktig mobil/datorvy innan bilder skickas.
+
 ## 2026-10-04 — [lutra] Vecka 40 fullt återställd och liveverifierad
 - GitHub webbinloggning godkänd av Anton; `gh auth setup-git`, keyring-status och icke-interaktiv push dry-run verifierade. Utgåva + Git-skydd pushade i `37914d7`; live titelgate passerade efter 4 försök.
 - Valideringsrapportens regex-parserformat skiljer sig från PyYAML, men jämförelse med samma parser och SHA-256 mot backup bekräftar att det validerade innehållet är oförändrat.

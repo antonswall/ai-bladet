@@ -6,7 +6,7 @@
   <title>Grok Build öppen källkod — och AI angriper Hugging Face — Vecka 29 2026 — AI-Bladet</title>
   <meta name="description" content="xAI släpper kodningsagenten som öppen källkod, medan Hugging Face avslöjar ett autonomt agentangrepp. — AI-Bladet vecka 29 2026.">
   <link rel="canonical" href="/v/2026/29/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="Grok Build öppen källkod — och AI angriper Hugging Face — Vecka 29 2026">
   <meta property="og:description" content="xAI släpper kodningsagenten som öppen källkod, medan Hugging Face avslöjar ett autonomt agentangrepp. — AI-Bladet vecka 29 2026.">
   <meta property="og:type" content="article">
@@ -21,52 +21,60 @@
   <meta name="twitter:image" content="https://x.ai/images/news/open-source-cover.png">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Grok Build är nu öppen källkod — kör kodningsagenten lokalt","description":"xAI släpper kodningsagenten som öppen källkod, medan Hugging Face avslöjar ett autonomt agentangrepp.","datePublished":"2026-07-12","dateModified":"2026-07-12","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/29/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/29/"},"image":["https://x.ai/images/news/open-source-cover.png"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Säkerhet"},{"@type":"Thing","name":"Forskning"}],"keywords":"Verktyg, Säkerhet, Forskning"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 29 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span><span class="cat">Forskning</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">5 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span><span class="cat">Forskning</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/open-source-cover.png" alt="Grok Build är nu öppen källkod — kör kodningsagenten lokalt" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/open-source-cover.png" alt="Grok Build är nu öppen källkod — kör kodningsagenten lokalt" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · xAI (pressbild)</figcaption>
   </figure>
-      <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
-      <h1 class="lead-headline">Grok Build är nu öppen källkod — kör kodningsagenten lokalt</h1>
-      <p class="lead-ingress">xAI har lagt ut hela Grok Build på GitHub. Kodbasen inkluderar agentloop, verktyg, terminalgränssnitt och ett extensionssystem — och kan kompileras och köras helt lokalt utan att en enda byte lämnar din maskin.</p>
       <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>Att xAI öppnar Grok Build är mer än ett PR-drag. Terminalgränssnitt med
 agentloop har hittills dominerats av stängda eller halvöppna alternativ.
 Med en MIT-liknande kodbas kan utvecklare inspektera exakt hur agentloopen
 fungerar, bygga egna extensions och köra modellen på lokal hårdvara — något
 som är avgörande för den som hanterar känslig kod eller vill slippa
 molnberoende. Det sätter press på konkurrenter att matcha öppenheten.
-</p></aside>
+</p></aside></div>
+      <div class="lead-copy">
+      <div class="lead-kicker">Verktyg<span class="lead-sources">· 10 källor</span></div>
+      <h1 class="lead-headline">Grok Build är nu öppen källkod — kör kodningsagenten lokalt</h1>
+      <p class="lead-ingress">xAI har lagt ut hela Grok Build på GitHub. Kodbasen inkluderar agentloop, verktyg, terminalgränssnitt och ett extensionssystem — och kan kompileras och köras helt lokalt utan att en enda byte lämnar din maskin.</p>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-29-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://cdn-uploads.huggingface.co/production/uploads/67e44a92b96703c8b0e5a805/VGYINP_TZGLSkx2zW8uIa.png" alt="NVIDIA och Hugging Face: finjustera videomodeller i produktionsskala utan kodrewrite" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -85,7 +93,7 @@ molnberoende. Det sätter press på konkurrenter att matcha öppenheten.
         <div class="story-kicker">Verktyg</div>
         <h2 class="story-headline">Apache Ossie vill bli lingua franca för semantiska modeller i AI och BI</h2>
         <p class="story-ingress">Apache Ossie är ett nytt open source-projekt som standardiserar hur semantiska modeller utbyts mellan verktyg som dbt, GoodData och Salesforce — med en leverantörsoberoende JSON/YAML-specifikation som ska eliminera inkonsekvenser i dataanalys- och AI-pipelines.</p>
-        <p class="story-body">Apache Ossie — tidigare känt som Open Semantic Interchange — är ett samarbetsprojekt med öppen källkod under Apache-paraplyet. Projektet erbjuder en leverantörsoberoende specifikation i JSON- och YAML-format för att standardisera utbyte av semantiska modeller inom dataanalys, AI och BI. Kodbasen innehåller referenskonverterare för format som dbt, GoodData, Polaris och Salesforce.</p><p class="story-body">Problemet Ossie adresserar är välbekant för alla som bygger datapipelines med flera verktyg: semantiska definitioner — vad ett mätvärde faktiskt betyder, hur dimensioner hänger ihop — definieras om och om igen i varje verktyg, vilket leder till inkonsekvenser och dubbelarbete. En gemensam specifikation gör det möjligt att definiera en semantisk modell en gång och sedan konvertera den till det format varje nedströmsverktyg förstår. Det är samma idé som OpenAPI för REST-API:er, men applicerad på semantiklagret i datastack.</p><p class="story-body">För den som bygger AI-applikationer ovanpå strukturerad data är ett stabilt semantiklager avgörande — det är grunden för att en LLM ska kunna ställa korrekta frågor mot ett datalager utan att hallucinera definitioner. Ossie är fortfarande tidigt, men Apache-inkubatorn ger projektet trovärdighet och en tydlig väg mot bredare adoption.</p></div></article></section><header class="segment-header">
+        <p class="story-body">Apache Ossie — tidigare känt som Open Semantic Interchange — är ett samarbetsprojekt med öppen källkod under Apache-paraplyet. Projektet erbjuder en leverantörsoberoende specifikation i JSON- och YAML-format för att standardisera utbyte av semantiska modeller inom dataanalys, AI och BI. Kodbasen innehåller referenskonverterare för format som dbt, GoodData, Polaris och Salesforce.</p><p class="story-body">Problemet Ossie adresserar är välbekant för alla som bygger datapipelines med flera verktyg: semantiska definitioner — vad ett mätvärde faktiskt betyder, hur dimensioner hänger ihop — definieras om och om igen i varje verktyg, vilket leder till inkonsekvenser och dubbelarbete. En gemensam specifikation gör det möjligt att definiera en semantisk modell en gång och sedan konvertera den till det format varje nedströmsverktyg förstår. Det är samma idé som OpenAPI för REST-API:er, men applicerad på semantiklagret i datastack.</p><p class="story-body">För den som bygger AI-applikationer ovanpå strukturerad data är ett stabilt semantiklager avgörande — det är grunden för att en LLM ska kunna ställa korrekta frågor mot ett datalager utan att hallucinera definitioner. Ossie är fortfarande tidigt, men Apache-inkubatorn ger projektet trovärdighet och en tydlig väg mot bredare adoption.</p></div></article></section><header id="segment-bransch" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">02</span>
         <h2 class="segment-label">Bransch i korthet</h2>
@@ -95,7 +103,7 @@ molnberoende. Det sätter press på konkurrenter att matcha öppenheten.
           <ul class="briefs-list briefs-list--bransch"><li><p class="brief-text">OpenAI presenterar GPT-Red, en automatiserad red-teaming-modell tränad med självspel. Modellen används direkt i träningen av produktionsmodeller och har enligt OpenAI resulterat i att GPT-5.6 Sol har sex gånger färre misslyckanden på det svåraste prompt injection-benchmarkt jämfört med bästa produktionsmodellen från fyra månader tidigare.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> om du bygger system som är exponerade för prompt injection är GPT-5.6 Sol den hittills mest robusta OpenAI-modellen att testa mot — men verifiera alltid med egna tester, inte enbart leverantörens benchmark.</p></li><li><p class="brief-text">NVIDIA har introducerat Jetson T3000 och T2000, två nya moduler baserade på Thor-arkitekturen för edge AI och robotik. T3000 levererar enligt NVIDIA 865 FP4 teraflops i ett format som är ungefär hälften så stort och strömsnålt som föregångaren T5000. T2000 erbjuder 400 FP4 teraflops med 16 GB minne. Företag som Boston Dynamics och Amazon Robotics finns bland tidiga användare av Jetson AGX Thor.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> om du bygger edge AI-applikationer eller robotiklösningar finns nu ett bredare hårdvarualternativ i Thor-familjen med lägre effektförbrukning och kompaktare formfaktor.</p></li></ul>
-        </section><header class="segment-header">
+        </section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -114,5 +122,6 @@ molnberoende. Det sätter press på konkurrenter att matcha öppenheten.
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

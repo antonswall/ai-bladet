@@ -6,7 +6,7 @@
   <title>Grok går längre – och kalkylblad blir appar — Vecka 33 2026 — AI-Bladet</title>
   <meta name="description" content="Grok 4.6 tar sikte på uthålliga agenter medan Google och Hugging Face bygger om praktiska arbetsflöden. — AI-Bladet vecka 33 2026.">
   <link rel="canonical" href="/v/2026/33/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="Grok går längre – och kalkylblad blir appar — Vecka 33 2026">
   <meta property="og:description" content="Grok 4.6 tar sikte på uthålliga agenter medan Google och Hugging Face bygger om praktiska arbetsflöden. — AI-Bladet vecka 33 2026.">
   <meta property="og:type" content="article">
@@ -21,47 +21,55 @@
   <meta name="twitter:image" content="https://x.ai/images/news/grok-4-6-og.png">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsArticle","headline":"Grok 4.6 tar sikte på det långa agentjobbet","description":"Grok 4.6 tar sikte på uthålliga agenter medan Google och Hugging Face bygger om praktiska arbetsflöden.","datePublished":"2026-08-16","dateModified":"2026-08-16","inLanguage":"sv-SE","isAccessibleForFree":true,"url":"https://aibladet.se/v/2026/33/","mainEntityOfPage":{"@type":"WebPage","@id":"https://aibladet.se/v/2026/33/"},"image":["https://x.ai/images/news/grok-4-6-og.png"],"author":{"@type":"Person","name":"Anton Swall"},"publisher":{"@type":"Organization","name":"AI-Bladet","logo":{"@type":"ImageObject","url":"https://aibladet.se/favicon.svg"}},"about":[{"@type":"Thing","name":"Modeller"},{"@type":"Thing","name":"Verktyg"},{"@type":"Thing","name":"Säkerhet"},{"@type":"Thing","name":"Forskning"}],"keywords":"Modeller, Verktyg, Säkerhet, Forskning"}</script>
 </head>
 <body>
-  <header class="masthead">
+  <a class="skip-link" href="#main">Till innehållet</a>
+  <header class="hero" data-hero>
     <div class="masthead-top">
       <span>Vecka 33 · 2026</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
-    <div class="masthead-brand">
-      <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
-      <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+    <div class="hero-logo"><span class="hero-ai">AI</span><span class="bladet"><span class="hero-dash">-</span><span class="hero-word">Bladet</span></span></div>
+    <div class="hero-foot">
+      <p class="hero-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
+      <a class="hero-cue" href="#main"><span>Till veckans nummer</span><span class="hero-cue-line" aria-hidden="true"></span></a>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
-  <div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span><span class="cat">Forskning</span></div><header class="segment-header segment-header--first">
+  <main class="sheet" id="main">
+  <nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a><a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a><a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a><span class="issue-readtime">5 min läsning</span></nav><div class="sections sections--top"><span class="label">I detta nummer</span><span class="cat">Modeller</span><span class="cat">Verktyg</span><span class="cat">Säkerhet</span><span class="cat">Forskning</span></div><header id="segment-verktyg" class="segment-header segment-header--first">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">01</span>
         <h2 class="segment-label">Veckans verktyg</h2>
         <span class="segment-desc">Modeller, releaser och verktyg som ändrar din AI-vardag</span>
       </div>
     </header><section class="lead">
-      <figure class="figure lead-figure">
-    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/grok-4-6-og.png" alt="Grok 4.6 tar sikte på det långa agentjobbet" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
+      <div class="lead-visual"><figure class="figure lead-figure">
+    <span class="figure-frame"><img class="figure-img" src="https://x.ai/images/news/grok-4-6-og.png" alt="Grok 4.6 tar sikte på det långa agentjobbet" loading="eager" fetchpriority="high" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
     <figcaption class="figure-credit">Foto · xAI (pressbild)</figcaption>
   </figure>
+      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>AI-Bladets analys: Grok 4.6 handlar mindre om en enskild spektakulär funktion och mer om att hålla ihop krävande arbetsflöden. Kombinationen av kodning, självtestning, verifiering och arbete med webb och CAD visar vilken sorts modell xAI vill bygga: en uthållig medarbetare snarare än en ren chattbot. Den omedelbara tillgången i Cursor gör lanseringen konkret för utvecklare.
+</p></aside></div>
+      <div class="lead-copy">
       <div class="lead-kicker">Modeller<span class="lead-sources">· 10 källor</span></div>
       <h1 class="lead-headline">Grok 4.6 tar sikte på det långa agentjobbet</h1>
       <p class="lead-ingress">xAI lanserar Grok 4.6 med en längre kompletterande träning och fokus på uthålligt agentarbete, kodning och visuella projekt. Modellen finns nu i Cursor och Grok Build, där inkluderad användning fördubblas under den första veckan.</p>
-      <aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>AI-Bladets analys: Grok 4.6 handlar mindre om en enskild spektakulär funktion och mer om att hålla ihop krävande arbetsflöden. Kombinationen av kodning, självtestning, verifiering och arbete med webb och CAD visar vilken sorts modell xAI vill bygga: en uthållig medarbetare snarare än en ren chattbot. Den omedelbara tillgången i Cursor gör lanseringen konkret för utvecklare.
-</p></aside>
+      </div>
     </section><section class="stories-column"><article class="story-card" id="story-33-0">
       <figure class="figure story-figure">
     <span class="figure-frame"><img class="figure-img" src="https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Sheets_canvas-blog-header-2784x1566.width-1300.jpg" alt="Google gör kalkylbladet till en miniapp" loading="lazy" decoding="async" onerror="this.remove()"><span class="figure-fallback" aria-hidden="true">AI<span class="figure-fallback-b">-Bladet</span></span></span>
@@ -89,7 +97,7 @@
         <div class="story-kicker">Modeller</div>
         <h2 class="story-headline">Liten synmodell vässas för skärmar och edge-enheter</h2>
         <p class="story-ingress">LFM2.5-VL-3B kombinerar en bildkodare från SigLIP2 med textbasen LFM2.5-2.6B. Den nya vision-språkmodellen är inriktad på skärmförståelse, visuell grundning, flera bilder och funktionsanrop – uppgifter som gör den relevant för lokala visuella agenter.</p>
-        <blockquote class="story-quote"><p>LFM2.5-VL-3B leder sin storleksklass på verkliga bilduppgifter och läser samtidigt digitalt innehåll väl, från dokument och diagram till gränssnitt på skärmen.</p><cite>Artikelförfattaren, ej namngiven</cite></blockquote><p class="story-body">LFM2.5-VL-3B är en vision-språkmodell för edge-användning med 3,1 miljarder parametrar. Modellen kombinerar en SigLIP2 400M NaFlex-bildkodare med samma förtränade bas som textmodellen LFM2.5-2.6B. Förbättringarna koncentreras till fyra områden: förståelse av skärmar och användargränssnitt, visuell grundning och objektdetektering, resonemang över flera bilder samt funktionsanrop. Leverantören uppger att modellen har förtränats på omkring 34 biljoner tokens och fyra gånger mer bilddata än tidigare.</p><p class="story-body">Efterträningen sker i två huvudsteg. Först används övervakad finjustering, kunskapsdestillation och Antidoom-träning. Därefter följer förstärkningsinlärning med flera belöningssignaler. Utvärderingarna täcker bland annat flerspråkig bildförståelse, dokument, OCR, diagram, objektgrundning, bildserier och skärmgränssnitt. Kombinationen är särskilt relevant för system som inte bara ska beskriva en bild, utan också tolka digitala arbetsytor och koppla den visuella förståelsen till verktygsanrop.</p><p class="story-body">Modellstorleken placerar LFM2.5-VL-3B i ett område där lokal eller resursbegränsad drift blir en central del av användningsfallet. Det skiljer den från större multimodala modeller som kräver tyngre infrastruktur. Researchunderlaget anger ingen särskild svensk eller europeisk tillgänglighet, men modellens edge-inriktning gör den praktiskt relevant i projekt där visuella data ska behandlas nära den miljö där de uppstår.</p></div></article></section><header class="segment-header">
+        <blockquote class="story-quote"><p>LFM2.5-VL-3B leder sin storleksklass på verkliga bilduppgifter och läser samtidigt digitalt innehåll väl, från dokument och diagram till gränssnitt på skärmen.</p><cite>Artikelförfattaren, ej namngiven</cite></blockquote><p class="story-body">LFM2.5-VL-3B är en vision-språkmodell för edge-användning med 3,1 miljarder parametrar. Modellen kombinerar en SigLIP2 400M NaFlex-bildkodare med samma förtränade bas som textmodellen LFM2.5-2.6B. Förbättringarna koncentreras till fyra områden: förståelse av skärmar och användargränssnitt, visuell grundning och objektdetektering, resonemang över flera bilder samt funktionsanrop. Leverantören uppger att modellen har förtränats på omkring 34 biljoner tokens och fyra gånger mer bilddata än tidigare.</p><p class="story-body">Efterträningen sker i två huvudsteg. Först används övervakad finjustering, kunskapsdestillation och Antidoom-träning. Därefter följer förstärkningsinlärning med flera belöningssignaler. Utvärderingarna täcker bland annat flerspråkig bildförståelse, dokument, OCR, diagram, objektgrundning, bildserier och skärmgränssnitt. Kombinationen är särskilt relevant för system som inte bara ska beskriva en bild, utan också tolka digitala arbetsytor och koppla den visuella förståelsen till verktygsanrop.</p><p class="story-body">Modellstorleken placerar LFM2.5-VL-3B i ett område där lokal eller resursbegränsad drift blir en central del av användningsfallet. Det skiljer den från större multimodala modeller som kräver tyngre infrastruktur. Researchunderlaget anger ingen särskild svensk eller europeisk tillgänglighet, men modellens edge-inriktning gör den praktiskt relevant i projekt där visuella data ska behandlas nära den miljö där de uppstår.</p></div></article></section><header id="segment-bransch" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">02</span>
         <h2 class="segment-label">Bransch i korthet</h2>
@@ -99,7 +107,7 @@
           <ul class="briefs-list briefs-list--bransch"><li><p class="brief-text">OpenAI gör Daybreak Blue och Daybreak Red tillgängliga för godkända kunder via Amazon Bedrock. Nivåerna är avsedda för auktoriserat defensivt säkerhetsarbete, från detektion och incidenthantering till sårbarhetsforskning och exploateringsvalidering.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> åtkomst till modellerna kräver registrering och godkännande i Daybreak Access innan de kan användas via Bedrock-konsolen eller Responses API.</p></li><li><p class="brief-text">CyberStag-26B-A4B-v1 är en textbaserad cybersäkerhetsmodell byggd på Gemma-4-26B-A4B och finjusterad för bland annat hotmodellering, logganalys och incidenthantering. Den finns i MLX- och GGUF-format, medan Q4_K_M-versionen är kvantiserad för begränsat VRAM.</p>
         <p class="brief-konsekvens"><strong class="konsekvens-label">Vad betyder det för dig:</strong> modellen kan köras via bland annat llama.cpp, LM Studio och Apple Silicon, men stöder inte bild, ljud eller andra multimodala indata.</p></li></ul>
-        </section><header class="segment-header">
+        </section><header id="segment-vartattveta" class="segment-header">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">03</span>
         <h2 class="segment-label">Värt att veta</h2>
@@ -118,5 +126,6 @@
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>

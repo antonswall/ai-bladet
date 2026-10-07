@@ -130,7 +130,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
   function segmentHeader(key, extraClass) {
     const seg = SEGMENT[key];
     if (!seg) return '';
-    return `<header class="segment-header${extraClass ? ' ' + extraClass : ''}">
+    return `<header id="segment-${key}" class="segment-header${extraClass ? ' ' + extraClass : ''}">
       <div class="segment-header-row">
         <span class="segment-num" aria-hidden="true">${seg.num}</span>
         <h2 class="segment-label">${esc(seg.label)}</h2>
@@ -148,11 +148,13 @@ function renderIssue(issue, mode, prev, next, allIssues) {
   // Lead
   const defaultKicker = segmented ? 'VECKANS VERKTYG' : 'VECKANS STÖRSTA';
   const leadHtml = lead ? `<section class="lead">
-      ${figure(lead.image, lead.headline || title, 'lead-figure', lead.credit)}
+      <div class="lead-visual">${figure(lead.image, lead.headline || title, 'lead-figure', lead.credit)}
+      ${lead.analysis ? `<aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>${esc(lead.analysis)}</p></aside>` : ''}</div>
+      <div class="lead-copy">
       <div class="lead-kicker">${esc(lead.kicker || defaultKicker)}<span class="lead-sources">${sources ? `· ${sources} källor` : ''}</span></div>
       <h1 class="lead-headline">${isPermalink ? esc(lead.headline || title) : `<a href="/v/${year}/${week}/">${esc(lead.headline || title)}</a>`}</h1>
       <p class="lead-ingress">${esc(lead.ingress || summary || '')}</p>
-      ${lead.analysis ? `<aside class="lead-analysis"><span class="lead-analysis-label">AI-Bladets analys</span><p>${esc(lead.analysis)}</p></aside>` : ''}
+      ${!isPermalink ? `<a class="lead-cta" href="/v/${year}/${week}/">Läs hela utgåvan <span aria-hidden="true">↗</span></a>` : ''}</div>
     </section>` : '';
 
   if (segmented) {
@@ -161,6 +163,7 @@ function renderIssue(issue, mode, prev, next, allIssues) {
     const branschStories = (stories || []).filter(s => s.segment === 'bransch');
     let idx = 0;
 
+    body += `<nav class="issue-jump" aria-label="I detta nummer"><a href="#segment-verktyg">01 · Verktyg <span aria-hidden="true">↗</span></a>${branschStories.length || briefsBransch.length ? '<a href="#segment-bransch">02 · Bransch <span aria-hidden="true">↗</span></a>' : ''}${briefsVartAttVeta.length ? '<a href="#segment-vartattveta">03 · Värt att veta <span aria-hidden="true">↗</span></a>' : ''}<span class="issue-readtime">${readTime} min läsning</span></nav>`;
     body += ribbon;
 
     // 01 · Veckans verktyg — alltid först, leaden ingår
@@ -312,7 +315,9 @@ function renderIssue(issue, mode, prev, next, allIssues) {
     content: body,
     week,
     year,
-    ogImage: leadImage || undefined
+    ogImage: leadImage || undefined,
+    hero: true,
+    heroTeaser: isPermalink ? null : esc(title)
   });
 }
 
@@ -327,7 +332,7 @@ function esc(str) {
 // the placeholder shows through. `credit` renders a newspaper-style photo byline.
 function figure(url, alt, cls, credit) {
   const img = url
-    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="lazy" decoding="async" onerror="this.remove()">`
+    ? `<img class="figure-img" src="${esc(url)}" alt="${esc(alt || '')}" loading="${cls === 'lead-figure' ? 'eager' : 'lazy'}"${cls === 'lead-figure' ? ' fetchpriority="high"' : ''} decoding="async" onerror="this.remove()">`
     : '';
   const cap = credit ? `<figcaption class="figure-credit">${esc(credit)}</figcaption>` : '';
   return `<figure class="figure ${cls}">

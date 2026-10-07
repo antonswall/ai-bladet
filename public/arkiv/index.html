@@ -6,7 +6,7 @@
   <title>Arkiv — AI-Bladet</title>
   <meta name="description" content="Alla utgåvor av AI-Bladet, Sveriges veckotidning om AI.">
   <link rel="canonical" href="/arkiv/">
-  <meta name="theme-color" content="#16130d">
+  <meta name="theme-color" content="#FFF8F0">
   <meta property="og:title" content="Arkiv — AI-Bladet">
   <meta property="og:description" content="Alla utgåvor av AI-Bladet, Sveriges veckotidning om AI.">
   <meta property="og:type" content="website">
@@ -21,31 +21,36 @@
   <meta name="twitter:image" content="https://aibladet.se/favicon.svg">
   <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="AI-Bladet RSS">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/Newsreader-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/FamiljenGrotesk-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/fonts/Newsreader-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/dust.css">
+  <script>(function(){var d=document.documentElement;try{if(localStorage.getItem('ab-motion')==='off')return}catch(e){}if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!(navigator.connection&&navigator.connection.saveData))d.classList.add('dust-pending')})()</script>
   
 </head>
 <body>
+  <a class="skip-link" href="#main">Till innehållet</a>
   <header class="masthead">
     <div class="masthead-top">
       <span>Veckotidning om AI</span>
+      <button class="motion-toggle" type="button" aria-pressed="false">Pausa rörelse</button>
     </div>
     <div class="masthead-brand">
       <div class="masthead-name"><a href="/">AI<span class="bladet">-Bladet</span></a></div>
       <p class="masthead-tag">Sveriges veckotidning om artificiell intelligens — en utgåva i veckan.</p>
     </div>
   </header>
-  <div class="masthead-rule"></div>
-  <div class="edition">
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="site-bar">
+    <a class="bar-logo" href="/" aria-label="AI-Bladet, startsidan">AI<span class="bladet">-Bladet</span></a>
     <div class="edition-meta">Redaktör <b>Anton Swall</b> · Nästa nummer söndag</div>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="/arkiv/">Arkiv</a>
       <a href="/om/">Om</a>
       <a href="/feed.xml">RSS</a>
     </nav>
   </div>
-  <main class="sheet">
+  <main class="sheet" id="main">
   <h1 class="page-title">Arkiv</h1>
     <p class="page-intro">Varje nummer av AI-Bladet, hela vägen tillbaka. 16 utgåvor och räknar.</p><h2 class="archive-year">2026<span>16 utgåvor</span></h2><div class="archive-grid"><article class="archive-card">
         <a href="/v/2026/40/" class="archive-card-link">
@@ -266,5 +271,6 @@
     <a href="/om/">Om</a>
   </footer>
   <script src="/app.js" defer></script>
+  <script src="/dust.js" defer></script>
 </body>
 </html>
