@@ -417,7 +417,7 @@ void main() {
     const img = frameEl.querySelector('.figure-img');
     if (!img || !coverGL) return null;
     const { gl } = coverGL;
-    const c = { el: frameEl, visible: false, ready: false, loading: false, failed: false, p: 0, dust: false, frames: 0, kicks: 0, count: 0, step: 1, rect: null, tex: null, buffer: null, w: 0, h: 0, nw: 0, nh: 0 };
+    const c = { el: frameEl, visible: false, ready: false, loading: false, failed: false, sharp: false, p: 0, dust: false, frames: 0, kicks: 0, count: 0, step: 1, rect: null, tex: null, buffer: null, w: 0, h: 0, nw: 0, nh: 0 };
     const burst = { x: -9999, y: -9999, age: 9 };
 
     function upload(source) {
@@ -465,12 +465,12 @@ void main() {
       c.count = grid.count; c.step = grid.step; c.rect = r; c.w = W; c.h = H;
       c.ready = c.count > 0;
       frameEl.dataset.particles = String(c.count);
-      if (c.ready && !motionOff()) frameEl.classList.add('is-sand');
+      if (c.ready && !c.sharp && !motionOff()) frameEl.classList.add('is-sand');
       return c.ready;
     };
 
     c.frame = function (dt, g) {
-      if (!c.ready || motionOff()) return false;
+      if (!c.ready || c.sharp || motionOff()) return false;
       const fr = frameEl.getBoundingClientRect();
       if (Math.abs(fr.width - c.w) > 1 || Math.abs(fr.height - c.h) > 1) { if (!c.layout()) return false; }
       const target = coverProgress(fr.top, fr.bottom, window.innerHeight);
@@ -511,6 +511,23 @@ void main() {
       c.kicks += 1; frameEl.dataset.kicks = String(c.kicks);
       schedule();
     };
+    // Tryck på ett pixlat omslag: visa originalbilden skarp. Tryck igen: tillbaka till partiklar.
+    c.setSharp = function (on) {
+      if (on === c.sharp) return;
+      c.sharp = on;
+      frameEl.classList.toggle('is-sharp', on);
+      frameEl.setAttribute('aria-pressed', String(on));
+      frameEl.setAttribute('aria-label', on ? 'Visa omslaget som partiklar' : 'Visa omslaget skarpt i full upplösning');
+      if (on) {
+        c.dust = false;
+        frameEl.classList.remove('is-dust', 'is-sand');
+        frameEl.dataset.state = 'sharp';
+      } else if (c.ready && !motionOff()) {
+        c.reset();
+        frameEl.classList.add('is-sand');
+      }
+      schedule();
+    };
     c.reset = function () { const fr = frameEl.getBoundingClientRect(); c.p = coverProgress(fr.top, fr.bottom, window.innerHeight); burst.age = 9; };
     return c;
   }
@@ -520,7 +537,7 @@ void main() {
     if (!g || g.lost) return false;
     const { gl, canvas, loc } = g;
     let active = false;
-    for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].ready && !motionOff()) { active = true; break; }
+    for (let i = 0; i < covers.length; i++) if (covers[i].visible && covers[i].ready && !covers[i].sharp && !motionOff()) { active = true; break; }
     if (!active) {
       if (g.dirty) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); g.dirty = false; }
       covers.forEach(c => { if (c.dust && !c.visible) { c.dust = false; c.el.classList.remove('is-dust'); } });
@@ -573,6 +590,18 @@ void main() {
       io.observe(frameEl);
       const img = frameEl.querySelector('.figure-img');
       img.addEventListener('error', () => { frameEl.classList.remove('is-sand', 'is-dust'); c.ready = false; c.failed = true; }, { once: true });
+      frameEl.classList.add('is-tappable');
+      frameEl.setAttribute('role', 'button');
+      frameEl.setAttribute('tabindex', '0');
+      frameEl.setAttribute('aria-pressed', 'false');
+      frameEl.setAttribute('aria-label', 'Visa omslaget skarpt i full upplösning');
+      const toggle = e => {
+        if (motionOff() || c.failed) return;
+        if (e.target.closest && e.target.closest('a') && frameEl.contains(e.target.closest('a'))) e.preventDefault();
+        c.setSharp(!c.sharp);
+      };
+      frameEl.addEventListener('click', toggle);
+      frameEl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(e); } });
     });
   }
 
@@ -593,7 +622,7 @@ void main() {
       ensureHero();
       if (hero && hero.built) { root.classList.add('dust-live'); hero.canvas.style.visibility = ''; hero.replay(); }
       covers.forEach(c => {
-        if (c.ready) { c.reset(); c.el.classList.add('is-sand'); } else if (c.visible) c.load();
+        if (c.ready && !c.sharp) { c.reset(); c.el.classList.add('is-sand'); } else if (c.visible) c.load();
       });
     }
     lastNow = 0;
