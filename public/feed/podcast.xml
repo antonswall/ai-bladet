@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+  
 
 
 
@@ -16,7 +17,9 @@
 
 
 
+  
   <channel>
+    
 
 
 
@@ -33,7 +36,9 @@
 
 
 
+    
     <title>AI-Bladet</title>
+    
 
 
 
@@ -50,7 +55,9 @@
 
 
 
+    
     <link>https://ai-bladet.pages.dev/</link>
+    
 
 
 
@@ -67,7 +74,9 @@
 
 
 
+    
     <description>Varje söndag — 90 sekunder om veckans viktigaste AI-nyheter på svenska.</description>
+    
 
 
 
@@ -84,7 +93,9 @@
 
 
 
+    
     <language>sv</language>
+    
 
 
 
@@ -101,7 +112,9 @@
 
 
 
+    
     <itunes:author>AI-Bladet</itunes:author>
+    
 
 
 
@@ -118,7 +131,9 @@
 
 
 
+    
     <itunes:category text="Technology"/>
+    
 
 
 
@@ -135,7 +150,9 @@
 
 
 
+    
     <itunes:explicit>false</itunes:explicit>
+    
 
 
 
@@ -152,7 +169,9 @@
 
 
 
+    
     <itunes:image href="https://ai-bladet.pages.dev/static/android-chrome-512x512.png"/>
+    
 
 
 
@@ -169,7 +188,9 @@
 
 
 
+    
     <item>
+      
 
 
 
@@ -184,7 +205,9 @@
 
 
 
+      
       <title>Vecka 31 — xAI fyller på Copilot — och bygger webbappar i chatten</title>
+      
 
 
 
@@ -199,7 +222,9 @@
 
 
 
+      
       <description>AI-Bladet vecka 31. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
@@ -214,7 +239,9 @@
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-31.mp3</link>
+      
 
 
 
@@ -229,7 +256,9 @@
 
 
 
+      
       <guid>ai-bladet-2026-31</guid>
+      
 
 
 
@@ -244,7 +273,9 @@
 
 
 
+      
       <pubDate>Sun, 26 Jul 2026 09:00:00 +0000</pubDate>
+      
 
 
 
@@ -259,7 +290,9 @@
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-31.mp3" length="1057062" type="audio/mpeg"/>
+      
 
 
 
@@ -274,7 +307,9 @@
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
@@ -289,7 +324,9 @@
 
 
 
+    
     </item>
+    
 
 
 
@@ -304,7 +341,9 @@
 
 
 
+    
     <item>
+      
 
 
 
@@ -317,7 +356,9 @@
 
 
 
+      
       <title>Vecka 33 — Grok går längre – och kalkylblad blir appar</title>
+      
 
 
 
@@ -330,7 +371,9 @@
 
 
 
+      
       <description>AI-Bladet vecka 33. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
@@ -343,7 +386,9 @@
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-33.mp3</link>
+      
 
 
 
@@ -356,7 +401,9 @@
 
 
 
+      
       <guid>ai-bladet-2026-33</guid>
+      
 
 
 
@@ -369,7 +416,9 @@
 
 
 
+      
       <pubDate>Sun, 16 Aug 2026 09:00:00 +0000</pubDate>
+      
 
 
 
@@ -382,7 +431,9 @@
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-33.mp3" length="1084230" type="audio/mpeg"/>
+      
 
 
 
@@ -395,7 +446,9 @@
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
@@ -408,7 +461,9 @@
 
 
 
+    
     </item>
+    
 
 
 
@@ -421,7 +476,9 @@
 
 
 
+    
     <item>
+      
 
 
 
@@ -432,7 +489,9 @@
 
 
 
+      
       <title>Vecka 35 — Grok 4.6 flyttar in i Amazons modellhall</title>
+      
 
 
 
@@ -443,7 +502,9 @@
 
 
 
+      
       <description>AI-Bladet vecka 35. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
@@ -454,7 +515,9 @@
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-35.mp3</link>
+      
 
 
 
@@ -465,7 +528,9 @@
 
 
 
+      
       <guid>ai-bladet-2026-35</guid>
+      
 
 
 
@@ -476,7 +541,9 @@
 
 
 
+      
       <pubDate>Sun, 30 Aug 2026 09:00:00 +0000</pubDate>
+      
 
 
 
@@ -487,7 +554,9 @@
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-35.mp3" length="1203348" type="audio/mpeg"/>
+      
 
 
 
@@ -498,7 +567,9 @@
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
@@ -509,7 +580,9 @@
 
 
 
+    
     </item>
+    
 
 
 
@@ -520,7 +593,9 @@
 
 
 
+    
     <item>
+      
 
 
 
@@ -529,7 +604,9 @@
 
 
 
+      
       <title>Vecka 36 — Agenter som minns — och lär sig av erfarenhet</title>
+      
 
 
 
@@ -538,7 +615,9 @@
 
 
 
+      
       <description>AI-Bladet vecka 36. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
@@ -547,7 +626,9 @@
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-36.mp3</link>
+      
 
 
 
@@ -556,7 +637,9 @@
 
 
 
+      
       <guid>ai-bladet-2026-36</guid>
+      
 
 
 
@@ -565,7 +648,9 @@
 
 
 
+      
       <pubDate>Sun, 06 Sep 2026 09:00:00 +0000</pubDate>
+      
 
 
 
@@ -574,7 +659,9 @@
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-36.mp3" length="955916" type="audio/mpeg"/>
+      
 
 
 
@@ -583,7 +670,9 @@
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
@@ -592,7 +681,9 @@
 
 
 
+    
     </item>
+    
 
 
 
@@ -601,151 +692,235 @@
 
 
 
+    
     <item>
+      
 
 
 
 
 
 
+      
       <title>Vecka 37 — GPT-Live-1 i API:et — röstens arkitektur förenklas</title>
+      
 
 
 
 
 
 
+      
       <description>AI-Bladet vecka 37. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-37.mp3</link>
+      
 
 
 
 
 
 
+      
       <guid>ai-bladet-2026-37</guid>
+      
 
 
 
 
 
 
+      
       <pubDate>Sun, 13 Sep 2026 09:00:00 +0000</pubDate>
+      
 
 
 
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-37.mp3" length="950065" type="audio/mpeg"/>
+      
 
 
 
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
 
 
 
+    
     </item>
+    
 
 
 
 
 
 
+    
     <item>
+      
 
 
 
 
+      
       <title>Vecka 38 — Röstlagret blir slagfält — xAI och Google släpper nytt</title>
+      
 
 
 
 
+      
       <description>AI-Bladet vecka 38. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-38.mp3</link>
+      
 
 
 
 
+      
       <guid>ai-bladet-2026-38</guid>
+      
 
 
 
 
+      
       <pubDate>Sun, 20 Sep 2026 09:00:00 +0000</pubDate>
+      
 
 
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-38.mp3" length="1179524" type="audio/mpeg"/>
+      
 
 
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
 
 
+    
     </item>
+    
 
 
 
 
+    
     <item>
+      
 
 
+      
       <title>Vecka 39 — GGUF i Transformers, Grok 4.7 och snabbare tokens</title>
+      
 
 
+      
       <description>AI-Bladet vecka 39. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
 
 
+      
       <link>https://ai-bladet.pages.dev/audio/2026-39.mp3</link>
+      
 
 
+      
       <guid>ai-bladet-2026-39</guid>
+      
 
 
+      
       <pubDate>Sun, 27 Sep 2026 09:00:00 +0000</pubDate>
+      
 
 
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-39.mp3" length="1012341" type="audio/mpeg"/>
+      
 
 
+      
       <itunes:duration>00:01:30</itunes:duration>
+      
 
 
+    
     </item>
+    
 
 
+    
     <item>
+      
+      
       <title>Vecka 40 — GPT-6.1 Sol, Gemini 4 Argon och en vecka full av xAI</title>
+      
+      
       <description>AI-Bladet vecka 40. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      
+      
       <link>https://ai-bladet.pages.dev/audio/2026-40.mp3</link>
+      
+      
       <guid>ai-bladet-2026-40</guid>
+      
+      
       <pubDate>Sun, 04 Oct 2026 09:00:00 +0000</pubDate>
+      
+      
       <enclosure url="https://ai-bladet.pages.dev/audio/2026-40.mp3" length="507022" type="audio/mpeg"/>
+      
+      
       <itunes:duration>00:01:09</itunes:duration>
+      
+    
+    </item>
+    
+  
+    <item>
+      <title>Vecka 41 — GPT-6 till alla — och ett nytt sätt att se AI-svar</title>
+      <description>AI-Bladet vecka 41. 90-sekunders sammanfattning av veckans AI-nyheter.</description>
+      <link>https://ai-bladet.pages.dev/audio/2026-41.mp3</link>
+      <guid>ai-bladet-2026-41</guid>
+      <pubDate>Sun, 11 Oct 2026 09:00:00 +0000</pubDate>
+      <enclosure url="https://ai-bladet.pages.dev/audio/2026-41.mp3" length="630889" type="audio/mpeg"/>
+      <itunes:duration>00:01:30</itunes:duration>
     </item>
   </channel>
+  
+
 
 
 
