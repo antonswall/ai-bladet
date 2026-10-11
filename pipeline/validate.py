@@ -453,16 +453,12 @@ def _parse_validation(response: str | None) -> dict:
 
     return default
 
-def _check_urls(research_stories: list[dict]) -> dict:
-    """Kontrollera att käll-URLs fortfarande är levande."""
-    valid = 0
-    invalid = 0
-    for s in research_stories[:6]:
-        url = s.get("url", "")
-        if not url or not _acceptable_source_url(url):
-            invalid += 1
-            continue
-
+def _url_is_alive(url: str) -> bool:
+    """Jina-proxyn (gratis, utan nyckel) svajar ibland. Ett tillfälligt fel får
+    inte stoppa ett helt nummer: försök igen med backoff, och fall till sist
+    tillbaka på en direkt förfrågan mot källan."""
+    import time
+    for attempt in range(3):
         try:
             proxy = requests.get(
                 f"https://r.jina.ai/{url}",
@@ -471,12 +467,34 @@ def _check_urls(research_stories: list[dict]) -> dict:
                 headers={"User-Agent": "Mozilla/5.0 (AI-Bladet validator)"},
             )
             if proxy.status_code < 300 and _jina_content_is_valid(proxy.text, url):
-                valid += 1
-                continue
+                return True
+            if 400 <= proxy.status_code < 500 and proxy.status_code != 429:
+                break  # proxyn säger att källan är borta — inget att vänta på
         except requests.RequestException:
             pass
-        invalid += 1
+        if attempt < 2:
+            time.sleep(3 * (attempt + 1))
+    try:
+        direct = requests.get(
+            url, timeout=15, allow_redirects=True, stream=True,
+            headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36"},
+        )
+        direct.close()
+        return direct.status_code < 400
+    except requests.RequestException:
+        return False
 
+
+def _check_urls(research_stories: list[dict]) -> dict:
+    """Kontrollera att käll-URLs fortfarande är levande."""
+    valid = 0
+    invalid = 0
+    for s in research_stories[:6]:
+        url = s.get("url", "")
+        if url and _acceptable_source_url(url) and _url_is_alive(url):
+            valid += 1
+        else:
+            invalid += 1
     return {"valid": valid, "invalid": invalid, "total": valid + invalid}
 
 

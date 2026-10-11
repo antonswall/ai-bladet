@@ -424,3 +424,50 @@ class LinkedInDraftTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlaceholderBriefAndUrlRetryTests(unittest.TestCase):
+    def test_placeholder_brief_removed_and_empty_list_dropped(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pipeline"))
+        import write
+        text = ("---\nyear: 2026\nbriefs_bransch:\n"
+                "  - \"Inga branschnyheter om politik, reglering, förvärv eller datacenter finns i veckans research. Segmentet utelämnas därför i sin helhet — ett tomt segment är bättre än fabricerat innehåll.\"\n"
+                "briefs_vart_att_veta:\n  - \"Riktig notis. Vad betyder det för dig: x.\"\n---\n")
+        out = write._drop_placeholder_briefs(text)
+        self.assertNotIn("briefs_bransch", out)
+        self.assertNotIn("Segmentet utelämnas", out)
+        self.assertIn("Riktig notis", out)
+
+    def test_real_brief_kept(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pipeline"))
+        import write
+        text = "briefs_bransch:\n  - \"EU antar AI-förordningens nästa steg. Vad betyder det för dig: krav.\"\n"
+        self.assertEqual(write._drop_placeholder_briefs(text), text)
+
+    def test_url_check_retries_transient_proxy_failure(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pipeline"))
+        import validate
+        from unittest import mock
+        good = ("Title: x\nURL Source: https://example.org/a\nMarkdown Content:\n" + "text " * 100)
+        calls = {"n": 0}
+        def fake_get(url, **kw):
+            calls["n"] += 1
+            r = mock.Mock()
+            if calls["n"] == 1:
+                r.status_code, r.text = 503, "busy"
+            else:
+                r.status_code, r.text = 200, good
+            return r
+        with mock.patch.object(validate.requests, "get", side_effect=fake_get), \
+             mock.patch("time.sleep"), \
+             mock.patch.object(validate, "_jina_content_is_valid", return_value=True):
+            self.assertTrue(validate._url_is_alive("https://example.org/a"))
+        self.assertEqual(calls["n"], 2)
+
+    def test_url_check_dead_source_stays_dead(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "pipeline"))
+        import validate
+        from unittest import mock
+        r = mock.Mock(status_code=404, text="nope")
+        with mock.patch.object(validate.requests, "get", return_value=r), mock.patch("time.sleep"):
+            self.assertFalse(validate._url_is_alive("https://example.org/gone"))

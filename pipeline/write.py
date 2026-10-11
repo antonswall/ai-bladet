@@ -463,6 +463,32 @@ lead.ingress + varje story.ingress hålls korta (2-3 meningar resp. 40-60 ord)."
 # ─── Parse output ─────────────────────────────────────────────────────────────
 
 
+_PLACEHOLDER_BRIEF = re.compile(
+    r"(segmentet utelämnas|utelämnas (därför|i sin helhet)|tomt segment|inga (bransch)?nyheter (om|finns)|finns (inga|ingen) .{0,40}i veckans research)",
+    re.IGNORECASE,
+)
+
+
+def _drop_placeholder_briefs(text: str) -> str:
+    """Modellen skriver ibland en meta-notis ("Inga branschnyheter ... segmentet
+    utelämnas") i stället för att utelämna listan. Den saknar konsekvensrad och
+    fäller valideringen — ta bort sådana rader, och listan om den blir tom."""
+    lines = text.split("\n")
+    out = []
+    for line in lines:
+        if re.match(r"^\s+- ", line) and _PLACEHOLDER_BRIEF.search(line):
+            continue
+        out.append(line)
+    cleaned = []
+    for i, line in enumerate(out):
+        if re.match(r"^briefs(_bransch|_vart_att_veta)?:\s*$", line):
+            nxt = out[i + 1] if i + 1 < len(out) else ""
+            if not re.match(r"^\s+- ", nxt):
+                continue
+        cleaned.append(line)
+    return "\n".join(cleaned)
+
+
 def parse_sonnet_output(text: str) -> str:
     """Verifiera att Sonnet producerade korrekt frontmatter + markdown."""
     if not text:
@@ -481,6 +507,8 @@ def parse_sonnet_output(text: str) -> str:
             text = text[fm_start:]
         else:
             raise ValueError(f"Ingen YAML-frontmatter funnen i svar:\n{text[:300]}")
+
+    text = _drop_placeholder_briefs(text)
 
     # Kolla att alla obligatoriska fält finns
     required = ["year:", "week:", "date:", "title:", "summary:", "lead:", "stories:"]

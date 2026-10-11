@@ -147,6 +147,11 @@ if dup.get('duplicate'):
 if not d.get('validation',{}).get('se_eu_angle',{}).get('found'):
     lines.append('SE/EU-VINKEL SAKNAS: Minst en story måste ha svensk eller EU-vinkel.')
 
+# Konsekvensrad saknas (regel 19)
+k = d.get('validation',{}).get('konsekvensrad',{})
+if k and not k.get('ok', True):
+    lines.append('KONSEKVENSRAD SAKNAS: ' + '; '.join(k.get('missing', [])) + ' — lägg till raden, eller ta bort notisen helt om den inte är en riktig nyhet (skriv aldrig meta-notiser om att ett segment utelämnas).')
+
 # Lägg till high/medium issues
 for i in issues:
     sev = i.get('severity','')
