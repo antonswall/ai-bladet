@@ -1,5 +1,12 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-11 — [lutra] Vecka 41 räddad + valideringen härdad
+- Söndagskörningen stoppades: (1) URL-koll via r.jina.ai svarade inte -> 3/6 källor "döda" (alla levande vid omkörning), (2) Sonnet skrev en meta-notis "Inga branschnyheter ... segmentet utelämnas" utan konsekvensrad i försök 2-3. Retry-feedbacken nämnde varken URL- eller konsekvensfelet, så omskrivningarna kunde inte rätta något.
+- validate.py: _url_is_alive — 3 försök mot Jina med backoff, därefter direkt GET mot källan; riktiga 4xx räknas fortfarande som döda.
+- write.py: _drop_placeholder_briefs tar bort meta-notiser och tom lista efter parsning.
+- run_weekly.sh: konsekvensrad-fel skickas nu med i retry-feedbacken.
+- +4 tester (73/73 Python, 8/8 Node), vecka 41 validerad 100 %, URL 6/6, publicerad, distribution 5/5, live-verifierad med ljud. X-utkast pekar på ai-bladet.pages.dev.
+
 ## 2026-10-07 — [lutra] Säkerhetshärdning inför trafik
 - Anton: säkerställ att sajten är säker att driva trafik till.
 - build.js genererar nu public/_headers (CSP med sha256 för inline-skriptet, HSTS, X-Frame-Options DENY, nosniff, Referrer-, Permissions-, COOP) + public/cover-allow.json.
