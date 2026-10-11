@@ -1,5 +1,10 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-11 — [lutra] Tryck på omslag = skarp bild
+- Anton: man ska kunna trycka på pixlade omslag för att få vanliga högupplösta bilder.
+- static/dust.js: c.setSharp — klick/Enter/Space på ett omslag stänger av partiklarna för just det omslaget och visar originalet (<img>, full upplösning); tryck igen = tillbaka till partiklar. Ej ritat medan skarpt (ingen GPU-kostnad). role=button, aria-pressed/-label, tangentbord. static/dust.css: zoom-in/zoom-out-markör, kort inblandning (blur->skarp), fokusram; av när rörelse pausad/reduced motion.
+- Verifierat på preview: före is-dust (img opacity 0) -> efter klick is-sharp, opacity 1, 1600x900 originalbild, inga nya partikelbildrutor; andra klick tillbaka till partiklar; 0 JS-fel; 8/8 Node.
+
 ## 2026-10-11 — [lutra] Vecka 41 räddad + valideringen härdad
 - Söndagskörningen stoppades: (1) URL-koll via r.jina.ai svarade inte -> 3/6 källor "döda" (alla levande vid omkörning), (2) Sonnet skrev en meta-notis "Inga branschnyheter ... segmentet utelämnas" utan konsekvensrad i försök 2-3. Retry-feedbacken nämnde varken URL- eller konsekvensfelet, så omskrivningarna kunde inte rätta något.
 - validate.py: _url_is_alive — 3 försök mot Jina med backoff, därefter direkt GET mot källan; riktiga 4xx räknas fortfarande som döda.
