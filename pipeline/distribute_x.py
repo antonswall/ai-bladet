@@ -177,7 +177,7 @@ Publicera måndag 09:00.
 ```
 
 ---
-Länk: https://ai-bladet.pages.dev/{year}/{week}
+Länk: https://ai-bladet.pages.dev/v/{year}/{week}/
 """
         thread_path.write_text(thread_content, encoding="utf-8")
         print(f"    ➡ Sparad: {thread_path.name}")
@@ -206,7 +206,7 @@ Publicera måndag 09:00 (EFTER thread).
 ```
 
 ---
-Länk: https://ai-bladet.pages.dev/{year}/{week}
+Länk: https://ai-bladet.pages.dev/v/{year}/{week}/
 """
         lie_path.write_text(lie_content, encoding="utf-8")
         print(f"    ➡ Sparad: {lie_path.name}")
