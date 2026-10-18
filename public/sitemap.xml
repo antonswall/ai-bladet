@@ -164,6 +164,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://ai-bladet.pages.dev/ordbok/mixture-of-experts</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://ai-bladet.pages.dev/ordbok/no-code-plattform</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -254,6 +260,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://ai-bladet.pages.dev/audio/2026-42.mp3</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://ai-bladet.pages.dev/audio/test.mp3</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -315,6 +327,12 @@
   </url>
   <url>
     <loc>https://ai-bladet.pages.dev/memes/2026-41.png</loc>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://ai-bladet.pages.dev/memes/2026-42.png</loc>
     <lastmod>2026-10-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
