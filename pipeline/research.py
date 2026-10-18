@@ -119,6 +119,11 @@ Briefen ska vara:
 - Strukturerad i rubriker
 - Innehålla: nyckelfakta, siffror, citat, svensk vinkel, källa, PUBLICERINGSDATUM
 
+Ta med belagda risker, etiska konflikter, politiska beslut och begränsningar
+bland nyckelfakta, inte bara produktfördelar. Attribuera leverantörspåståenden.
+Vid uteblivet släpp: skilj presentation, åtkomst, inställt släpp och stoppad
+utveckling. Ange bara orsak om källan belägger den; annars okänd.
+Vid AGI-debatt: skilj observationer, forskartolkningar och prognoser.
 Var kortfattad. Hitta på ingenting. Publiceringsdatum är KRITISKT — leta efter datum i texten, URL, eller metadata."""
 
 

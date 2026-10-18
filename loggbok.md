@@ -1,5 +1,28 @@
 # AI-Bladet — Loggbok
 
+## 2026-10-18 — [lutra] V42: återhämtning efter GitHub-nätfel (pågår)
+- 07:00-körningen avbröts före insamling: anslutning till github.com:443 misslyckades efter 75 s. Cronens Telegram-felrapport fick också timeout. Ingen v42 hade skapats; live visade v41. Git-push dry-run fungerar vid återkontroll 17:48; ingen auth- eller nätverkskonfiguration ändrad.
+- Omkörning startad 17:49 med AI_BLADET_ALLOW_OPENROUTER=0. Insamling: 40/40 källor, 470 nya kandidater; dedup/research/skrivning fortsätter med Claude-abonnemanget (Haiku/Sonnet, inga Codex-körningar).
+- llm.py + write.py: OpenRouter kräver nu explicit AI_BLADET_ALLOW_OPENROUTER=1, en sparad nyckel räcker inte. Ingen ElevenLabs-nyckel finns; lokal Alva-TTS är reservvägen.
+- run_weekly.sh: verifierad nätverksretry i GitHub-preflight (max tre försök, 15/30 s väntan), autentiseringsfel återförsöks inte; rätt felkategori. Testad kopia installerad atomiskt så den redan körande Bash-processen behåller sitt original. RUNBOOK.md uppdaterad.
+- RED→GREEN för nätfel och API-opt-in: 82 pytest-tester + 4 subtests, 8 Node-tester gröna; bash -n och diff-check rena. Backup: ~/.hermes/cache/scratch/ai-bladet-recovery-20261018. Tidigare lokala redaktionsändringar från 11/10 bevarade.
+- Verktygsfel: första SOUL-sökvägen fel och en sökning failade (rättat/omkört); urllib utan User-Agent gav 403 mot sajten men curl fick 200; en gissad runnerloggsökväg saknades (använder processloggen); första nätfelstestet hade citatteckenfel i stubben, rättat innan RED-verifiering. Inga fabricerade leveransresultat.
+- Valideringens andra försök hade 100 % faktastöd men 140 ord i en artikel; retry-feedback saknade ordlängdsfelet. Tredje försöket stoppades manuellt före publicering för redaktionell kontroll. Två rubrikbaserade, overifierade notiser togs bort, en kort Beam-text utökades med redan belagd MoE-förklaring och ett språkfel rättades. Slutlig validate.py: PASS, 100 %, 0 issues, 6/6 URL:er, samtliga hårda grindar gröna.
+- Retry-feedbacken skickar nu rubrik, aktuellt ordantal och miniminivå till skrivsteget. RED→GREEN-regression; slutlig svit 83 pytest-tester + 4 subtests och 8 Node-tester grön. Nästa: runnerns exakta post-valideringskedja (build/push/livekontroll/SeenDB/distribution/slutpush), därefter Telegram.
+
+## 2026-10-11 — [lutra] Redaktionella regler uppdaterade inför v42
+- score.py: neutrala kategorivikter, ingen aktionabilitetsstyrd lead-dämpning, releasebonus 8→2; upp till 20 % av scoring-batchen reserveras för samhälls-/risk-/förseningssignaler. Rättat tilldelning av fallback-score så prioriterade kandidater inte skrivs över.
+- write.py/research.py: optimism utan glorifiering; politik, etik, säkerhet och betydande forskning får vara lead/full artikel; uppföljning av uteblivna släpp; tydlig gräns mellan observation, AGI-tolkning och prognos. Bransch upp till tre artiklar, konsekvens kan gälla samhället.
+- validate.py accepterar lead i verktyg eller bransch, inga kategori-förbud. Fyra nya regressionstester, RED→GREEN. 68/68 Python + 8/8 Node gröna, diff-check ren; faktisk v42-prompt verifierad utan LLM-anrop.
+- Backup: ~/.hermes/cache/scratch/ai-bladet-editorial-20261011. Lokal cron-wrapper kör direkt dessa filer. Ingen ny upplaga, externa utskick, push eller UI-ändring. Presentationens fasta översta rubrik Veckans verktyg kvarstår även vid branschlead; separat redaktionell rubrikjustering behövs för full presentationskonsekvens.
+- Verktygsfel: select.py saknas (urval i score.py); en search_files-process failade, ersatt av read_file; npm test är placeholder, direkt Node kördes; ett kontrollanrop hade citeringsfel före exekvering, rättat. Skill-patch överskred storleksgränsen, kortare patch lyckades.
+- Nästa: Claude Code kan committa dessa lokala ändringar enligt samarbetskontraktet; nästa ordinarie söndagskörning använder reglerna.
+
+## 2026-10-11 — [lutra] Redaktionell kritik: optimism utan glorifiering
+- Read-only granskat v41 och write.py. Verktygslead är obligatorisk, policy/forskning förbjuds som lead och bransch begränsas; detta missgynnar samhälls-/riskbevakning. V41 har två korta riskomnämnanden men ingen bransch/politik.
+- Sparat Antons feedback och källkontroll i editorial-feedback-2026-10-11.md. Al Jazeera 29/9 belägger inställt GPT-6.1 Astra-släpp, inte stoppad utveckling. TechTarget 1/10 beskriver Argon med begränsad initial åtkomst; senare uppskjutet allmänt släpp/orsak ej verifierat.
+- Ingen kod, cron eller upplaga ändrad. Nästa: besluta om redaktionell viktning och granska insamling/urval innan implementation. Första SOUL-läsningen använde fel sökväg; ~/.hermes/SOUL.md återfunnen och läst, oförändrad.
+
 ## 2026-10-11 — [lutra] Tryck på omslag = skarp bild
 - Anton: man ska kunna trycka på pixlade omslag för att få vanliga högupplösta bilder.
 - static/dust.js: c.setSharp — klick/Enter/Space på ett omslag stänger av partiklarna för just det omslaget och visar originalet (<img>, full upplösning); tryck igen = tillbaka till partiklar. Ej ritat medan skarpt (ingen GPU-kostnad). role=button, aria-pressed/-label, tangentbord. static/dust.css: zoom-in/zoom-out-markör, kort inblandning (blur->skarp), fokusram; av när rörelse pausad/reduced motion.

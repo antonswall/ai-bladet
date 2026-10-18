@@ -4,7 +4,8 @@ pipeline/llm.py — Gemensam LLM-wrapper via Claude Code CLI (claude -p).
 Använder Antons redan inloggade OAuth-session (Claude Pro/Max) — ingen extra
 API-kostnad. Kräver att `claude` CLI är inloggad (claude /login).
 
-Fallback: OpenRouter GPT-5.6 Luna om Claude CLI inte svarar (OAuth expired etc).
+Fallback: OpenRouter GPT-5.6 Luna endast efter uttrycklig opt-in
+(AI_BLADET_ALLOW_OPENROUTER=1); annars ingen betald reservväg.
 
 Användning:
     from llm import llm_call
@@ -31,6 +32,8 @@ ALLOWED_CLAUDE_MODELS = {"haiku", "sonnet"}
 
 
 def _get_openrouter_api_key() -> str:
+    if os.getenv("AI_BLADET_ALLOW_OPENROUTER") != "1":
+        return ""
     key = os.getenv("OPENROUTER_API_KEY", "")
     if not key:
         env_path = os.path.expanduser("~/.hermes/.env")

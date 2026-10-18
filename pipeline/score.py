@@ -47,7 +47,7 @@ MODEL_FAMILY_TERMS = (
     "mistral", "grok", "command", "phi", "nemotron", "gemma", "yi",
     "kimi", "minimax", "hunyuan",
 )
-MODEL_RELEASE_BONUS = 8
+MODEL_RELEASE_BONUS = 2
 
 # Editorial fatigue — samma leverantör får inte äga leaden vecka efter vecka.
 # Om en entity varit lead minst två av de senaste fyra numren får nya kandidater
@@ -95,10 +95,21 @@ def _ar_modellrelease_signal(candidate: dict) -> bool:
 
 
 def prioritize_scoring_candidates(candidates: list[dict], limit: int = 100) -> list[dict]:
-    """Välj scoring-batch med modellrelease-signaler först."""
-    release_candidates = [c for c in candidates if _ar_modellrelease_signal(c)]
-    other_candidates = [c for c in candidates if not _ar_modellrelease_signal(c)]
-    return (release_candidates + other_candidates)[:limit]
+    """Reservera plats för samhällsbevakning utan att garantera publicering."""
+    if limit <= 0:
+        return []
+    terms = ("safety", "alignment", "unauthorized", "risk", "ethic", "regulation",
+             "policy", "legislation", "agi", "säkerhet", "etik", "politik",
+             "reglering", "delayed", "paused", "cancelled", "inställt", "försen")
+    public_interest = [c for c in candidates if any(
+        term in f"{c.get('title', '')} {c.get('summary', '')}".lower()
+        for term in terms)]
+    reserved = public_interest[:max(1, limit // 5)]
+    selected_ids = {id(c) for c in reserved}
+    remaining = [c for c in candidates if id(c) not in selected_ids]
+    releases = [c for c in remaining if _ar_modellrelease_signal(c)]
+    others = [c for c in remaining if not _ar_modellrelease_signal(c)]
+    return (reserved + releases + others)[:limit]
 
 
 def pre_filter(candidates: list[dict]) -> list[dict]:
@@ -170,9 +181,9 @@ Varje artikel får en score baserat på:
 - Lead-potential (1-5): Skulle detta kunna vara veckans lead story?
 - Aktionabilitet (ja/nej): Skulle en person som bygger med AI dagligen ändra något
   i sitt arbete DEN HÄR VECKAN på grund av den här nyheten? Ja → hög lead-potential.
-  Nej men strategiskt viktig → brief-material, aldrig lead.
-  Konkreta verktyg, modellsläpp och releaser är oftast aktionabla.
-  Policy, förvärv och metaforskning är det nästan aldrig.
+  Aktionabilitet är information, inte ett villkor för huvudnyhet.
+  Säkerhet, etik, politik och forskning bedöms efter betydelse och evidens,
+  på samma villkor som verktyg och modellsläpp.
 - Svensk relevans (0-3): Relevant för svenska läsare? (Svenska bolag, EU-policy, svenska forskare)
 - Kategori: Modeller, Politik, Verktyg, Forskning, Företag, Säkerhet, Övrigt
 
@@ -184,8 +195,11 @@ Extra prioritet för första omslaget:
 - Sätt release_status till released, preview, beta, announced, rumor eller none.
 - Ett verifierat större modellsläpp ska normalt få lead_potential 4-5 och kategorin Modeller.
 
-Lead-potential ska spegla aktionabiliteten: en nyhet som inte ändrar någons
-AI-vardag denna vecka får aldrig lead_potential 4-5, oavsett hur stor den är.
+Lead-potential ska spegla nyhetsvärde, samhällskonsekvenser och evidens.
+Betydande säkerhetsincidenter, politiska beslut och stoppade släpp kan få 4-5
+även utan omedelbar nytta för utvecklare. Optimism utan glorifiering:
+beakta risker, makt, ansvar och dokumenterade AGI-relevanta förmågeskiften.
+Ett påstående om AGI är inte belagt bara för att en leverantör säger det.
 
 Din bedömning påverkar direkt vilka nyheter som publiceras. Var noggrann och motivera kort."""
 
@@ -292,14 +306,8 @@ def _default_scores(batch: list[dict], start_idx: int) -> list[dict]:
 # ─── Slutgiltig scoring (viktad) ──────────────────────────────────────────────
 
 
-# Kategori-vikter: verktyg/modeller är det läsarna bygger med — de ska vinna
-# lead-platsen. Allmän policy/forskning är brief-material och justeras ned.
-KATEGORI_BONUS = {
-    "Modeller": 4,
-    "Verktyg": 4,
-    "Politik": -3,
-    "Forskning": -2,
-}
+# Nyhetsvärde går före kategori.
+KATEGORI_BONUS = {}
 
 
 def final_score(c: dict) -> float:
@@ -316,15 +324,13 @@ def final_score(c: dict) -> float:
     model_release = bool(ai.get("model_release", False))
     release_status = ai.get("release_status", "none")
 
-    # Aktionabilitet in i lead-potentialen: en nyhet som ändrar läsarens
-    # AI-vardag denna vecka lyfts; en som inte gör det dämpas.
-    lead_eff = min(5, lead + 2) if actionable else max(1, lead - 1)
+    lead_eff = lead
 
     # Viktning:
     # news_value (0-10) ×3
     # lead_potential inkl. aktionabilitet (0-5) ×2
     # swedish (0-3) ×4
-    # kategori-bonus: Modeller/Verktyg +4, Politik -3, Forskning -2
+    # Ingen kategori-bonus eller kategori-bestraffning
     # tier-bonus: Tier 1 +2, Tier 2 +1, Tier 3 +0, Tier 4 -1
     tier_bonus = {1: 2, 2: 1, 3: 0}.get(tier, -1)
     kategori_bonus = KATEGORI_BONUS.get(category, 0)
@@ -421,7 +427,8 @@ def score(input_path: Path, output_path: Path) -> dict:
             c["_ai_score"] = all_scores[i]
 
     # Default scores för resten (inte i AI-batch)
-    for c in candidates[len(scoring_batch):]:
+    scored_ids = {id(c) for c in scoring_batch}
+    for c in (c for c in candidates if id(c) not in scored_ids):
         c["_ai_score"] = {"score": 3, "lead_potential": 1, "actionable": False, "swedish_relevance": 0, "category": "Övrigt", "reason": "Ej i topp 100"}
 
     # Beräkna editorial fatigue innan final score. Detta hindrar att samma

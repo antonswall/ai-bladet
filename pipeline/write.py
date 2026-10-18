@@ -46,6 +46,8 @@ MAX_OUTPUT_TOKENS = 8000    # 4000 var för snålt: 5 stories à 250 svenska ord
 
 
 def _get_openrouter_key() -> Optional[str]:
+    if os.getenv("AI_BLADET_ALLOW_OPENROUTER") != "1":
+        return None
     key = os.getenv("OPENROUTER_API_KEY", "")
     if key:
         return key
@@ -64,7 +66,7 @@ def sonnet_call(prompt: str, system: str = None,
     """Anropa Claude Sonnet 4.6 via OpenRouter, med sessionslös Claude CLI-fallback."""
     key = _get_openrouter_key()
     if not key:
-        print("  ⚠️  OPENROUTER_API_KEY saknas — försöker sessionslös CLI-fallback", file=sys.stderr)
+        print("  ℹ️  OpenRouter ej aktiverat eller nyckel saknas — använder Claude Sonnet via abonnemanget", file=sys.stderr)
         return subscription_write_fallback(prompt, system, max_tokens=max_tokens)
 
     messages = []
@@ -134,21 +136,29 @@ Din röst: ledig men trovärdig — tabloid i energi, sansad i sak. Tänk DN/SvD
 Inga uppmaningar till läsaren, ingen "i den här artikeln", inga emojis, inget marknadsföringsspråk.
 Svenska, genomgående. Varje huvudstory skrivs på 200-300 ord enligt strukturkravet (regel 10).
 
-Läsaren är en person som BYGGER med AI dagligen. Frågan varje utgåva besvarar:
-"Vad påverkar min AI-vardag den här veckan?"
+Läsaren använder eller bygger med AI och vill förstå både möjligheter och
+samhällskonsekvenser. Optimism utan glorifiering: oberoende journalistik,
+inte bolagens PR. Beskriv relevanta risker utan påtvingad negativitet.
+Bevaka säkerhet, etik/filosofi, politik, reglering, arbetsliv och makt.
+Skilj dokumenterade förmågor från tolkning och prognos om AGI; autonomi,
+långa uppgifter och benchmarkresultat bevisar inte AGI eller medvetande.
+Följ upp tidigare annonserade modeller vid nya verifierade uppgifter om
+försening, begränsad åtkomst eller inställt släpp. Ange datum, åtkomststatus
+ och belagd orsak; inställt släpp är inte samma sak som stoppad utveckling.
+Okända orsaker och obekräftade uppgifter ska uttryckligen märkas så.
 
 SEGMENTSTRUKTUR — varje utgåva har EXAKT dessa tre segment, i EXAKT denna ordning:
 
-1. VECKANS VERKTYG (lead + 1-3 stories, segment: "verktyg")
+1. VECKANS VERKTYG (1-3 stories, segment: "verktyg")
    Modeller, releaser, open source-verktyg — det läsaren faktiskt bygger med.
    Exempel: Claude/GPT/Gemini/Grok/DeepSeek/Hermes/Copilot/nya verktyg och releaser.
-   Leaden är ALLTID en verktygsstory (regel 18). Segmentet har alltid minst leaden.
+   Leaden väljs oberoende av segment efter nyhetsvärde (regel 18).
 
-2. BRANSCH I KORTHET (2-4 briefs i briefs_bransch, max 1 full story med segment: "bransch")
-   Politik, reglering, förvärv, datacenter, kapitalrundor.
+2. BRANSCH I KORTHET (0-4 briefs i briefs_bransch, 0-3 fulla stories med segment: "bransch")
+   Politik, reglering, säkerhet, etik, samhälle, betydande forskning och AGI-debatt.
    Varje bransch-brief OCH bransch-story avslutas med "Vad betyder det för dig:"
-   följt av en konkret konsekvensmening för AI-byggare (regel 19).
-   Kan du inte skriva den meningen trovärdigt utan att hitta på — stryk storyn.
+   följt av en belagd konsekvens för användare eller samhället (regel 19).
+   Osäker konsekvens får beskrivas som osäker; kräv inte utvecklarnytta.
 
 3. VÄRT ATT VETA (0-3 briefs i briefs_vart_att_veta)
    Forskning, metod, papers. En rad per item. Bara när något faktiskt förtjänar plats.
@@ -290,22 +300,21 @@ REDAKTIONELLA REGLER — inga undantag:
    ska granskas aktivt och får inte drunkna bakom Grok om de är aktuella.
    Har du bara 3-4 stories totalt i research: välj max 1 per företag.
 
-18. LEAD ALLTID OM VERKTYG
-   Leaden är ALLTID en story ur segmentet Veckans verktyg (kategori Modeller
-   eller Verktyg). En branschnyhet (politik/reglering/förvärv) får ALDRIG vara
-   lead om den inte har direkt, konkret påverkan på AI-verktyg som läsaren
-   använder — och då skrivs den som verktygsstory med den påverkan i fokus.
-   Metaforskning och policyanalys är aldrig lead, oavsett score. Finns ingen
-   stark verktygsstory: ta veckans mest konkreta modell/release och skriv den
-   rakt — en liten men verklig verktygsnyhet slår en stor abstrakt bransch-story.
+18. NYHETSVÄRDE FÖRE KATEGORI
+   Leaden är veckans viktigaste belagda nyhet, oavsett kategori.
+   Politik, säkerhet, etik och forskning får vara lead (segment: "bransch").
+   En betydande säkerhetshändelse väger tyngre än en mindre produktrelease.
+   När research innehåller betydande risk-/samhällsnyheter ska minst en få
+   substantiellt utrymme som lead eller full artikel, inte gömmas i en notis.
+   Hitta aldrig på riskmaterial för att fylla en kvot.
 
 19. "VAD BETYDER DET FÖR DIG" — OBLIGATORISK KONSEKVENSRAD
    Varje bransch-story (segment: "bransch") avslutar sin body med ett eget
    stycke som börjar exakt "Vad betyder det för dig:" följt av en konkret
-   konsekvensmening för någon som bygger med AI. Varje brief i briefs_bransch
+   konsekvensmening för användare, berörda grupper eller samhället. Varje brief i briefs_bransch
    avslutas med samma fras och en konsekvenssats. Raden måste vara grundad i
    research (regel 0 och 7 gäller) — kan du inte skriva den trovärdigt,
-   degradera storyn till brief eller stryk den helt."""
+   beskriv vad som är osäkert utan att uppfinna en praktisk konsekvens."""
 
 def build_prompt(stories: list[dict], week: str, year: int,
                  published_date: str) -> str:
@@ -380,17 +389,16 @@ RESEARCHADE ARTIKLAR (scores från DeepSeek V4 Pro):
 
 INSTRUKTIONER:
 
-1. Välj lead-story: veckans viktigaste VERKTYGSNYHET (kategori Modeller/Verktyg).
-   LEAD-, AKTIONABEL- och MODELLSLÄPP-märkta stories är kandidater. Om det finns
-   ett verifierat modellsläpp (status released, preview eller beta), välj det i
-   första hand till omslaget om det inte finns ett tydligt större släpp. Regel 18
-   gäller — politik, förvärv och forskning kan ALDRIG vara lead.
+1. Välj lead-story: veckans viktigaste verifierade nyhet, oavsett kategori.
+   Regel 18 gäller: betydande säkerhet, politik, etik eller forskning kan vara
+   lead. Modellsläpp ges inte automatiskt företräde. Segment verktyg används
+   för modeller/verktyg; bransch för samhälle, säkerhet och forskning.
 
 2. Välj 1-3 ytterligare verktygsstories (segment: "verktyg"). Rangordna efter
    hur mycket de påverkar läsarens AI-vardag.
 
-3. Välj max 1 full bransch-story (segment: "bransch") och 2-4 bransch-briefs
-   (briefs_bransch). Bransch = politik, reglering, förvärv, datacenter.
+3. Välj 0-3 fulla bransch-stories (segment: "bransch") och 0-4 bransch-briefs
+   (briefs_bransch). Bransch omfattar även säkerhet, etik och samhällsviktig forskning.
    ALLA avslutas med "Vad betyder det för dig:" + konsekvensmening (regel 19).
 
 4. Välj 0-3 forsknings-/metodbriefs (briefs_vart_att_veta). Bara det som
@@ -409,9 +417,9 @@ date: {date_str}
 title: "Redaktionell rubrik för HELA utgåvan (max 70 tecken)"
 summary: "En mening som säljer veckan (max 140 tecken)"
 lead:
-  kicker: "KATEGORI (Modeller eller Verktyg — segmentheadern visar redan 'Veckans verktyg')"
-  segment: "verktyg"
-  headline: "Veckans största verktygs-/modellnyhets rubrik (inte exakt samma som research-titeln)"
+  kicker: "Den valda nyhetens kategori, exempelvis Säkerhet eller Politik"
+  segment: "verktyg eller bransch — välj efter nyhetens faktiska kategori"
+  headline: "Veckans viktigaste nyhet, oavsett kategori"
   ingress: "2-3 meningar som säljer storyn"
   analysis: |
     AI-Bladets analys: 50-70 ord som kontextualiserar toppstoryn, grundad i research (regel 11).
@@ -437,14 +445,14 @@ stories:
       Tredje stycket - Sverige/EU-vinkel ENDAST om research stöder det (~50 ord).
   - segment: "bransch"
     kicker: "KATEGORI (Politik, Företag, Säkerhet, Sverige)"
-    headline: "Max EN bransch-story per nummer — utelämna blocket om ingen förtjänar full story"
+    headline: "Bransch-story — upprepa blocket för betydande samhällsnyheter, högst tre"
     ingress: "40-60 ord"
     body: |
       Vad hände + kontext enligt regel 10.
 
-      Vad betyder det för dig: konkret konsekvensmening för AI-byggare (regel 19). Sista stycket.
+      Vad betyder det för dig: belagd samhälls-/användarkonsekvens eller tydlig osäkerhet (regel 19). Sista stycket.
 briefs_bransch:
-  - "Branschnotis 2-4 meningar. Vad betyder det för dig: konkret konsekvens för AI-byggare."
+  - "Branschnotis 2-4 meningar. Vad betyder det för dig: belagd konsekvens för användare eller samhället."
   - "Ännu en branschnotis. Vad betyder det för dig: konsekvensen."
 briefs_vart_att_veta:
   - "Forsknings-/metodnotis, en rad. Utelämna hela listan om inget förtjänar plats."
@@ -452,8 +460,8 @@ categories: [Kategori1, Kategori2]
 sources: {len(stories)}
 ---
 
-Segmentordningen i stories-listan: ALLA verktygsstories först, sedan max en
-bransch-story. Varje stories.body skrivs på 200-300 ord enligt strukturen i
+Segmentordningen i stories-listan: ALLA verktygsstories först, sedan
+bransch-stories (högst tre). Varje stories.body skrivs på 200-300 ord enligt strukturen i
 regel 10 (vad hände / varför det spelar roll / Sverige-EU där relevant).
 lead.ingress + varje story.ingress hålls korta (2-3 meningar resp. 40-60 ord)."""
 

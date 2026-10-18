@@ -49,9 +49,31 @@ fi
 if [ -z "${SKIP_GIT_PUSH:-}" ]; then
     git -C "$PROJECT_DIR" var GIT_AUTHOR_IDENT >/dev/null 2>&1 \
         || { echo "❌ PREFLIGHT: Git-identitet saknas — konfigurera user.name och user.email i repot"; preflight_fail=1; }
-    GIT_TERMINAL_PROMPT=0 git -C "$PROJECT_DIR" -c credential.interactive=false \
-        push --dry-run origin HEAD:refs/heads/main \
-        || { echo "❌ PREFLIGHT: Git-push saknar fungerande autentisering eller skrivåtkomst"; preflight_fail=1; }
+    git_preflight_ok=0
+    for git_attempt in 1 2 3; do
+        if git_output=$(GIT_TERMINAL_PROMPT=0 git -C "$PROJECT_DIR" -c credential.interactive=false \
+            push --dry-run origin HEAD:refs/heads/main 2>&1); then
+            printf '%s\n' "$git_output"
+            git_preflight_ok=1
+            break
+        fi
+        printf '%s\n' "$git_output"
+        case "$git_output" in
+            *"Failed to connect"*|*"Could not resolve host"*|*"Couldn't connect"*|*"Connection timed out"*|*"Connection reset"*|*"Operation timed out"*|*"error: 502"*|*"error: 503"*|*"error: 504"*)
+                if [ "$git_attempt" -lt 3 ]; then
+                    echo "⚠️ PREFLIGHT: tillfälligt nätverksfel mot GitHub — nytt försök $((git_attempt + 1))/3"
+                    sleep $((git_attempt * 15))
+                    continue
+                fi
+                echo "❌ PREFLIGHT: GitHub kan inte nås — nätverksfel efter 3 försök"
+                ;;
+            *) echo "❌ PREFLIGHT: Git-push saknar fungerande autentisering eller skrivåtkomst" ;;
+        esac
+        break
+    done
+    if [ "$git_preflight_ok" -ne 1 ]; then
+        preflight_fail=1
+    fi
 fi
 if [ "$preflight_fail" -ne 0 ]; then
     echo "⛔ Avbryter FÖRE pipeline — åtgärda ovan. Inget skrivet, inget pushat, inget halvgjort."
@@ -151,6 +173,10 @@ if not d.get('validation',{}).get('se_eu_angle',{}).get('found'):
 k = d.get('validation',{}).get('konsekvensrad',{})
 if k and not k.get('ok', True):
     lines.append('KONSEKVENSRAD SAKNAS: ' + '; '.join(k.get('missing', [])) + ' — lägg till raden, eller ta bort notisen helt om den inte är en riktig nyhet (skriv aldrig meta-notiser om att ett segment utelämnas).')
+
+for story in d.get('validation',{}).get('word_counts',{}).get('stories',[]):
+    if not story.get('ok', True):
+        lines.append(f'FÖR KORT: {story.get(\"headline\",\"?\")} har {story.get(\"words\",0)} ord; minst {story.get(\"min\",150)} krävs i body. Utöka med belagda fakta ur research, inte utfyllnad.')
 
 # Lägg till high/medium issues
 for i in issues:

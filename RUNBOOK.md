@@ -13,6 +13,7 @@ vad du gör när något går fel, och hur du kör manuellt.
   Hermes blockerar symlänkar som pekar utanför scripts-katalogen; använd därför
   **inte** symlänk här.
 - **Timeout:** `cron.script_timeout_seconds: 1800` i `~/.hermes/config.yaml`.
+- **Modeller/kostnad:** Claude CLI via befintligt abonnemang (Haiku; Sonnet för skrivning). OpenRouter är avstängt som standard, även om nyckel finns. `AI_BLADET_ALLOW_OPENROUTER=1` får bara sättas efter Antons uttryckliga opt-in. Lokal svensk TTS används när ElevenLabs-nyckel saknas.
 - **Flöde:** preflight (Python-deps + Git-identitet och push dry-run; inga LLM-smokes) → checkpoint/collect → dedup → score →
   research → images → write → validering (max 3 fungerande feedback-retries) →
   build → git push → live-verifiering → SeenDB-commit → distribution → slut-push →
@@ -63,6 +64,7 @@ Vill du behålla en handtrimmad utgåva: ta en kopia först.
   Cloudflare deployar på push. Auth = osxkeychain (datorn måste vara upplåst).
 
 ### 4. Preflight-stopp ("❌ PREFLIGHT: …")
+- GitHub-nätverksfel får högst tre försök (15/30 sekunders väntan); permanent nätfel märks som nätverksfel, inte auth. Auth-/skrivåtkomstfel återförsöks inte.
 - Saknad binär/dep/nyckel. Avbryter FÖRE pipeline (inget halvgjort). Åtgärda det
   som listas (t.ex. `pip install requests beautifulsoup4 lxml`, eller nyckel i
   `~/.hermes/.env`) och kör om.

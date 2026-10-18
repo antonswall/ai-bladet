@@ -342,44 +342,13 @@ def _ar_segmenterad(fm: dict) -> bool:
     return bool(fm.get("briefs_bransch") or fm.get("briefs_vart_att_veta"))
 
 def _check_lead_verktyg(issue: dict, research_stories: list[dict]) -> dict:
-    """Regel 18: Leaden måste vara ett verktyg (kategori Modeller/Verktyg),
-    aldrig politik eller forskning.
-
-    Kollar två signaler:
-    1. lead.segment / lead.kicker — ska signalera verktyg
-    2. Fuzzy-match av lead-headline mot research-titlar → kategorin på bästa träff
-    Gäller endast segmenterade nummer — gamla format passerar orörda.
-    """
+    """Kontrollera segmentkontrakt utan att förbjuda samhällsnyheter som lead."""
     fm = issue.get("frontmatter", {})
     if not _ar_segmenterad(fm):
         return {"ok": True, "reason": "Legacy-format — segmentkrav gäller ej"}
-
-    lead = fm.get("lead", {})
-    segment = lead.get("segment", "").lower()
-    kicker = lead.get("kicker", "").lower()
-
-    # Signal 1: uttrycklig segment-/kicker-markering
-    if segment and segment != "verktyg":
-        return {"ok": False, "reason": f"lead.segment är '{segment}' — måste vara 'verktyg' (regel 18)"}
-    forbjudna_kickers = ["politik", "forskning", "företag", "reglering"]
-    if any(k in kicker for k in forbjudna_kickers):
-        return {"ok": False, "reason": f"Lead-kickern '{lead.get('kicker','')}' signalerar bransch/forskning — lead måste vara verktyg (regel 18)"}
-
-    # Signal 2: kategori på bäst matchande research-story
-    lead_words = set((lead.get("headline", "") + " " + lead.get("ingress", "")).lower().split())
-    best_cat, best_overlap = "", 0.0
-    for s in research_stories:
-        title_words = set(s.get("title", "").lower().split())
-        if not title_words or not lead_words:
-            continue
-        overlap = len(lead_words & title_words) / len(title_words)
-        if overlap > best_overlap:
-            best_overlap = overlap
-            best_cat = s.get("category", "")
-
-    if best_overlap >= 0.4 and best_cat in ("Politik", "Forskning"):
-        return {"ok": False, "reason": f"Leaden matchar en {best_cat}-story i research ({best_overlap:.0%} överlapp) — lead måste vara Modeller/Verktyg (regel 18)"}
-
+    segment = fm.get("lead", {}).get("segment", "").lower()
+    if segment not in {"verktyg", "bransch"}:
+        return {"ok": False, "reason": "lead.segment måste vara verktyg eller bransch"}
     return {"ok": True, "reason": ""}
 
 def _check_konsekvensrad(issue: dict) -> dict:
