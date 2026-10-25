@@ -1,6 +1,6 @@
 # AI-Bladet — Loggbok
 
-## 2026-10-18 — [lutra] V42: återhämtning efter GitHub-nätfel (pågår)
+## 2026-10-18 — [lutra] V42 publicerad och Telegram skickat
 - 07:00-körningen avbröts före insamling: anslutning till github.com:443 misslyckades efter 75 s. Cronens Telegram-felrapport fick också timeout. Ingen v42 hade skapats; live visade v41. Git-push dry-run fungerar vid återkontroll 17:48; ingen auth- eller nätverkskonfiguration ändrad.
 - Omkörning startad 17:49 med AI_BLADET_ALLOW_OPENROUTER=0. Insamling: 40/40 källor, 470 nya kandidater; dedup/research/skrivning fortsätter med Claude-abonnemanget (Haiku/Sonnet, inga Codex-körningar).
 - llm.py + write.py: OpenRouter kräver nu explicit AI_BLADET_ALLOW_OPENROUTER=1, en sparad nyckel räcker inte. Ingen ElevenLabs-nyckel finns; lokal Alva-TTS är reservvägen.
@@ -8,7 +8,11 @@
 - RED→GREEN för nätfel och API-opt-in: 82 pytest-tester + 4 subtests, 8 Node-tester gröna; bash -n och diff-check rena. Backup: ~/.hermes/cache/scratch/ai-bladet-recovery-20261018. Tidigare lokala redaktionsändringar från 11/10 bevarade.
 - Verktygsfel: första SOUL-sökvägen fel och en sökning failade (rättat/omkört); urllib utan User-Agent gav 403 mot sajten men curl fick 200; en gissad runnerloggsökväg saknades (använder processloggen); första nätfelstestet hade citatteckenfel i stubben, rättat innan RED-verifiering. Inga fabricerade leveransresultat.
 - Valideringens andra försök hade 100 % faktastöd men 140 ord i en artikel; retry-feedback saknade ordlängdsfelet. Tredje försöket stoppades manuellt före publicering för redaktionell kontroll. Två rubrikbaserade, overifierade notiser togs bort, en kort Beam-text utökades med redan belagd MoE-förklaring och ett språkfel rättades. Slutlig validate.py: PASS, 100 %, 0 issues, 6/6 URL:er, samtliga hårda grindar gröna.
-- Retry-feedbacken skickar nu rubrik, aktuellt ordantal och miniminivå till skrivsteget. RED→GREEN-regression; slutlig svit 83 pytest-tester + 4 subtests och 8 Node-tester grön. Nästa: runnerns exakta post-valideringskedja (build/push/livekontroll/SeenDB/distribution/slutpush), därefter Telegram.
+- Retry-feedbacken skickar nu rubrik, aktuellt ordantal och miniminivå till skrivsteget. RED→GREEN-regression; slutlig svit 83 pytest-tester + 4 subtests och 8 Node-tester grön.
+- Publicerad via runnerns oförändrade post-valideringssteg: d8aa443 (utgåva + fixar + tidigare redaktionsregler), 1ea80b7 (distribution). SeenDB commit efter verifierad sida; distribution 5/5. main=origin/main verifierat. V42: https://ai-bladet.pages.dev/v/2026/42/ — Anthropic öppnar dörren för METR – och skriver lagförslag.
+- Oberoende livekontroll 18:15: rätt titel på startsida, permalänk, RSS och podcast-RSS. Hämtad MP3 679913 byte och PNG 750568 byte hashmatchar public/; faktisk ljudavkodning PASS och podcast-enclosure matchar filstorleken. Evidens: scratch/ai-bladet-recovery-20261018/verification.json.
+- 18:16: slutnotis skickad med hermes send till Antons befintliga Telegram-DM 6823340224; API-kvitto success=true, message_id=939. Exakt meddelandetext och rätt chat_id återlästa i Telegram-sessionens lokala spegel (messages.id=135673); lässtatus hos Anton ej verifierad.
+- Nästa: ordinarie cron är fortsatt 25/10 kl 07:00; ingen schemasändring eller nätverksändring. Endast denna slutstatus i loggboken är lokal efter deploy, enligt samarbetskontraktet för Claude Codes nästa commit. Ingen ytterligare åtgärd krävs för v42.
 
 ## 2026-10-11 — [lutra] Redaktionella regler uppdaterade inför v42
 - score.py: neutrala kategorivikter, ingen aktionabilitetsstyrd lead-dämpning, releasebonus 8→2; upp till 20 % av scoring-batchen reserveras för samhälls-/risk-/förseningssignaler. Rättat tilldelning av fallback-score så prioriterade kandidater inte skrivs över.
