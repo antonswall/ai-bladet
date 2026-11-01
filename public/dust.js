@@ -568,7 +568,10 @@ void main() {
     return busy;
   }
 
+  /* Tillfälligt avstängd (Anton 2026-11-01): omslagen visas som vanliga bilder, bara loggan har partikeleffekten. */
+  const COVER_DUST = false;
   function setupCovers() {
+    if (!COVER_DUST) return;
     const frames = Array.from(document.querySelectorAll('.lead-figure .figure-frame, .story-figure .figure-frame'));
     if (!frames.length || !('IntersectionObserver' in window)) return;
     coverGL = createCoverGL();

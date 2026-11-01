@@ -290,6 +290,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://ai-bladet.pages.dev/audio/2026-44.mp3</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://ai-bladet.pages.dev/audio/test.mp3</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
@@ -363,6 +369,12 @@
   </url>
   <url>
     <loc>https://ai-bladet.pages.dev/memes/2026-43.png</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://ai-bladet.pages.dev/memes/2026-44.png</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
