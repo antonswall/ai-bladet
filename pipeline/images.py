@@ -113,9 +113,22 @@ def find_image_in_text(text: str) -> str | None:
     return None
 
 
+# Generiska textkort/repo-kort är inte pressbilder (Anton 2026-11-01): GitHub-OG-kort
+# (repo-namn + stjärnor) och OpenAI:s gradientkort med bara artikelrubriken.
+BLOCKED_IMAGE_PATTERNS = (
+    "opengraph.githubassets.com",
+    "repository-images.githubusercontent.com",
+    "images.ctfassets.net/kftzwdyauwt9/",
+)
+
+
+def is_blocked_image(url: str) -> bool:
+    return bool(url) and any(pat in url for pat in BLOCKED_IMAGE_PATTERNS)
+
+
 def verify_image(url: str) -> bool:
     """Kolla om en bild-URL faktiskt returnerar en bild."""
-    if not url:
+    if not url or is_blocked_image(url):
         return False
     try:
         r = requests.head(url, headers={"User-Agent": USER_AGENT},
