@@ -1,5 +1,11 @@
 # AI-Bladet — Loggbok
 
+## 2026-11-01 — [lutra] V44 räddad och komplett
+- Söndagskörning 07:00 föll i score-steget: Claude CLI OAuth utgången (100/100 kandidater utan LLM). Efter ny inloggning kördes pipelinen om (OpenRouter av): v44 publicerad, ab7a349.
+- Distribution stoppade 4/5: meme-bild 503 från Pollinations. Meme körd om manuellt, build + commit + push 77eca4b; live-verifierad (sida, podcast-RSS, MP3, meme).
+- static/dust.js: COVER_DUST=false — omslag visas som vanliga bilder tills vidare, loggans partiklar oförändrade. 8/8 Node. Återaktivering: sätt COVER_DUST=true.
+- Nästa: ordinarie cron 8/11 07:00. Rot: OAuth-utgång saknar larm; ev. preflight-koll av `claude -p` före insamling.
+
 ## 2026-10-18 — [lutra] V42 publicerad och Telegram skickat
 - 07:00-körningen avbröts före insamling: anslutning till github.com:443 misslyckades efter 75 s. Cronens Telegram-felrapport fick också timeout. Ingen v42 hade skapats; live visade v41. Git-push dry-run fungerar vid återkontroll 17:48; ingen auth- eller nätverkskonfiguration ändrad.
 - Omkörning startad 17:49 med AI_BLADET_ALLOW_OPENROUTER=0. Insamling: 40/40 källor, 470 nya kandidater; dedup/research/skrivning fortsätter med Claude-abonnemanget (Haiku/Sonnet, inga Codex-körningar).
