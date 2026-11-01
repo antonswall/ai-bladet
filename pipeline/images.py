@@ -114,11 +114,10 @@ def find_image_in_text(text: str) -> str | None:
 
 
 # Generiska textkort/repo-kort är inte pressbilder (Anton 2026-11-01): GitHub-OG-kort
-# (repo-namn + stjärnor) och OpenAI:s gradientkort med bara artikelrubriken.
+# (repo-namn + stjärnor).
 BLOCKED_IMAGE_PATTERNS = (
     "opengraph.githubassets.com",
     "repository-images.githubusercontent.com",
-    "images.ctfassets.net/kftzwdyauwt9/",
 )
 
 
