@@ -218,6 +218,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://ai-bladet.pages.dev/ordbok/syntetisk-data</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://ai-bladet.pages.dev/ordbok/test</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -302,6 +308,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://ai-bladet.pages.dev/audio/2026-45.mp3</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://ai-bladet.pages.dev/audio/test.mp3</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -381,6 +393,12 @@
   </url>
   <url>
     <loc>https://ai-bladet.pages.dev/memes/2026-44.png</loc>
+    <lastmod>2026-11-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://ai-bladet.pages.dev/memes/2026-45.png</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
