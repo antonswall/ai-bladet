@@ -7,6 +7,13 @@
 <atom:link href="https://ai-bladet.pages.dev/feed.xml" rel="self" type="application/rss+xml"/>
 <language>sv</language>
 <item>
+  <title>OpenAI: prototyp tog fram 948 root-exploits i Linux-kärnan — Vecka 45 2026</title>
+  <description>OpenAI redovisar en AI-pipeline mot Linux-kärnan. Dessutom Gemini Omni 1.2 Flash, Cosmos 3 och OpenAIs datacenterlöften.</description>
+  <link>https://ai-bladet.pages.dev/v/2026/45/</link>
+  <guid>https://ai-bladet.pages.dev/v/2026/45/</guid>
+  <pubDate>Sun, 08 Nov 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Gemini 4 Carbon först ut till cyberförsvarare — Vecka 44 2026</title>
   <description>Google håller sin nya toppmodell tillbaka, OpenAI redovisar sin larmlucka och Apple-utvecklare får öppen taligenkänning.</description>
   <link>https://ai-bladet.pages.dev/v/2026/44/</link>
@@ -138,13 +145,6 @@
   <link>https://ai-bladet.pages.dev/v/2026/26/</link>
   <guid>https://ai-bladet.pages.dev/v/2026/26/</guid>
   <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>OpenAI värvar transformerarkitekturens fader inför börsen — Vecka 25 2026</title>
-  <description>OpenAI plockar upp AI-legendaren Noam Shazeer från Google — och USA exportkontrollerar Anthropics toppmodeller.</description>
-  <link>https://ai-bladet.pages.dev/v/2026/25/</link>
-  <guid>https://ai-bladet.pages.dev/v/2026/25/</guid>
-  <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
